@@ -1,0 +1,65 @@
+=== Canalplan ===
+
+Contributors: SteveAtty
+Tags: crosspost, Canalplan
+Requires at least: 3.0
+Tested up to: 3.2
+Stable tag: 0.9.1
+
+== Description ==
+
+This plugin allows you link your blog to the Canalplan AC website. You can import routes from the route planner and link your blog posts to the canalplan gazetteer.
+
+
+== IMPORTANT ==  
+
+This plugin creates 9 tables in your database which occupy about 6MB of space.
+
+The plugin also uses the fopen and file_get_contents calls. Please ensure that these functions are available and that they can access external sites.
+
+You have to have PHP V5 installed for this plugin to work as the code contains several PHP V5 specific features. As PHP V5 is a requirement for running Wordpress 3.2 you shouldn't have any problems but if you are on older version of Wordpress and still running PHP V4 then you need to talk to your hosting company and get PHP upgraded.
+
+== Installation ==
+
+1. [Download] (http://wordpress.org/extend/plugins/canalplan-ac/) the latest version of Wordbooker.
+1. Unzip the ZIP file.
+1. Upload the `canalplan` directory to the `/wp-content/plugins/` directory.
+1. Activate the plugin through the 'Plugins' menu in WordPress. 
+1. Navigate to `Options` &rarr; `Canalplan AC` and you can start to configure and customise the plugin. 
+1. If you are running in Mulitsite then some configuration can be done through the multisite.php file
+
+
+== Features ==
+
+- Imports data from the Canalplan AC website so you have an up to date list of all canalplan locations (currently stadning at 13601 places)
+- Easy linking to Canalplan AC Gazetteer entries
+- Easy inclusion of Googlemaps related to Canalplan AC locations
+- Easy inclusion of maps of complete waterways or sections of waterways based on Canalplan AC Data 
+- Import Planned routes from Canalplan AC and create a "Cruising Log" of blog entries for the trip.
+- Supports a "Trips" page which summarises all the sets of "Cruising Log" entries. This page also displays a map and a list of individual posts for a specific "Cruising Log"
+- Bulk export of links to Canalplan AC Gazetteer entries for when you publish cruising log
+- Canalplan AC website automatically links back to relevant blog entries from Gazetteer pages.
+- Works in "Classic" (Single blog) and Networked Blogs mode. Can be Network activated
+- Common set of Tables for Networked Blogs mode - so 1 set of tables per Networked Blogs install, not per blog.
+- Global configuration for Multisite can be done through a special multisite.php file.
+
+
+== Screenshots ==
+
+1. Canalplan Plugin : Top Level Trips screen
+2. Canalplan Plugin : Trip Screen for a single trip
+
+
+== Changelog ==
+
+= Version 0.9.1 12/07/2011 =
+- Added PDF user guide and added links to it
+- Moved Calendar javascript into its own file 
+- Removed a lot of commented out code that wasn't needed any more
+- Added Code revision tag for version checking of live installations
+- Changed Bulk load limit back to 20 from 2 (left in by accident during testing)
+
+
+= Version 0.9  04/07/2011 =
+- Initial Beta release
+
