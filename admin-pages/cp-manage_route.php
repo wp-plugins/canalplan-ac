@@ -11,11 +11,7 @@ Author: Steve Atty
 
 require_once('admin.php');
 $title = __('CanalPlan Manage Route');
-#include_once ("./admin-header.php");;
-#include("../canalplan/canalplanfunct.js");
-
 nocache_headers();
-
 ?>
 
 <div class="wrap">
@@ -42,7 +38,6 @@ echo '<form action="" name="distform" id="dist_form" method="post"> ';
 echo '<input type="hidden" name="_submit_check" value="99"/>';
 echo '<input type="hidden" name="route_list" value="'.$_POST["route_list"].'"/>';
 echo '<p class="submit"> <input type="submit" name="def_delete" value="Yes Please, delete them all" />&nbsp;&nbsp;<input type="submit" name="NO_NO" value="No, get me out of here!" /></p></form>';
-#var_dump($_POST);
 $_POST["route_list"]=0;
 $_POST["_submit_check"]=99;
 }
@@ -54,20 +49,17 @@ while($rid = mysql_fetch_array($r))
 wp_delete_post($rid['post_id']);
 }
 $sql="delete from ".CANALPLAN_ROUTES." where blog_id=".$blog_id." and route_id=".$_POST["route_list"].";";
-#print $sql;
 $r=mysql_query($sql);
 $sql="delete from ".CANALPLAN_ROUTE_DAY." where blog_id=".$blog_id." and route_id=".$_POST["route_list"].";";
 $r=mysql_query($sql);
 unset($_POST["route_list"]);
 unset($_POST["_submit_check"]);
-#echo "DELETED!!!!!!!!!!!!!!!";
 }
 
 if ($_POST['_submit_check']==2) {
 
 
 $sql="Update ".CANALPLAN_ROUTES." set title='".$_POST['rtitle']."' , description='".$_POST['rdesc']."', uom='".$_POST['dfsel']."', status=".$_POST['routestatus']." where blog_id=".$blog_id." and route_id=".$_POST["route_list"].";";
-#echo $sql."<br>";
 $dformat=$_POST['dfsel'];
 $res2 = mysql_query($sql);
 $eplacelength=$_POST['duration'];
@@ -108,19 +100,14 @@ $r=mysql_query($sql);
 $rw=mysql_fetch_array($r);
 $route=split(",",$totalroute);
 $dayroute=array_slice($route,$rw['start_id'],( $rw['end_id']-$rw['start_id'])+1);
-#echo "<br>".count($route).": ".$rw['start_id']." - ".$rw['end_id']."<br>";
-#var_dump($dayroute);
-#echo "<br>";
 $newlocks=0;
 $newdistance=0;
 for ($placeindex=1;$placeindex<count($dayroute);$placeindex+=1){
 $p1=$dayroute[$placeindex];
 $p2=$dayroute[$placeindex-1];
 $sql="select metres,locks from ".CANALPLAN_LINK." where (place1='".$p1."' and place2='".$p2."' ) or  (place1='".$p2."' and place2='".$p1."' ) ;";
-#print "<br>".$sql."<br>";
 $r=mysql_query($sql);
 $rw=mysql_fetch_array($r);
-#echo $p2." - ".$p1." : ".$rw['metres']." - ".$rw['locks']."<br>";
 $newlocks=$newlocks+$rw['locks'];
 $newdistance=$newdistance+$rw['metres'];
 }
@@ -142,11 +129,8 @@ if ($_POST[$elock]=='on' and $placeindex==0) {$newlocks=$newlocks;} elseif ($_PO
 }
 $newlocks=$newlocks+$rw['locks'];
 }
-#echo $newdistance." - ",$newlocks."<br>";
 $sql="update ".CANALPLAN_ROUTE_DAY." set distance=".$newdistance." , locks=".$newlocks." where blog_id=".$blog_id." and route_id=".$_POST["route_list"]." and day_id=".$eplacecount.";";
-#print $sql."<br>";
 $r=mysql_query($sql);
-#echo format_distance($newdistance,$newlocks,$dformat,1)."<br>";
 }
 }
 
@@ -181,12 +165,9 @@ else {print '<option value="'.$i.'" >'.$arr[$i].'</option>';}
 echo '</select></td></tr></table><br><table>';
 echo "<tr><td><b>Date</b></td><td><b>From</b></td><td><b>To</b></td><td><b>Distance</b></td></tr>";
 $total_route=explode(",",$rw['totalroute']);
-#print "!!!".count($total_route);
 $r = "SELECT distinct day_id,route_date,start_id,end_id,distance,locks,flags FROM ".CANALPLAN_ROUTE_DAY." where blog_id=".$blog_id." and route_id=".$_POST["route_list"]." ORDER BY `route_date` ASC";
-#print "!!!".$r;
 $r=mysql_query($r);
 
-#echo '<select id="route_list" name="route_list" >';
 while($rw = mysql_fetch_array($r))
 {
 $splace="SELECT place_name from ".CANALPLAN_CODES." where canalplan_id='".$total_route[$rw['start_id']]."'";
@@ -218,7 +199,6 @@ $endlock="";
 $eplace="SELECT place_name,attributes from ".CANALPLAN_CODES." where canalplan_id='".$total_route[$rw['end_id']]."'";
 $eplace=mysql_query($eplace);
 $eplace=mysql_fetch_row($eplace);
-#print "<br>".$eplace[0]." - ".$eplace[1]."<br>";
 if (strpos($eplace[1],'L') !== false) {
 $endlock=1;
 }
@@ -290,25 +270,4 @@ while($rw = mysql_fetch_array($r))
 print "You don't seem to have any routes to manage. Please <a href='admin.php?page=canalplan/admin-pages/cp-import_route.php'>import</a> a route first";
 }
 }
-?>
-
-<?php
-function parse_data($data,$blid)
-{$i=1;
-#string mysql_real_escape_string  ( string $unescaped_string  [, resource $link_identifier  ] )
-#$sql="Delete from canalplan_favourites where blog_id=".$blid." and place_order>0";
-
-#$res = mysql_query($sql);
-  $containers = explode(":", $data);
-  foreach($containers AS $container)
-  {
-
-      $values = explode(",", $container);
-      $sql="insert into ".CANALPLAN_FAVOURITES." set blog_id=".$blid." ,canalplan_id='".$values[0]."', place_name='".$values[1]."',place_order=".$i.";";
- #    $res = mysql_query($sql);
-
-        $i ++;
-  }
-}
-#include('admin-footer.php');
 ?>

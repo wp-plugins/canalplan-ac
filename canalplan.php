@@ -1,14 +1,12 @@
 <?php
 
 /*
-Plugin Name: CanalPlan Integration
+Plugin Name: CanalPlan AC Integration
 Plugin URI: http://blogs.canalplan.org.uk/canalplanac/canalplan-plug-in/
 Description: Provides features to integrate your blog with <a href="http://www.canalplan.eu">Canalplan AC</a> - the Canal Route Planner.
-Version: 0.9
+Version: 0.9.1
 Author: Steve Atty
 Author URI: http://blogs.canalplan.org.uk/steve/
-
-
  *
  *
  * Copyright 2011 Steve Atty (email : posty@tty.org.uk)
@@ -26,14 +24,15 @@ Author URI: http://blogs.canalplan.org.uk/steve/
  * You should have received a copy of the GNU General Public License along with
  * this program; if not, write to the Free Software Foundation, Inc., 51
  * Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-
 */
+
 @include("multisite.php");
-global $table_prefix, $wp_version,$wpdb,$db_prefix;
 define ('CANALPLAN_URL','http://www.canalplan.eu/cgi-bin/');
 define ('CANALPLAN_GAZ_URL','http://www.canalplan.eu/gazetteer/');
-define ('CANALPLAN_MAX_POST_PROCESS',2);
+define ('CANALPLAN_MAX_POST_PROCESS',20);
+define('CANALPLAN_CODE_RELEASE','0.9.1 r00');
 
+global $table_prefix, $wp_version,$wpdb,$db_prefix;
 # Determine the right table prefix to use
 $cp_table_prefix=$table_prefix;
 if (isset ($db_prefix) ) { $cp_table_prefix=$db_prefix;}
@@ -63,16 +62,12 @@ function ascii_encode($numb) {
 function ascii_encode_helper($numb) {
         $string = "";
         $count = 0;
-
         while ($numb >= 0x20) {
-                //echo $numb . "<br>";
                 $count++;
                 $string .= (pack("C",(0x20 | ($numb & 0x1f)) + 63));
                 $numb = $numb >> 5;
         }
-        //echo $numb . "<br>";
         $string .= pack("C", $numb+63);
-        //echo $string . "<br>";;
         return str_replace("\\","\\\\",$string);
 
 }
@@ -675,6 +670,12 @@ echo '<meta name="verify-v1" content="gh8YjrQxNNQP2cet22ZdfXucI+py1YHC/6eczI1ljH
 return $blah;
 }
 
+function canalplan_footer($blah) {
+	echo "\n<!-- Canalplan AC code revision : ".CANALPLAN_CODE_RELEASE." -->\n";
+	echo "<p style='font-size:80%'>Canalplan Interlinking provided by <a href='http://wordpress.org/extend/plugins/canalplan-ac/'> Canalplan AC Plugin </a></p>";
+	return $blah;
+}
+
 function blroute (){
 
 $routeid = $_REQUEST['routeid'];
@@ -1034,6 +1035,7 @@ function save_error(){
 
 add_filter('the_content','blogroute_insert');
 add_action('wp_head', 'canalplan_header');
+add_action('wp_footer', 'canalplan_footer');
 add_action('init', array('CanalPlanAutolinker', 'canal_init'));
 register_activation_hook(__FILE__, 'canal_activate');
 add_action('admin_menu', 'wp_canalplan_admin_pages');

@@ -9,7 +9,6 @@ Author: Steve Atty
 */
 
 require_once('admin.php');
-//require_once('../wp-config.php');
 $parent_file = 'canalplan-manager.php';
 
 echo "<h2>";
@@ -23,10 +22,7 @@ $jsonvers=phpversion('json');
 if (!phpversion('json')) { $jsonvers="Installed but version not being returned";}
 $sxmlvers=phpversion('simplexml');
 if (!phpversion('simplexml')) { $sxmlvers=" No version being returned";}
-#$x=CANALPLAN_URL.'api.cgi?mode=version '; 
-#$fcheck=file_get_contents($x);
-#$cp_version=json_decode($fcheck,true);
-#if (!isset($cp_version['version'])) {$fopenstatus='Fopen cannot acccess the Canalplan Website';}
+
 $fopenstat="file_get_contents is not available ";
 if(function_exists("file_get_contents")){
 	$fopenstat="file_get_contents is available ";
@@ -46,7 +42,7 @@ if ($mysqlvers=="Unknown") {
 	}
 
 $info = array(	
-		'CanalPlan' => $plug_info['canalplan/canalplan.php']['Version'],
+		'CanalPlan' => $plug_info['canalplan/canalplan.php']['Version']." (".CANALPLAN_CODE_RELEASE.")",
 		'File_open Status' => $fopenstat.$fopenstat2,
 		'CanalPlan AC (Website)'=> $cp_version['version']." ( ".$cp_version['date'].' )',
 		'WordPress' => $wp_version,
@@ -73,7 +69,7 @@ $info = array(
 	echo "</b></p><br /><br />";
 	_e('For feature requests, bug reports, and general support :'); ?>
 	<ul>	
-	<li><?php _e('Check the '); ?><a href="../wp-content/plugins/canalplan/canalplan_user_guide.pdf" target="wordpress"><?php _e('User Guide'); ?></a>.</li>
+	<li><?php _e('Check the '); ?><a href="../wp-content/plugins/canalplan/canalplan_ac_user_guide.pdf" target="wordpress"><?php _e('User Guide'); ?></a>.</li>
 	<li><?php _e('Check the '); ?><a href="http://wordpress.org/extend/plugins/canalplan-ac/other_notes/" target="wordpress"><?php _e('WordPress.org Notes'); ?></a>.</li>
 	<li><?php _e('Consider upgrading to the '); ?><a href="http://wordpress.org/download/"><?php _e('latest stable release'); ?></a> <?php _e(' of WordPress. '); ?></li>
 

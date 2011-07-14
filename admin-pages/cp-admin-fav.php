@@ -9,11 +9,9 @@ Author: Steve Atty
 */
 
 require_once('admin.php');
-//require_once('../wp-config.php');
 $parent_file = 'canalplan-manager.php';
 $title = __('Favourites');
 $this_file = 'canalplan-favour.php';
-#include_once ("./admin-header.php");
 global $blog_id;
 echo '<script type="text/javascript"> var linktype=1; cplogid='.$blog_id.'</script>';
 
@@ -129,13 +127,10 @@ $res = mysql_query($sql);
   $containers = explode(":", $data);
   foreach($containers AS $container)
   {
-
       $values = explode(",", $container);
       $sql="insert into ".CANALPLAN_FAVOURITES." set blog_id=".$blid." ,canalplan_id='".$values[0]."', place_name='".$values[1]."',place_order=".$i.";";
-     $res = mysql_query($sql);
-
+   	  $res = mysql_query($sql);
         $i ++;
   }
 }
-#include('admin-footer.php');
 ?>

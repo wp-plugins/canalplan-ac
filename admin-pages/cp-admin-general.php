@@ -9,9 +9,7 @@ Description: General Settings for the Canalplan AC Plugin
 Author: Steve Atty
 */
 
-#require_once('admin.php');
 $title = __('CanalPlan Options');
-#include_once ("./admin-header.php");;
 global $blog_id;
 echo '<script type="text/javascript"> var linktype=1; cplogid='.$blog_id.'</script>';
 echo '<script type="text/javascript" src="/wp-content/plugins/canalplan/canalplan/canalplanfunctions.js" DEFER></script>';
@@ -78,13 +76,7 @@ if (isset($_POST["canalkey"]) && isset($_POST['SCK'])){
 }
 
 if (isset($_POST["canalkey"]) && isset($_POST['RCK'])){
-#$api=mysql_real_escape_string($_POST['canalkey']);
-$r = mysql_query("Delete FROM ".CANALPLAN_OPTIONS." where blog_id=".$blog_id." and pref_code='canalkey'");
-#$sql="update ".CANALPLAN_OPTIONS." set pref_value='".$api."' where blog_id=".$blog_id." and pref_code='canalkey'";
-if (mysql_num_rows($r)==0) {
-#$sql="insert into ".CANALPLAN_OPTIONS." (pref_value,blog_id,pref_code) values ('".$api."',".$blog_id.",'canalkey')";
-}
-#mysql_query($sql);
+	$r = mysql_query("Delete FROM ".CANALPLAN_OPTIONS." where blog_id=".$blog_id." and pref_code='canalkey'");
 }
 
 if (isset($_POST["routeslug"])){
@@ -94,18 +86,14 @@ if (isset($_POST["routeslug"])){
 	if (mysql_num_rows($r)==0) {
 		$sql="insert into ".CANALPLAN_OPTIONS." (pref_value,blog_id,pref_code) values ('".$routeslug."','.$blog_id.','routeslug')";
 	}
-#	var_dump($sql);
 	mysql_query($sql);
 }
 
 if (isset($_POST["update_data"])){
 	echo '<table border="1" cellpadding="10" ><tr><th>Table Name </th><th>Contained (Rows)</th><th>Now Contains (Rows)</th></tr>';
-	#print "Updating Canalplan Aliases table<br>";
 	$sql="select count(*) from ".CANALPLAN_ALIASES.";";
 	$res = mysql_query($sql);
 	$res2=mysql_fetch_array($res);
-	#$dbhandle = new PDO("sqlite:../canalplan/canal.sqlite");
-	#$dbhandle = new PDO("sqlite:http://www.canalplan.org.uk/canal.sqlite");
 	$handle=fopen("http://www.canalplan.org.uk/stable_canal.sqlite","rb");
 	$handle2=fopen("../wp-content/uploads/canalplan_data.sqlite","w");
 	$contents = '';
@@ -128,8 +116,6 @@ if (isset($_POST["update_data"])){
 	$res = mysql_query($sql);
 	$res3=mysql_fetch_array($res);
 	print "<tr><td>Canalplan Aliases</td><td>".$res2[0]."</td><td>".$res3[0]."</td></tr>";
-
-	#print "<br>Updating Canalplan Places Table<br>";
 	$sql="select count(*) from ".CANALPLAN_CODES.";";
 	$res = mysql_query($sql);
 	$res2=mysql_fetch_array($res);
@@ -144,9 +130,6 @@ if (isset($_POST["update_data"])){
 	$res = mysql_query($sql);
 	$res3=mysql_fetch_array($res);
 	print "<tr><td>Canalplan Places</td><td>".$res2[0]."</td><td>".$res3[0]."</td></tr>";
-
-
-	#print "<br>Updating Canalplan Link Table<br>";
 	$sql="select count(*) from ".CANALPLAN_LINK.";";
 	$res = mysql_query($sql);
 	$res2=mysql_fetch_array($res);
@@ -162,7 +145,6 @@ if (isset($_POST["update_data"])){
 	$res3=mysql_fetch_array($res);
 	print "<tr><td>Canalplan Links</td><td>".$res2[0]."</td><td>".$res3[0]."</td></tr>";
 
-	#print "<br>Updating Canalplan Waterways Table<br>";
 	$sql="select count(*) from ".CANALPLAN_CANALS.";";
 	$res = mysql_query($sql);
 	$res2=mysql_fetch_array($res);
@@ -177,7 +159,6 @@ if (isset($_POST["update_data"])){
 	$res3=mysql_fetch_array($res);
 	print "<tr><td>Canalplan Waterways</td><td>".$res2[0]."</td><td>".$res3[0]."</td></tr>";
 
-	#print "<br>Updating Canalplan PolyLines<br>";
 	$sql="select count(*) from ".CANALPLAN_POLYLINES.";";
 	$res = mysql_query($sql);
 	$res2=mysql_fetch_array($res);
@@ -194,8 +175,6 @@ if (isset($_POST["update_data"])){
 
 	$sql="update ".CANALPLAN_OPTIONS." set pref_value='".time()."' where blog_id=-1 and pref_code='update_date'";
 	$res = mysql_query($sql);
-
-	#mysql_free_result($res);
 
 	print "</table><br>All Done<br/><br/>";
 	$sql="update ".CANALPLAN_OPTIONS." set pref_value='".time()."' where blog_id=-1 and pref_code='update_date'";
@@ -325,7 +304,6 @@ $url=get_bloginfo('url');
 $sname=get_bloginfo('name');
 if (strlen($api)<4) {
 	$x=CANALPLAN_URL.'api.cgi?mode=register_blogger&domain='.$url.'&title='.urlencode($sname); 
-	#var_dump($x);
 	$fcheck=file_get_contents($x);
 	$cp_register=json_decode($fcheck,true);
 	$api=$cp_register['key'];

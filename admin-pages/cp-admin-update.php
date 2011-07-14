@@ -36,7 +36,6 @@ if (isset($_POST["bulkprocess"])){
 				$x.='&url='.$link.'&date='.$date;
 				$fcheck=file_get_contents($x);
 				$cp_bulk=json_decode($fcheck,true);
-				#var_dump($cp_bulk);
 				echo "&nbsp;&nbsp;&nbsp;Found link to <i>".$placeinfo[0]."</i>";
 				if ($cp_bulk['status']=='OK') { 
 					echo " and ",$cp_bulk['detail'].' the link ';

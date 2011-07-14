@@ -14,7 +14,6 @@ $title = __('Home Mooring');
 $this_file =  'canalplan-home.php';
 $parent_file = 'canalplan-manager.php';
 $base_dir=dirname(__FILE__);
-#include_once ("./admin-header.php");
 global $blog_id;
 echo '<script type="text/javascript"> var linktype=1; cplogid='.$blog_id.'</script>';
 
@@ -37,7 +36,6 @@ function getCanalPlan2(tag)
 
         function showValue(cptext,cpid)
         {
-//document.getElementById("current").value=cpid+","+cptext;
 document.getElementById("current").value=cptext;
 document.getElementById("dataset").value=cpid+","+cptext;
         }
@@ -100,5 +98,4 @@ $res = mysql_query($sql);
       $sql="insert into ".CANALPLAN_FAVOURITES." set blog_id=".$blid." ,canalplan_id='".$values[0]."', place_name='".$values[1]."',place_order=0;";
      $res = mysql_query($sql);
 }
-#include('admin-footer.php');
 ?>
