@@ -4,7 +4,7 @@
 Plugin Name: CanalPlan AC Integration
 Plugin URI: http://blogs.canalplan.org.uk/canalplanac/canalplan-plug-in/
 Description: Provides features to integrate your blog with <a href="http://www.canalplan.eu">Canalplan AC</a> - the Canal Route Planner.
-Version: 0.9.1
+Version: 1.0
 Author: Steve Atty
 Author URI: http://blogs.canalplan.org.uk/steve/
  *

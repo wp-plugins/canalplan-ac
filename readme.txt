@@ -3,8 +3,8 @@
 Contributors: SteveAtty
 Tags: crosspost, Canalplan
 Requires at least: 3.0
-Tested up to: 3.2
-Stable tag: 0.9.1
+Tested up to: 3.3
+Stable tag: 1.0
 
 == Description ==
 
@@ -51,6 +51,11 @@ You have to have PHP V5 installed for this plugin to work as the code contains s
 
 
 == Changelog ==
+
+= Version 1.0 22/12/2011 =
+- Checked for WP 3.3 compatability.
+- Minor tweaks in some of the refresh logic
+
 
 = Version 0.9.1 12/07/2011 =
 - Added PDF user guide and added links to it
