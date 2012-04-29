@@ -1,12 +1,5 @@
 <?php
 /*
-	Plugin Name: Canalplan Latitude
-	Plugin URI: http://www.canalplan.org.uk
-	Description: Displays your current Latitude location and displays a link to the nearest Canalplan AC Location
-	Version: 1.00
-	Author: Steve Atty
-	Author URI: http://www.canalplan.org.uk
-
 	Copyright 2012, Steve Atty
 
 	This program is free software: you can redistribute it and/or modify
@@ -50,11 +43,11 @@ class CanalPLanWidget extends WP_Widget {
 		$lng=$x[0];
 		$lat=$x[1];
 	      #  $sql="SELECT place_name,canalplan_id,lat,`long`,GLength(LineStringFromWKB(LineString(AsBinary(lat_lng_point), AsBinary(GeomFromText('Point(".$lat." ".$lng.")'))))) AS distance FROM ".CANALPLAN_CODES." ORDER BY distance ASC LIMIT 1";
-		$sql="SELECT place_name,canalplan_id,lat,`long`,GLength(LineString(lat_lng_point, GeomFromText('Point(".$lat." ".$lng.")'))) AS distance FROM ".CANALPLAN_CODES." ORDER BY distance ASC LIMIT 1";
+		$sql="SELECT place_name,canalplan_id,lat,`long`,GLength(LineString(lat_lng_point, GeomFromText('Point(".$lat." ".$lng.")'))) AS distance FROM ".CANALPLAN_CODES." where place_name not like '%!%' ORDER BY distance ASC LIMIT 1";
 		$res = mysql_query($sql);
 		$gazstring='http://www.canalplan.org.uk/cgi-bin/gazetteer.cgi?where=$';
 		while($row=mysql_fetch_array($res)) {
-		print "<p><br />Nearest Canalplan location is : <br /> <a href='".$gazstring.$row['canalplan_id']."' target='_new' > ".$row['place_name']."</a> <br /></p></div>";
+		print "<p>Nearest Canalplan location is : <br /> <a href='".$gazstring.$row['canalplan_id']."' target='_new' > ".$row['place_name']."</a> <br /></p></div>";
 		}
 	}
 	

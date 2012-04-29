@@ -4,7 +4,7 @@ Contributors: SteveAtty
 Tags: crosspost, Canalplan
 Requires at least: 3.0
 Tested up to: 3.3.2
-Stable tag: 2.0
+Stable tag: 2.1
 
 == Description ==
 
@@ -51,6 +51,11 @@ You also need to ensure that your PHP installation has the PDOs for SQLite V3 in
 
 
 == Changelog ==
+
+= Version 2.1 29/04/2012 =
+- Fixed an incorrect header in the widget plugin which confused the Wordpress SVN which reported the plugin as Version 1.0 rather than 2.0
+- Latitude Widget no longer shows ! places as nearest locations.
+
 
 = Version 2.0 28/04/2012 =
 - Checked for Wordpress 3.3.2 compatability
