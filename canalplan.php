@@ -3,12 +3,12 @@
 Plugin Name: CanalPlan Integration
 Plugin URI: http://blogs.canalplan.org.uk/canalplanac/canalplan-plug-in/
 Description: Provides features to integrate your blog with <a href="http://www.canalplan.eu">Canalplan AC</a> - the Canal Route Planner.
-Version: 2.2
+Version: 2.3
 Author: Steve Atty
 Author URI: http://blogs.canalplan.org.uk/steve/
  *
  *
- * Copyright 2011 Steve Atty (email : posty@tty.org.uk)
+ * Copyright 2011 - 2012 Steve Atty (email : posty@tty.org.uk)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -28,7 +28,7 @@ Author URI: http://blogs.canalplan.org.uk/steve/
 define ('CANALPLAN_URL','http://www.canalplan.eu/cgi-bin/');
 define ('CANALPLAN_GAZ_URL','http://www.canalplan.eu/gazetteer/');
 define ('CANALPLAN_MAX_POST_PROCESS',20);
-define('CANALPLAN_CODE_RELEASE','2.2.0 r00');
+define('CANALPLAN_CODE_RELEASE','2.3.0 r00');
 
 global $table_prefix, $wp_version,$wpdb,$db_prefix;
 # Determine the right table prefix to use
@@ -143,8 +143,8 @@ function myplugin_inner_custom_box() {
     	wp_create_nonce( plugin_basename(__FILE__) ) . '" />';
 	global $wpdb,$blog_id;
 	echo '<script type="text/javascript"> var linktype=1; cplogid='.$blog_id.'</script>';
-	echo '<script type="text/javascript" src="/wp-content/plugins/canalplan/canalplan/canalplanfunctions.js" DEFER></script>';
-	echo '<script type="text/javascript" src="/wp-content/plugins/canalplan/canalplan/canalplan_actb.js"></script>';
+	echo '<script type="text/javascript" src="/wp-content/plugins/canalplan-ac/canalplan/canalplanfunctions.js" DEFER></script>';
+	echo '<script type="text/javascript" src="/wp-content/plugins/canalplan-ac/canalplan/canalplan_actb.js"></script>';
 	echo "Insert : ";
 	$blog_favourites = $wpdb->get_results("SELECT place_name FROM ".CANALPLAN_FAVOURITES." where blog_id=$blog_id order by place_order asc" );
 	if (count($blog_favourites)>0 ){
