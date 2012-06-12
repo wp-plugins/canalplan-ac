@@ -744,7 +744,7 @@ function canalplan_actb(obj,ca,path){
         }
       };
 
-      xmlhttp.open("GET","/wp-content/plugins/canalplan/canalplan/canalplan.php?match="+t,true)
+      xmlhttp.open("GET","/wp-content/plugins/canalplan-ac/canalplan/canalplan.php?match="+t,true)
       xmlhttp.send(null)
     }
   }
