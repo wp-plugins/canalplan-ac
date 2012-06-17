@@ -124,6 +124,8 @@ if (isset($_POST["update_data"])){
 	$result = $dbhandle->query($sqlGetView);
 	foreach ($result as $entry) {
 	   $sql= "INSERT INTO ".CANALPLAN_CODES." (canalplan_id,place_name,size,lat,`long`,attributes,lat_lng_point) VALUES ('".$entry['id']."','".mysql_real_escape_string($entry['name'])."','".$entry['type']."','".$entry['latitude']."','".$entry['longitude']."','".$entry['attributes']."', GeomFromText('Point(".$entry['latitude']." ".$entry['longitude'].")')) ON DUPLICATE KEY UPDATE place_name='".mysql_real_escape_string($entry['name'])."', size='".$entry['type']."', lat='".$entry['latitude']."', `long`='".$entry['longitude']."', attributes='".$entry['attributes']."', lat_lng_point=GeomFromText('Point(".$entry['latitude']." ".$entry['longitude'].")'); ";
+	#var_dump($sql);
+#	echo "<br />";
 	   $res = mysql_query($sql);
 	}
 	$sql="select count(*) from ".CANALPLAN_CODES.";";
@@ -257,32 +259,7 @@ else {print '<option value="'.$i.'" >'.$arr[$i].'</option>';}
 </form>
 
 </div>
-<?php  if (!defined('CANALPLAN_GMAP_KEY')) { ?>
-<hr>
-<h3><?php _e('Google Maps API Key') ?></h3>
-<form action="" name="googleapi" id="googleapi" method="post">
 
-<?php
-$r2 = mysql_query("SELECT pref_value FROM ".CANALPLAN_OPTIONS." where  blog_id=".$blog_id." and pref_code='apikey'");
-if (mysql_num_rows($r2)==0) {
-     $api="";
-}
-else
-{
-	$rw = mysql_fetch_array($r2,MYSQL_ASSOC);
-	$api=$rw['pref_value'];
-} 
-echo '<input type="text" name="apikey" maxlength="100" size="100" value="'.$api.'">';
-?>
-<input type="hidden" name="googleapi" value="1"/>
-<p class="submit"> <input type="submit"  value="Save API Key" /></p>
-</form>
-
-<p>You can obtain a Google Map API Key by <a href='http://code.google.com/apis/maps/signup.html'> Signing up for one at Google </a></p>
-
-<?php
-}
-?>
 <hr>
 
 <h3><?php _e('Canalplan Key') ?></h3>
