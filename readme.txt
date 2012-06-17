@@ -3,8 +3,8 @@
 Contributors: SteveAtty
 Tags: crosspost, Canalplan
 Requires at least: 3.0
-Tested up to: 3.3.2
-Stable tag: 2.3
+Tested up to: 3.4
+Stable tag: 2.4
 
 == Description ==
 
@@ -51,6 +51,10 @@ You also need to ensure that your PHP installation has the PDOs for SQLite V3 in
 
 
 == Changelog ==
+
+= Version 2.4 17/06/2012 =
+- Fixed a problem with blogged routes. Was coded to expect a .htaccess re-write rule. No-one seems to have noticed though!
+- Checked 3.4 compatability
 
 = Version 2.3 12/06/2012 =
 - Fixed the paths for lots of script and http references. Serves me right for developing in a folder with the wrong name!
