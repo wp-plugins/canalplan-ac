@@ -47,6 +47,8 @@ $info = array(
 		'CanalPlan AC (Website)'=> $cp_version['version']." ( ".$cp_version['date'].' )',
 		'WordPress' => $wp_version,
 		 'PHP' => $phpvers,
+		 'PHP Memory Limit' => ini_get('memory_limit'),
+		 'PHP Memory Usage (MB)' => memory_get_usage(true)/1024/1024,
 		'MySQL' => $mysqlvers
 		);
 

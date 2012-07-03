@@ -1,10 +1,13 @@
 <?php
-$match=$_GET['match'];
-$place=$_GET['place'];
-$cp_blog_id=$_GET['blogid'];
+
+
 require("../../../../wp-config.php");
 if ($cp_blog_id=="undefined") {unset($cp_blog_id);}
 if (strlen($match)>0){
+$match=mysql_real_escape_string($_GET['match']);
+$place=mysql_real_escape_string(_GET['place']);
+$cp_blog_id=mysql_real_escape_string($_GET['blogid']);
+
 $sql="set names 'utf8';";
 $zed = mysql_query($sql);
 	//	$canalplaces = mysql_query($sql);
