@@ -3,7 +3,7 @@
 Plugin Name: CanalPlan Integration
 Plugin URI: http://blogs.canalplan.org.uk/canalplanac/canalplan-plug-in/
 Description: Provides features to integrate your blog with <a href="http://www.canalplan.eu">Canalplan AC</a> - the Canal Route Planner.
-Version: 2.4
+Version: 2.5
 Author: Steve Atty
 Author URI: http://blogs.canalplan.org.uk/steve/
  *
@@ -28,7 +28,7 @@ Author URI: http://blogs.canalplan.org.uk/steve/
 define ('CANALPLAN_URL','http://www.canalplan.eu/cgi-bin/');
 define ('CANALPLAN_GAZ_URL','http://www.canalplan.eu/gazetteer/');
 define ('CANALPLAN_MAX_POST_PROCESS',20);
-define('CANALPLAN_CODE_RELEASE','2.4.0 r00');
+define('CANALPLAN_CODE_RELEASE','2.5.0 r00');
 
 global $table_prefix, $wp_version,$wpdb,$db_prefix;
 # Determine the right table prefix to use
@@ -241,6 +241,7 @@ function canal_route_maps($content,$mapblog_id=NULL,$post_id=NULL,$search=NULL) 
 		$sql="select `lat`,`long`,`place_name` from ".CANALPLAN_CODES." where canalplan_id='".$place."'";
 		$res = mysql_query($sql);
 		$row = mysql_fetch_array($res);
+		if (count($row) > 2) {
 		if($place_count==$mid_point) {
 			$centre_lat=$row[lat];
 			$centre_long=$row[long];
@@ -256,6 +257,7 @@ function canal_route_maps($content,$mapblog_id=NULL,$post_id=NULL,$search=NULL) 
 			$last_lat=$row[lat];
 			$last_long=$row[long];
 		}
+	//	echo count($row).' - '.$place." - ".$row[place_name]." : ".$row[lat]." - ".$row[long]."<br />";
 		$points=$place.",".$row[lat].",".$row[long];
 	     	$pointx = $row[lat];
 	        $pointy = $row[long];;
@@ -275,6 +277,7 @@ function canal_route_maps($content,$mapblog_id=NULL,$post_id=NULL,$search=NULL) 
 		$lpointb1=$lpoint;
 		$y=$y+1;
 		$lpoint=$cpoint;
+		}
 	}
 
 	if ($firstid==$lastid) {
@@ -635,6 +638,7 @@ function blroute(){
 			$sql="select `lat`,`long`,`place_name` from ".CANALPLAN_CODES." where canalplan_id='".$place."'";
 			$res = mysql_query($sql);
 			$row = mysql_fetch_array($res);
+			if (count($row)> 2) {
 			if ($place==$firstid){
 				$firstname=$row[place_name];
 				$first_lat=$row[lat];
@@ -680,7 +684,7 @@ function blroute(){
 			$markertext.='var marker_stop'.$dogooglemap.' = new google.maps.Marker({ position: new google.maps.LatLng('.$last_lat.','.$last_long.'), map: map'.$dogooglemap.',  title: "Stop : '.$lastname.'" });';
 			$markertext.='iconFile = "http://maps.google.com/mapfiles/ms/icons/green-dot.png"; marker_start'.$dogooglemap.'.setIcon(iconFile) ; ';
 			$markertext.='iconFile = "http://maps.google.com/mapfiles/ms/icons/red-dot.png"; marker_stop'.$dogooglemap.'.setIcon(iconFile) ; '; 
-		}
+		}}
 		#$blroute .=$pointstring;
 		$options['size']=200;
 		$options['zoom']=$canalplan_options["canalplan_rm_zoom"];

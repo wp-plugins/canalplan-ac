@@ -94,7 +94,7 @@ if (isset($_POST["update_data"])){
 	$sql="select count(*) from ".CANALPLAN_ALIASES.";";
 	$res = mysql_query($sql);
 	$res2=mysql_fetch_array($res);
-	$handle=fopen("http://www.canalplan.org.uk/stable_canal.sqlite","rb");
+	$handle=fopen("http://www.canalplan.org.uk/data/stable_canal.sqlite","rb");
 	$handle2=fopen("../wp-content/uploads/canalplan_data.sqlite","w");
 	$contents = '';
 	while (!feof($handle)) {
