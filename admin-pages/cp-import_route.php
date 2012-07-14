@@ -13,7 +13,7 @@ require_once('admin.php');
 $title = __('CanalPlan Import Route');
 nocache_headers();
 ?>
-<script type="text/javascript" src="/wp-content/plugins/canalplan/canalplan/calendar.js"></script>
+<script type="text/javascript" src="/wp-content/plugins/canalplan-ac/canalplan/calendar.js"></script>
 <?php
 if(isset($_POST['_submit_check']))
 {

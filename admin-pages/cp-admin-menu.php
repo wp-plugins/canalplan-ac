@@ -35,7 +35,7 @@ Provides information and diagnostics - You'll need to refer to this page if you'
 <p><a href="?page=canalplan-ac/admin-pages/cp-admin-update.php"> Bulk Link Notifier </a><br />
 During normal use the Canalplan AC website will learn about links from you blog back to it's gazetteer. However if you've just added a set of posts you might want to let Canalplan AC know about all the links.
 </p>
-<p><a href="../wp-content/plugins/canalplan/canalplan_ac_user_guide.pdf" target="wordpress">Canalplan AC plugin User Guide</a> - a PDF containing a basic guide to using the Canalplan AC plugin
+<p><a href="../wp-content/plugins/canalplan-ac/canalplan_ac_user_guide.pdf" target="wordpress">Canalplan AC plugin User Guide</a> - a PDF containing a basic guide to using the Canalplan AC plugin
 </p>
 </div>
 <?php

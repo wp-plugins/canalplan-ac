@@ -4,7 +4,7 @@ Contributors: SteveAtty
 Tags: crosspost, Canalplan
 Requires at least: 3.0
 Tested up to: 3.4.1
-Stable tag: 2.5
+Stable tag: 2.6
 
 == Description ==
 
@@ -51,6 +51,9 @@ You also need to ensure that your PHP installation has the PDOs for SQLite V3 in
 
 
 == Changelog ==
+
+= Version 2.6 14/07/2012 =
+- Found a few incorrect urls which would have caused some unwanted 404s
 
 = Version 2.5 03/07/2012 =
 - Rebuilding the blog revealed a glitch when a place vanished from the database which messed up the maps. Now fixed.

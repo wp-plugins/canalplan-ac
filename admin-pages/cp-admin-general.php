@@ -12,7 +12,7 @@ Author: Steve Atty
 $title = __('CanalPlan Options');
 global $blog_id;
 echo '<script type="text/javascript"> var linktype=1; cplogid='.$blog_id.'</script>';
-echo '<script type="text/javascript" src="/wp-content/plugins/canalplan/canalplan/canalplanfunctions.js" DEFER></script>';
+echo '<script type="text/javascript" src="/wp-content/plugins/canalplan-ac/canalplan/canalplanfunctions.js" DEFER></script>';
 nocache_headers(); 
 
 ?>
