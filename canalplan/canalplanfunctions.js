@@ -12,7 +12,7 @@ else if (window.ActiveXObject)
   }
 if (xmlhttp!=null)
   {
-  xmlhttp.open("GET","/wp-content/plugins/canalplan/canalplan/canalplan.php?place="+t+"&blogid="+bid,false)
+  xmlhttp.open("GET","/wp-content/plugins/canalplan-ac/canalplan/canalplan.php?place="+t+"&blogid="+bid,false)
   xmlhttp.send(false)
   xxx=xmlhttp.responseText.replace("\n","");
 xxx=xxx.replace(" ","");
