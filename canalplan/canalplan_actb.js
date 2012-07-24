@@ -1,43 +1,3 @@
-/* 20 Aug 2006: This started off as canalplan_actb.js from
-http://www.codeproject.com/jscript/jscanalplan_actb.asp.
-
-But it didn't work without the addEvent stuff that was in the demo page.  Web
-browsing suggests that this widely distributed stuff is from another source.
-There is a warning about it at quirksmode, but I think I should be immune from
-it.  So that was added at the top.
-
-Then I hacked in a hook to do server lookups.  This is the code that uses my
-new canalplan_actb_lastdownload variable.
-
-Then I wrote the download code.  This is a combination of the demo at
-http://www.w3schools.com/xml/tryit.asp?filename=try_xmlhttprequest_js1
-(although modified to move the state change function into a closure) and the
-"explode" function from http://textsnippets.com/
-
-This makes it a huge bag of code with mixed copyrights.  I'm comfortable
-saying that the creative commons license that applies to the original canalplan_actb
-code can be taken as applying to this derivative work, but if you wanted to
-use this in something that costs real money, you'd better check with your
-lawyers
-
-1 Sept 2006 - I noticed a mountain of errors from the Firefox CSS Parser.
-Changing the "=" to ":" in canalplan_actb_hStyle prevented this, and made the
-highlighted part bold as well!
-
-1 Sept 2006 - added a default of "sans-serif" to the "arial narrow" font
-family, for those of us who don't have arial.
-
-4 Nov 2006 - made "tab" leave the box without selection: much more how I'd
-like it to work
-
-August 2008 - changed the format to work better with names coming from SQL
-
-April 2009 - fixed (in a messy way) a bug where the top element didn't
-show in some browsers
-
-June 2009 - Added UTF8 accented character folding - so each entry has
-a "disp"lay and a "match" version
-*/
 
 function addEvent(obj,event_name,func_name){
   if (obj.attachEvent){
@@ -744,7 +704,7 @@ function canalplan_actb(obj,ca,path){
         }
       };
 
-      xmlhttp.open("GET","/wp-content/plugins/canalplan/canalplan/canalplan.php?match="+t,true)
+      xmlhttp.open("GET","../wp-content/plugins/canalplan-ac/canalplan/canalplan.php?match="+t,true)
       xmlhttp.send(null)
     }
   }
