@@ -12,7 +12,7 @@ Author: Steve Atty
 $title = __('CanalPlan Options');
 global $blog_id;
 echo '<script type="text/javascript"> var linktype=1; cplogid='.$blog_id.'</script>';
-echo '<script type="text/javascript" src="/wp-content/plugins/canalplan-ac/canalplan/canalplanfunctions.js" DEFER></script>';
+echo '<script type="text/javascript" src="'.site_url().'/wp-content/plugins/canalplan-ac/canalplan/canalplanfunctions.js" DEFER></script>';
 nocache_headers(); 
 
 ?>
@@ -94,7 +94,17 @@ if (isset($_POST["update_data"])){
 	$sql="select count(*) from ".CANALPLAN_ALIASES.";";
 	$res = mysql_query($sql);
 	$res2=mysql_fetch_array($res);
-	$handle=fopen("http://www.canalplan.org.uk/data/stable_canal.sqlite","rb");
+		$params = array(
+			'redirection' => 0,
+			'httpversion' => '1.1',
+			'timeout' => 60,
+			'user-agent' => apply_filters( 'http_headers_useragent', 'WordPress/' . $wp_version . '; ' . get_bloginfo( 'url' ) . ';canalplan-' . CANALPLAN_CODE_RELEASE ),
+			'headers' => array( 'Expect:' ),
+			'sslverify' => false
+	);
+	//$response = wp_remote_get(CANALPLAN_BASE."/data/canalplan_wp.sqlite" ,$params);
+	//var_dump($response['body']);
+	$handle=fopen("http://www.canalplan.org.uk/data/canalplan_wp.sqlite","rb");
 	$handle2=fopen("../wp-content/uploads/canalplan_data.sqlite","w");
 	$contents = '';
 	while (!feof($handle)) {
@@ -124,8 +134,6 @@ if (isset($_POST["update_data"])){
 	$result = $dbhandle->query($sqlGetView);
 	foreach ($result as $entry) {
 	   $sql= "INSERT INTO ".CANALPLAN_CODES." (canalplan_id,place_name,size,lat,`long`,attributes,lat_lng_point) VALUES ('".$entry['id']."','".mysql_real_escape_string($entry['name'])."','".$entry['type']."','".$entry['latitude']."','".$entry['longitude']."','".$entry['attributes']."', GeomFromText('Point(".$entry['latitude']." ".$entry['longitude'].")')) ON DUPLICATE KEY UPDATE place_name='".mysql_real_escape_string($entry['name'])."', size='".$entry['type']."', lat='".$entry['latitude']."', `long`='".$entry['longitude']."', attributes='".$entry['attributes']."', lat_lng_point=GeomFromText('Point(".$entry['latitude']." ".$entry['longitude'].")'); ";
-	#var_dump($sql);
-#	echo "<br />";
 	   $res = mysql_query($sql);
 	}
 	$sql="select count(*) from ".CANALPLAN_CODES.";";
@@ -198,7 +206,8 @@ else
 	$rw = mysql_fetch_array($r2,MYSQL_ASSOC);
 	  $updated=$rw['age']/(3600*24);
 }
-
+// Un comment the following line to force Canalplan to think it's data is rather old
+//$updated=22;
 if ($updated> 14 && $do_update==0) {
 	echo "CanalPlan data was last updated over two weeks ago so its probably very out of date. Click on the button to refresh it";
 	$do_update="Get New Data";
@@ -215,6 +224,7 @@ if ( $do_update=="no button" && $updated>0.5) {
 }
 if ($do_update!="no button"){
 ?>
+<p> This may take several minutes to complete... please be patient</p>
 <form action="" name="data_update" id="data_update" method="post">
 <p class="submit"> <input type="submit"  value="<?php echo $do_update;?>" /></p>
 <input type="hidden" name="update_data" value="1"/>
@@ -277,7 +287,7 @@ $rw = mysql_fetch_array($r2,MYSQL_ASSOC);
 $api=$rw['pref_value'];
 } 
 
-$url=get_bloginfo('url');
+$url=get_home_url();
 $sname=get_bloginfo('name');
 if (strlen($api)<4) {
 	$x=CANALPLAN_URL.'api.cgi?mode=register_blogger&domain='.$url.'&title='.urlencode($sname); 
@@ -285,13 +295,13 @@ if (strlen($api)<4) {
 	$cp_register=json_decode($fcheck,true);
 	$api=$cp_register['key'];
 	$uid=$cp_register['id'];
-	echo "<br/>API Key has been set to : <i> ".$api." </i> and is valid for the blog titled:<b> '".$sname."' </b> on the following url : <b> ".$url.'</b><br/>';
+	echo "<br/>API Key has been set to : <i> ".$api." </i> and is valid for the blog titled:<b> '".$sname."' </b> on the following url : <b> ".$url.'</b><br />';
 	echo '<p class="submit"> <input type="submit" name="SCK"  value="Save Canalplan Key" /></p>';
 }
 
 else {
 $api=explode("|",$api);
-echo "<br/>API Key currently set to : <i> ".$api[0]." </i> and is valid for the blog titled:<b> '".$sname."' </b> on the following url : <b> ".$url.'</b><br/>';
+echo "<br/>API Key currently set to : <i> ".$api[0]." </i> and is valid for the blog titled:<b> '".$sname."' </b> on the following url : <b> ".$url.'</b><br />';
 echo '<p class="submit"><input type="submit" name="RCK" value="Reset Canalplan Key" /></p>';
 }
 
@@ -326,13 +336,13 @@ Your current page slug for blogged routes is
 <?php
 if ($routeslug=="UNDEFINED!") { echo " <b> currently not defined </b> so please set one";} else {
 
-echo "'". $routeslug."' so you need to make sure that <a href='".get_option("siteurl")."/".$routeslug."'>".get_option("siteurl")."/".$routeslug."</a> exists";
+echo "'". $routeslug."' so you need to make sure that <a href='".get_home_url()."/".$routeslug."'>".get_home_url()."/".$routeslug."</a> exists";
 }}
 else { 
 ?>
 The Site Administrator has set the page slug for blogged routes to be  '
 <?php
-echo CANALPLAN_ROUTE_SLUG."' so you need to make sure that <a href='".get_option("siteurl")."/".CANALPLAN_ROUTE_SLUG."'>".get_option("siteurl")."/".CANALPLAN_ROUTE_SLUG."</a> exists ";
+echo CANALPLAN_ROUTE_SLUG."' so you need to make sure that <a href='".get_home_url()."/".CANALPLAN_ROUTE_SLUG."'>".get_home_url()."/".CANALPLAN_ROUTE_SLUG."</a> exists ";
 }
 
 

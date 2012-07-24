@@ -4,7 +4,7 @@ Contributors: SteveAtty
 Tags: crosspost, Canalplan
 Requires at least: 3.0
 Tested up to: 3.4.1
-Stable tag: 2.6
+Stable tag: 2.7
 
 == Description ==
 
@@ -51,6 +51,15 @@ You also need to ensure that your PHP installation has the PDOs for SQLite V3 in
 
 
 == Changelog ==
+
+= Version 2.7 24/07/2012 =
+- Server work to reduce DB download size. 
+- Recode data loader to use smaller fetch requests
+- Fixed a rogue 500 error in the place matching routine.
+- Changed all javascript urls to be relative rather than absolute to fix issue with running blog in a subdirectory
+- Changed Where Am I widget to need full Google ID (i.e including the -) rather than just assuming it.
+- Added before and after widget calls to the Widget so that it picks up theme formatting for widgets.
+- Changed more hard coded Canalplan URLs to use the constants defined in the main file.
 
 = Version 2.6 14/07/2012 =
 - Found a few incorrect urls which would have caused some unwanted 404s

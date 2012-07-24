@@ -19,6 +19,7 @@ echo'</h2><form action="options.php" method="post" action="">';
 wp_nonce_field('canalplan_gm_options'); 
 settings_fields('canalplan_options');
 $canalplan_options = get_option('canalplan_options');
+$checked_flag=array('on'=>'checked','off'=>'');
 if (!isset($canalplan_options['canalplan_pm_type'])) {
 	$canalplan_options["canalplan_pm_type"]='H';
 	$canalplan_options["canalplan_pm_zoom"]=14;
@@ -101,6 +102,11 @@ for ($i = 0; $i <= 21; $i++) {
        else {print '<option value="'.$i.'" >'.$i.'</option>';}}
 echo "</select> pixels <br />";
 
+echo "<h3>Other Map Options</h3>";
 
-echo '<br /><input type="submit" name="SBLO" value="'.__("Save Google Map Options", 'canalplan').'" class="button-primary"  />&nbsp;&nbsp;&nbsp;<input type="submit" name="RSD" value="'.__("Reset to System Defaults", 'wordbooker').'" class="button-primary" action="poo" /</p></form><br /></div><hr>';
+echo '<label for="cp_gmap_disable">'.__('Disable Google Map API load', 'canalplan').' :</label>';
+echo '<INPUT TYPE=CHECKBOX NAME="canalplan_options[supress_google]" '.$checked_flag[$canalplan_options["supress_google"]].' ><br />';
+
+
+echo '<br /><input type="submit" name="SBLO" value="'.__("Save Google Map Options", 'canalplan').'" class="button-primary"  />&nbsp;&nbsp;&nbsp;<input type="submit" name="RSD" value="'.__("Reset to System Defaults", 'wordbooker').'" class="button-primary" action="poo" /</p></form>';
 ?>

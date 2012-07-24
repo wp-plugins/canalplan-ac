@@ -22,9 +22,9 @@ if(isset($_POST['_submit_check']))
 
 }
 ?>
-<script type="text/javascript" src="/wp-content/plugins/canalplan-ac/canalplan/plan.js"></script>
-<script type="text/javascript" src="/wp-content/plugins/canalplan-ac/canalplan/canalplan_actb.js"></script>
-<script type="text/javascript" src="/wp-content/plugins/canalplan-ac/canalplan/canalplanfunctions.js"></script>
+<script type="text/javascript" src="../wp-content/plugins/canalplan-ac/canalplan/plan.js"></script>
+<script type="text/javascript" src="../wp-content/plugins/canalplan-ac/canalplan/canalplan_actb.js"></script>
+<script type="text/javascript" src="../wp-content/plugins/canalplan-ac/canalplan/canalplanfunctions.js"></script>
 <script language="JavaScript" type="text/javascript">
 
 function getCanalPlan2(tag)

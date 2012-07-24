@@ -26,16 +26,17 @@ class CanalPLanWidget extends WP_Widget {
 		global  $wpdb, $user_ID,$table_prefix,$blog_id;
 		$userid=$instance['snorl'];
 		// Display the widget!
+		echo $before_widget;
 		echo "<!--Canalplan Latitude Start -->\n";
 		echo $before_title;
 		echo $instance['title'];
 		echo $after_title;
 		echo "<div align='center'>";
-		$params = '?user=-'.$instance['google'].'&type=iframe&maptype='.$instance['mf'].'&z='.$instance['zl'];
+		$params = '?user='.$instance['google'].'&type=iframe&maptype='.$instance['mf'].'&z='.$instance['zl'];
 		echo "<!-- Google Public Location Badge -->\n";
-		echo "<iframe src=\"http://www.google.com/latitude/apps/badge/api".$params."\" width=\"".$instance['width']."\" height=\"".$instance['height']."\" frameborder=\"0\" >\n";
-		echo "</iframe>\n";
-		$latfile='https://www.google.com/latitude/apps/badge/api?user=-'.$instance['google'].'&type=json';
+		echo "<iframe src=\"http://www.google.com/latitude/apps/badge/api".$params."\" width=\"".$instance['width']."\" height=\"".$instance['height']."\" frameborder=\"0\" ALLOWTRANSPARENCY=\"true\" >\n";
+		echo "</iframe>";
+		$latfile='https://www.google.com/latitude/apps/badge/api?user='.$instance['google'].'&type=json';
 		$llines = file_get_contents($latfile);
 		$lcontents=utf8_encode($llines);
 		$Latitude = json_decode($lcontents, false);
@@ -47,8 +48,9 @@ class CanalPLanWidget extends WP_Widget {
 		$res = mysql_query($sql);
 		$gazstring='http://www.canalplan.org.uk/cgi-bin/gazetteer.cgi?where=$';
 		while($row=mysql_fetch_array($res)) {
-		print "<p>Nearest Canalplan location is : <br /> <a href='".$gazstring.$row['canalplan_id']."' target='_new' > ".$row['place_name']."</a> <br /></p></div>";
+		print "Nearest Canalplan location is : <br /> <a href='".CANALPLAN_GAZ_URL.$row['canalplan_id']."' target='_new' > ".$row['place_name']."</a> <br /></div>";
 		}
+		echo "</p>".$after_widget;
 	}
 	
 	function update($new_instance, $old_instance) {

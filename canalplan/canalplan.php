@@ -1,13 +1,11 @@
 <?php
+require_once( '../../../../wp-config.php');
+global $wpdb,$user_ID;
 
-
-require("../../../../wp-config.php");
-if ($cp_blog_id=="undefined") {unset($cp_blog_id);}
-if (strlen($match)>0){
+if (strlen($_GET['match'])>0){
 $match=mysql_real_escape_string($_GET['match']);
-$place=mysql_real_escape_string(_GET['place']);
-$cp_blog_id=mysql_real_escape_string($_GET['blogid']);
 
+$cp_blog_id=mysql_real_escape_string($_GET['blogid']);
 $sql="set names 'utf8';";
 $zed = mysql_query($sql);
 	//	$canalplaces = mysql_query($sql);
@@ -23,8 +21,11 @@ $zed = mysql_query($sql);
         while ($canalplace = mysql_fetch_array($canalplaces)) { print trim($canalplace[fullname]).'#'; }
 
 }
+$place=mysql_real_escape_string($_GET['place']);
 if (strlen($place)>0){
 $place=trim(urldecode($place));
+$cp_blog_id=mysql_real_escape_string($_GET['blogid']);
+if ($cp_blog_id=="undefined") {unset($cp_blog_id);}
 // If we have a blog_id passed in then we need to get back the favourites and then the main rows but remove any common names
   if (isset($cp_blog_id)) {
 $sql="set names 'utf8';";

@@ -267,7 +267,7 @@ while($rw = mysql_fetch_array($r))
 <?php
 
 } else {
-print "You don't seem to have any routes to manage. Please <a href='admin.php?page=canalplan/admin-pages/cp-import_route.php'>import</a> a route first";
+print "You don't seem to have any routes to manage. Please <a href='?page=canalplan-ac/admin-pages/cp-import_route.php'>import</a> a route first";
 }
 }
 ?>

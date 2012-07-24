@@ -15,10 +15,10 @@ nocache_headers();
 <div class="wrap">
 
 <h2><?php _e('CanalPlan AC Integration Overview') ?> </h2>
-This plugin allows you to integrate your blog with <a href="http://www.canalplan.eu">Canalplan AC</a>
+This plugin allows you to integrate your blog with <a href="<?php echo CANALPLAN_BASE; ?>">Canalplan AC</a>
 
 <p><a href="?page=canalplan-ac/admin-pages/cp-admin-general.php"> General Options </a> <br />
-This sets up various general options for the Canalplan plugin such as the Canalplan API Key and GoogleMaps API Key</p>
+This sets up various general options for the Canalplan plugin such as the Distance Format and your Canalplan AC link code</p>
 <p><a href="?page=canalplan-ac/admin-pages/cp-admin-home.php"> Home Mooring </a><br />
 This allows you to set your home mooring location and give it a customised name </p>
 <p><a href="?page=canalplan-ac/admin-pages/cp-admin-fav.php"> Favourite Locations </a><br />

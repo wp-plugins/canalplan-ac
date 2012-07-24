@@ -24,9 +24,9 @@ if(isset($_POST['_submit_check']))
 	# var_dump($_POST['dataset']);
 }
 ?>
-<script type="text/javascript" src="/wp-content/plugins/canalplan-ac/canalplan/plan.js"></script>
-<script type="text/javascript" src="/wp-content/plugins/canalplan-ac/canalplan/canalplan_actb.js"></script>
-<script type="text/javascript" src="/wp-content/plugins/canalplan-ac/canalplan/canalplanfunctions.js" DEFER></script>
+<script type="text/javascript" src="../wp-content/plugins/canalplan-ac/canalplan/plan.js"></script>
+<script type="text/javascript" src="../wp-content/plugins/canalplan-ac/canalplan/canalplan_actb.js"></script>
+<script type="text/javascript" src="../wp-content/plugins/canalplan-ac/canalplan/canalplanfunctions.js" DEFER></script>
 <script language="JavaScript" type="text/javascript"><!--
 
 function getCanalPlan2(tag)
