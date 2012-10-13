@@ -1,13 +1,11 @@
 <?php
-
 /*
 Extension Name: Canalplan Manage Route
 Extension URI: http://blogs.canalplan.org.uk/canalplanac/canalplan-plug-in/
-Version: 0.9
+Version: 2.8
 Description: Manage Route Page for the Canalplan AC Plugin
 Author: Steve Atty
 */
-
 
 require_once('admin.php');
 $title = __('CanalPlan Manage Route');
@@ -267,7 +265,7 @@ while($rw = mysql_fetch_array($r))
 <?php
 
 } else {
-print "You don't seem to have any routes to manage. Please <a href='admin.php?page=canalplan/admin-pages/cp-import_route.php'>import</a> a route first";
+print "You don't seem to have any routes to manage. Please <a href='?page=canalplan-ac/admin-pages/cp-import_route.php'>import</a> a route first";
 }
 }
 ?>

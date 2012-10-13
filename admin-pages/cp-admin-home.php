@@ -1,13 +1,11 @@
 <?php
-
 /*
 Extension Name: Canalplan Home Mooring
 Extension URI: http://blogs.canalplan.org.uk/canalplanac/canalplan-plug-in/
-Version: 0.9
+Version: 2.8
 Description: Home Mooring admin page for the Canalplan AC Plugin
 Author: Steve Atty
 */
-
 
 require_once ('admin.php');
 $title = __('Home Mooring');
@@ -21,11 +19,12 @@ echo '<script type="text/javascript"> var linktype=1; cplogid='.$blog_id.'</scri
 if(isset($_POST['_submit_check']))
 {
 	parse_data($_POST['dataset'],$blog_id);
+	# var_dump($_POST['dataset']);
 }
 ?>
-<script type="text/javascript" src="/wp-content/plugins/canalplan/canalplan/plan.js"></script>
-<script type="text/javascript" src="/wp-content/plugins/canalplan/canalplan/canalplan_actb.js"></script>
-<script type="text/javascript" src="/wp-content/plugins/canalplan/canalplan/canalplanfunctions.js" DEFER></script>
+<script type="text/javascript" src="../wp-content/plugins/canalplan-ac/canalplan/plan.js"></script>
+<script type="text/javascript" src="../wp-content/plugins/canalplan-ac/canalplan/canalplan_actb.js"></script>
+<script type="text/javascript" src="../wp-content/plugins/canalplan-ac/canalplan/canalplanfunctions.js" DEFER></script>
 <script language="JavaScript" type="text/javascript"><!--
 
 function getCanalPlan2(tag)

@@ -1,19 +1,17 @@
 <?php
-
 /*
 Extension Name: Canalplan Import Route
 Extension URI: http://blogs.canalplan.org.uk/canalplanac/canalplan-plug-in/
-Version: 0.9
+Version: 2.8
 Description: Import Route page for the Canalplan AC Plugin
 Author: Steve Atty
 */
-
-
 require_once('admin.php');
 $title = __('CanalPlan Import Route');
 nocache_headers();
 ?>
-<script type="text/javascript" src="/wp-content/plugins/canalplan/canalplan/calendar.js"></script>
+
+<script type="text/javascript" src="../wp-content/plugins/canalplan-ac/canalplan/calendar.js"></script>
 <?php
 if(isset($_POST['_submit_check']))
 {
@@ -50,7 +48,6 @@ $startstring=$rw['canalplan_id'];
 <?php
 $cptable='places';
 $geturl=CANALPLAN_URL."api.cgi?session=".$cpsessionid."&mode=table&table=".$cptable;
-#print $geturl;
 $handle = fopen (CANALPLAN_URL."api.cgi?session=".$cpsessionid."&mode=table&table=".$cptable , 'r');
 		while (($data = fgets($handle)) !== FALSE)
 		{
@@ -104,7 +101,8 @@ $cptable='durations';
 
 
 # for Durations we need to load the value of jdata['value'] into jdata['name']
-$handle = fopen (CANALPLAN_URL."api.cgi?session=".$cpsession."&mode=table&table=".$cptable , 'r');
+$url=CANALPLAN_URL."api.cgi?session=".$cpsession."&mode=table&table=".$cptable;
+$handle = fopen ($url , 'r');
 		while (($data = fgets($handle)) !== FALSE)
 		{
 $jdata=json_decode($data, true);
@@ -283,7 +281,7 @@ $r=mysql_query($sql);
 
 }
 
-print "<br><br>Draft Posts created. You can now go and <a href='/wp-admin/edit.php'>edit</a> the posts or <a href='admin.php?page=canalplan/admin-pages/cp-manage_route.php'>change the daily subtotals</a>";
+print "<br><br>Draft Posts created. You can now go and <a href='/wp-admin/edit.php'>edit</a> the posts or <a href='?page=canalplan-ac/admin-pages/cp-manage_route.php'>change the daily subtotals</a>";
 break;
 }
 if ($i>10){
