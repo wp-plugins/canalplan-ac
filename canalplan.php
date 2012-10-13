@@ -3,7 +3,7 @@
 Plugin Name: CanalPlan Integration
 Plugin URI: http://blogs.canalplan.org.uk/canalplanac/canalplan-plug-in/
 Description: Provides features to integrate your blog with <a href="http://www.canalplan.eu">Canalplan AC</a> - the Canal Route Planner.
-Version: 2.7
+Version: 2.8
 Author: Steve Atty
 Author URI: http://blogs.canalplan.org.uk/steve/
  *
@@ -29,7 +29,7 @@ define ('CANALPLAN_BASE','http://www.canalplan.org.uk');
 define ('CANALPLAN_URL',CANALPLAN_BASE.'/cgi-bin/');
 define ('CANALPLAN_GAZ_URL',CANALPLAN_BASE.'/gazetteer/');
 define ('CANALPLAN_MAX_POST_PROCESS',20);
-define('CANALPLAN_CODE_RELEASE','2.7 r00');
+define('CANALPLAN_CODE_RELEASE','2.8 r00');
 
 global $table_prefix, $wp_version,$wpdb,$db_prefix;
 # Determine the right table prefix to use
@@ -570,7 +570,7 @@ function canal_options_page() {
 }
 
 function blroute(){
-	$routeid = $_REQUEST['routeid'];
+	$routeid = $_GET['routeid'];
 	$routeid = preg_replace('{/$}', '', $routeid);
 	if (!isset($routeid)){$routeid=0;}
 	if ($routeid<=0){$routeid=0;}
@@ -929,10 +929,12 @@ function save_error(){
 }
 
 add_action('activated_plugin','save_error');
+if (!is_admin()){
 add_filter('the_content','blogroute_insert');
 add_filter('the_excerpt','blogroute_insert');
 add_action('wp_head', 'canalplan_header');
 add_action('wp_footer', 'canalplan_footer');
+}
 add_action('admin_menu', 'canalplan_add_custom_box');
 add_action('init', 'canal_init');
 register_activation_hook(__FILE__, 'canal_activate');

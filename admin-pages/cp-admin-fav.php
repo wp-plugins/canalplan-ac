@@ -1,9 +1,8 @@
 <?php
-
 /*
 Extension Name: Canalplan Favourites
 Extension URI: http://blogs.canalplan.org.uk/canalplanac/canalplan-plug-in/
-Version: 0.9
+Version: 2.8
 Description: Favourites admin for the Canalplan AC Plugin
 Author: Steve Atty
 */

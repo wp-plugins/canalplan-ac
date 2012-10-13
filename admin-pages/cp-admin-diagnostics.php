@@ -1,9 +1,8 @@
 <?php
-
 /*
 Extension Name: Canalplan Diagnstics
 Extension URI: http://blogs.canalplan.org.uk/canalplanac/canalplan-plug-in/
-Version: 0.9
+Version: 2.8
 Description: Diagnostics for the Canalplan AC Plugin
 Author: Steve Atty
 */

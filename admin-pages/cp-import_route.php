@@ -1,14 +1,11 @@
 <?php
-
 /*
 Extension Name: Canalplan Import Route
 Extension URI: http://blogs.canalplan.org.uk/canalplanac/canalplan-plug-in/
-Version: 0.9
+Version: 2.8
 Description: Import Route page for the Canalplan AC Plugin
 Author: Steve Atty
 */
-
-
 require_once('admin.php');
 $title = __('CanalPlan Import Route');
 nocache_headers();

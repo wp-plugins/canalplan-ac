@@ -1,6 +1,4 @@
 <?php
-
-
 /*
 Extension Name: Canalplan General Settings
 Extension URI: http://blogs.canalplan.org.uk/canalplanac/canalplan-plug-in/
@@ -102,16 +100,24 @@ if (isset($_POST["update_data"])){
 			'headers' => array( 'Expect:' ),
 			'sslverify' => false
 	);
-	//$response = wp_remote_get(CANALPLAN_BASE."/data/canalplan_wp.sqlite" ,$params);
-	//var_dump($response['body']);
-	$handle=fopen("http://www.canalplan.org.uk/data/canalplan_wp.sqlite","rb");
+	$response = wp_remote_get(CANALPLAN_BASE."/data/canalplan_wp.sqlite" ,$params);
 	$handle2=fopen("../wp-content/uploads/canalplan_data.sqlite","w");
-	$contents = '';
-	while (!feof($handle)) {
-	  $contents = fread($handle, 8192);
-	   fwrite($handle2,$contents);
+	//var_dump($response['response']);
+	if ($response['response']['code']==200) {
+	//	echo "Retrieving data using remote get";
+		$data = $response['body'];
+		$handle2=fopen("../wp-content/uploads/canalplan_data.sqlite","w");
+		fwrite($handle2, $data);
+	} else {
+	//	echo "Retrieving data using fopen";
+		$handle=fopen(CANALPLAN_BASE."/data/canalplan_wp.sqlite","rb");;
+		$contents = '';
+		while (!feof($handle)) {
+		  $contents = fread($handle, 8192);
+		  fwrite($handle2,$contents);
+		}
+		fclose($handle);
 	}
-	fclose($handle);
 	fclose($handle2);
 	$dbhandle = new PDO("sqlite:../wp-content/uploads/canalplan_data.sqlite");
 	$sqlGetView = 'SELECT placeid,name FROM place_aliases';

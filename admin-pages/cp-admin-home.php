@@ -1,13 +1,11 @@
 <?php
-
 /*
 Extension Name: Canalplan Home Mooring
 Extension URI: http://blogs.canalplan.org.uk/canalplanac/canalplan-plug-in/
-Version: 0.9
+Version: 2.8
 Description: Home Mooring admin page for the Canalplan AC Plugin
 Author: Steve Atty
 */
-
 
 require_once ('admin.php');
 $title = __('Home Mooring');

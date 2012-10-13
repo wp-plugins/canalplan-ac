@@ -37,6 +37,7 @@ class CanalPLanWidget extends WP_Widget {
 		echo "<iframe src=\"http://www.google.com/latitude/apps/badge/api".$params."\" width=\"".$instance['width']."\" height=\"".$instance['height']."\" frameborder=\"0\" ALLOWTRANSPARENCY=\"true\" >\n";
 		echo "</iframe>";
 		$latfile='https://www.google.com/latitude/apps/badge/api?user='.$instance['google'].'&type=json';
+		#var_dump($latfile);
 		$llines = file_get_contents($latfile);
 		$lcontents=utf8_encode($llines);
 		$Latitude = json_decode($lcontents, false);
@@ -111,7 +112,6 @@ class CanalPLanWidget extends WP_Widget {
 	}	
 
 }
-
 /* register widget when loading the WP core */
 add_action('widgets_init', 'canalplan_widgets');
 $plugin_dir = basename(dirname(__FILE__));
@@ -119,7 +119,5 @@ $plugin_dir = basename(dirname(__FILE__));
 function canalplan_widgets(){
 	register_widget('CanalplanWidget');
 }
-
-
 
 ?>

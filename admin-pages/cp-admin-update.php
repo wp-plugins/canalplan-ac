@@ -1,9 +1,8 @@
 <?php
-
 /*
 Extension Name: Canalplan Bulk update
 Extension URI: http://blogs.canalplan.org.uk/canalplanac/canalplan-plug-in/
-Version: 0.9
+Version: 2.8
 Description: Bulk notifier page for the Canalplan AC Plugin
 Author: Steve Atty
 */

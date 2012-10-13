@@ -3,8 +3,8 @@
 Contributors: SteveAtty
 Tags: crosspost, Canalplan
 Requires at least: 3.0
-Tested up to: 3.4.1
-Stable tag: 2.7
+Tested up to: 3.4.2
+Stable tag: 2.8
 
 == Description ==
 
@@ -22,7 +22,7 @@ You also need to ensure that your PHP installation has the PDOs for SQLite V3 in
 
 == Installation ==
 
-1. [Download] (http://wordpress.org/extend/plugins/canalplan-ac/) the latest version of Wordbooker.
+1. [Download] (http://wordpress.org/extend/plugins/canalplan-ac/) the latest version of the Canaplan AC Plugin.
 1. Unzip the ZIP file.
 1. Upload the `canalplan` directory to the `/wp-content/plugins/` directory.
 1. Activate the plugin through the 'Plugins' menu in WordPress. 
@@ -52,7 +52,12 @@ You also need to ensure that your PHP installation has the PDOs for SQLite V3 in
 
 == Changelog ==
 
-= Version 2.7 24/07/2012 =
+= Version 2.8 13/10/2012 =
+- Changed a couple of fixed URLS to use constants to make url changes easier.
+- Added a couple of conditional checks to make things tidy.
+- Moved Data Pull from Canalplan to use wp_get - so fopen is not needed any more which makes things better.
+
+= Version 2.7 21/07/2012 =
 - Server work to reduce DB download size. 
 - Recode data loader to use smaller fetch requests
 - Fixed a rogue 500 error in the place matching routine.
