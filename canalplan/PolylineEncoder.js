@@ -4,89 +4,7 @@
 // polylines for use with Google Maps together with a few
 // auxiliary functions. Documentation at
 // http://facstaff.unca.edu/mcmcclur/GoogleMaps/EncodePolyline/PolylineEncoder.html
-//
-// Google map reference including encoded polylines:
-//   http://www.google.com/apis/maps/documentation/
-//
-// Details on the algorithm used here:
-//   http://facstaff.unca.edu/mcmcclur/GoogleMaps/EncodePolyline/
-//
-// Constructor:
-//   polylineEncoder = new PolylineEncoder(numLevels, 
-//     zoomFactor, verySmall, forceEndpoints?);
-// where numLevels and zoomFactor indicate how many 
-// different levels of magnification the polyline has
-// and the change in magnification between those levels,
-// verySmall indicates the length of a barely visible 
-// object at the highest zoom level, forceEndpoints 
-// indicates whether or not the  endpoints should be 
-// visible at all zoom levels.  forceEndpoints is 
-// optional with a default value of true.  Probably 
-// should stay true regardless.
-// 
-// Main methods:
-// * PolylineEncoder.dpEncodeToPolyline(points, 
-//     color?, weight?, opacity?)
-// Accepts an array of latLng objects (see below) and
-// optional style specifications.  Returns an encoded 
-// polyline that may be directly overlayed on a Google 
-// Map.  Requires that the Google Maps API be loaded.
-//
-// * PolylineEncoder.dpEncodeToPolygon(pointsArray, 
-//     boundaryColor?, boundaryWeight?, boundaryOpacity?,
-//     fillColor?, fillOpacity?, fill?, outline?)
-// Accepts an array of arrays latLng objects and
-// optional style specifications.  Returns an encoded 
-// polylgon that may be directly overlayed on a Google 
-// Map.  Requires that the Google Maps API be loaded.
-//
-//
-// Convenience classes and methods:
-// * PolylineEncoder.latLng
-// Constructor:
-//   myLatLng = new PolylineEncoder.latLng(y,x);
-// The dpEncode* functions expect points in the
-// form of an object with lat and lng methods.  A
-// GLatLng as defined by the Google Maps API does 
-// quite nicely.  If you're developing a javascript
-// without loading the API, however, you can use
-// a PolylineEncoder.latLng for this purpose.
-// //
-// PolylineEncoder.pointsToLatLngs
-// Sometimes your points are defined in terms of an
-// array of arrays, rather than an array of latLngs.
-// PolylineEncoder.pointsToLatLngs converts to an array
-// of arrays to an array of latLngs for use by the
-// dpEncode functions.
-// //
-// PolylineEncoder.pointsToGLatLngs
-// PolylineEncoder.pointsToGLatLngs is analagous to the 
-// previous function, but it returns GLatLngs rather
-// than PolylineEncoder.latLngs.  The first function may
-// be used independently of Google Maps.  Use the second,
-// if you need to use the result in a Goole Map function.
-//
-//
-// Lower level methods
-// PolylineEncoder.dpEncodeToJSON(points, 
-//     color?, weight?, opacity?)
-// Returns a legal argument to GPolyline.fromEncoded.
-// //
-// PolylineEncoder.dpEncode(points);
-// This is where the real work is done.  The return value
-// is a JSON object with properties named  encodedLevels,
-// encdodedPoints and encodedPointsLiteral. These are
-// strings which are acceptable input to the points and
-// levels properties of the GPolyline.fromEncoded
-// function. The encodedPoints string should be used for
-// maps generated dynamically, while the
-// encodedPointsLiteral string should be copied into a
-// static document.
-// 
-// The standard disclaimers, such as "use at your own risk, 
-// since I really don't have any idea what I'm doing," apply. 
 
-// The constructor
 PolylineEncoder = function(numLevels, zoomFactor, verySmall, forceEndpoints) {
   var i;
   if(!numLevels) {
@@ -111,11 +29,7 @@ PolylineEncoder = function(numLevels, zoomFactor, verySmall, forceEndpoints) {
   }
 }
 
-// The main function.  Essentially the Douglas-Peucker
-// algorithm, adapted for encoding. Rather than simply
-// eliminating points, we record their distance from the
-// segment which occurs at that recursive step.  These
-// distances are then easily converted to zoom levels.
+
 PolylineEncoder.prototype.dpEncode = function(points) {
   var absMaxDist = 0;
   var stack = [];
@@ -236,9 +150,6 @@ PolylineEncoder.prototype.dpEncodeToGPolygon = function(pointsArray,
   });
 }
 
-// distance(p0, p1, p2) computes the distance between the point p0
-// and the segment [p1,p2].  This could probably be replaced with
-// something that is a bit more numerically stable.
 PolylineEncoder.prototype.distance = function(p0, p1, p2) {
   var u, out;
   
@@ -263,10 +174,6 @@ PolylineEncoder.prototype.distance = function(p0, p1, p2) {
   return out;
 }
 
-// The createEncodings function is very similar to Google's
-// http://www.google.com/apis/maps/documentation/polyline.js
-// The key difference is that not all points are encoded, 
-// since some were eliminated by Douglas-Peucker.
 PolylineEncoder.prototype.createEncodings = function(points, dists) {
   var i, dlat, dlng;
   var plat = 0;
@@ -291,10 +198,6 @@ PolylineEncoder.prototype.createEncodings = function(points, dists) {
   return encoded_points;
 }
 
-// This computes the appropriate zoom level of a point in terms of it's 
-// distance from the relevant segment in the DP algorithm.  Could be done
-// in terms of a logarithm, but this approach makes it a bit easier to
-// ensure that the level is not too large.
 PolylineEncoder.prototype.computeLevel = function(dd) {
   var lev;
   if(dd > this.verySmall) {
@@ -306,9 +209,6 @@ PolylineEncoder.prototype.computeLevel = function(dd) {
   }
 }
 
-// Now we can use the previous function to march down the list
-// of points and encode the levels.  Like createEncodings, we
-// ignore points whose distance (in dists) is undefined.
 PolylineEncoder.prototype.encodeLevels = function(points, dists, absMaxDist) {
   var i;
   var encoded_levels = "";
@@ -333,23 +233,18 @@ PolylineEncoder.prototype.encodeLevels = function(points, dists, absMaxDist) {
   return encoded_levels;
 }
 
-// This function is very similar to Google's, but I added
-// some stuff to deal with the double slash issue.
+
 PolylineEncoder.prototype.encodeNumber = function(num) {
   var encodeString = "";
   var nextValue, finalValue;
   while (num >= 0x20) {
     nextValue = (0x20 | (num & 0x1f)) + 63;
-//     if (nextValue == 92) {
-//       encodeString += (String.fromCharCode(nextValue));
-//     }
+
     encodeString += (String.fromCharCode(nextValue));
     num >>= 5;
   }
   finalValue = num + 63;
-//   if (finalValue == 92) {
-//     encodeString += (String.fromCharCode(finalValue));
-//   }
+
   encodeString += (String.fromCharCode(finalValue));
   return encodeString;
 }
@@ -364,8 +259,6 @@ PolylineEncoder.prototype.encodeSignedNumber = function(num) {
 }
 
 
-// The remaining code defines a few convenience utilities.
-// PolylineEncoder.latLng
 PolylineEncoder.latLng = function(y, x) {
 	this.y = y;
 	this.x = x;
@@ -377,7 +270,7 @@ PolylineEncoder.latLng.prototype.lng = function() {
 	return this.x;
 }
 
-// PolylineEncoder.pointsToLatLngs
+
 PolylineEncoder.pointsToLatLngs = function(points) {
 	var i, latLngs;
 	latLngs = new Array(0);
@@ -387,7 +280,7 @@ PolylineEncoder.pointsToLatLngs = function(points) {
 	return latLngs;
 }
 
-// PolylineEncoder.pointsToGLatLngs
+
 PolylineEncoder.pointsToGLatLngs = function(points) {
 	var i, gLatLngs;
 	gLatLngs = new Array(0);
