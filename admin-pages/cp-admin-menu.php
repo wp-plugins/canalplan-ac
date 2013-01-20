@@ -2,17 +2,15 @@
 /*
 Extension Name: Canalplan Menu
 Extension URI: http://blogs.canalplan.org.uk/canalplanac/canalplan-plug-in/
-Version: 2.8
+Version: 3.0
 Description: Menu Page for the Canalplan AC Plugin
 Author: Steve Atty
 */
 
 $title = __('CanalPlan AC Integration');
-
-nocache_headers(); 
+nocache_headers();
 ?>
 <div class="wrap">
-
 <h2><?php _e('CanalPlan AC Integration Overview') ?> </h2>
 This plugin allows you to integrate your blog with <a href="<?php echo CANALPLAN_BASE; ?>">Canalplan AC</a>
 <p><a href="?page=canalplan-ac/admin-pages/cp-admin-general.php"> General Options </a> <br />

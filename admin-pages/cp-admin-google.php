@@ -2,7 +2,7 @@
 /*
 Extension Name: Canalplan Google options
 Extension URI: http://blogs.canalplan.org.uk/canalplanac/canalplan-plug-in/
-Version: 2.8
+Version: 3.0
 Description: Favourites admin for the Canalplan AC Plugin
 Author: Steve Atty
 */
@@ -15,7 +15,7 @@ global $blog_id;
 echo'<p><hr><h2>';
 _e('Google Map Settings','canalplan');
 echo'</h2><form action="options.php" method="post" action="">';
-wp_nonce_field('canalplan_gm_options'); 
+wp_nonce_field('canalplan_gm_options');
 settings_fields('canalplan_options');
 $canalplan_options = get_option('canalplan_options');
 $checked_flag=array('on'=>'checked','off'=>'');
@@ -70,7 +70,6 @@ for ($i = 0; $i <= 21; $i++) {
         if ($i==$canalplan_options['canalplan_rm_zoom']){ print '<option selected="yes" value="'.$i.'" >'.$i.'</option>';}
        else {print '<option value="'.$i.'" >'.$i.'</option>';}}
 echo "</select><br />";
-
 echo '<label for="cp_route_map_height">'.__('Route Map Height', 'canalplan').' : </label>';
 echo '<INPUT NAME="canalplan_options[canalplan_rm_height]" size=3 maxlength=3 value="'.stripslashes($canalplan_options["canalplan_rm_height"]).'"> pixels <br />';
 if($canalplan_options['canalplan_rm_height']<1) {$canalplan_options['canalplan_rm_height']=200;}
@@ -100,12 +99,8 @@ for ($i = 0; $i <= 21; $i++) {
         if ($i==$canalplan_options['canalplan_rm_weight']){ print '<option selected="yes" value="'.$i.'" >'.$i.'</option>';}
        else {print '<option value="'.$i.'" >'.$i.'</option>';}}
 echo "</select> pixels <br />";
-
 echo "<h3>Other Map Options</h3>";
-
 echo '<label for="cp_gmap_disable">'.__('Disable Google Map API load', 'canalplan').' :</label>';
 echo '<INPUT TYPE=CHECKBOX NAME="canalplan_options[supress_google]" '.$checked_flag[$canalplan_options["supress_google"]].' ><br />';
-
-
 echo '<br /><input type="submit" name="SBLO" value="'.__("Save Google Map Options", 'canalplan').'" class="button-primary"  />&nbsp;&nbsp;&nbsp;<input type="submit" name="RSD" value="'.__("Reset to System Defaults", 'wordbooker').'" class="button-primary" action="poo" /</p></form>';
 ?>

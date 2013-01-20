@@ -2,7 +2,7 @@
 /*
 Extension Name: Canalplan General Settings
 Extension URI: http://blogs.canalplan.org.uk/canalplanac/canalplan-plug-in/
-Version: 0.9
+Version: 3.0
 Description: General Settings for the Canalplan AC Plugin
 Author: Steve Atty
 */
@@ -11,7 +11,7 @@ $title = __('CanalPlan Options');
 global $blog_id;
 echo '<script type="text/javascript"> var linktype=1; cplogid='.$blog_id.'</script>';
 echo '<script type="text/javascript" src="'.site_url().'/wp-content/plugins/canalplan-ac/canalplan/canalplanfunctions.js" DEFER></script>';
-nocache_headers(); 
+nocache_headers();
 
 ?>
 <script language="JavaScript" type="text/javascript"><!--
@@ -20,8 +20,6 @@ nocache_headers();
 var x=document.getElementById("general_options");
 x.options[param].text=listID;
         }
-
-
         function showValue(listID)
         {
     var list = document.getElementById(listID);
@@ -35,7 +33,6 @@ x.options[param].text=listID;
         itemsString += items[i].innerHTML;
     }
 document.getElementById("dataset").value=itemsString;
-
         }
 	//-->
 	</script>
@@ -53,45 +50,39 @@ if(isset($_POST['_submit_check']))
 <br>
 <h3><?php _e('CanalPlan Data') ?></h3>
 <?php
-if (isset($_POST["googleapi"])){
-	$api=mysql_real_escape_string($_POST['apikey']);
-	$r = mysql_query("SELECT pref_value FROM ".CANALPLAN_OPTIONS." where blog_id=".$blog_id." and pref_code='apikey'");
-	$sql="update ".CANALPLAN_OPTIONS." set pref_value='".$api."' where blog_id=".$blog_id." and pref_code='apikey'";
-	if (mysql_num_rows($r)==0) {
-		$sql="insert into ".CANALPLAN_OPTIONS." (pref_value,blog_id,pref_code) values ('".$api."',".$blog_id.",'apikey')";
-	}
-	mysql_query($sql);
-}
-
 if (isset($_POST["canalkey"]) && isset($_POST['SCK'])){
-	$api=mysql_real_escape_string($_POST['canalkey']);
-	$r = mysql_query("SELECT pref_value FROM ".CANALPLAN_OPTIONS." where blog_id=".$blog_id." and pref_code='canalkey'");
-	$sql="update ".CANALPLAN_OPTIONS." set pref_value='".$api."' where blog_id=".$blog_id." and pref_code='canalkey'";
-	if (mysql_num_rows($r)==0) {
-		$sql="insert into ".CANALPLAN_OPTIONS." (pref_value,blog_id,pref_code) values ('".$api."',".$blog_id.",'canalkey')";
+	$api=preg_replace("/[^a-zA-Z0-9\s\p{P}]/", "", $_POST['canalkey']);
+	$sql2 =$wpdb->prepare("SELECT pref_value FROM ".CANALPLAN_OPTIONS." where blog_id=%d and pref_code='canalkey'",$blog_id);
+	$sql=$wpdb->prepare("update ".CANALPLAN_OPTIONS." set pref_value=%s where blog_id=%d and pref_code='canalkey'",$api,$blog_id);
+	$r = $wpdb->get_results($sql2);
+	if ($wpdb->num_rows==0) {
+		$sql=$wpdb->prepare("insert into ".CANALPLAN_OPTIONS." (pref_value,blog_id,pref_code) values ($s,%d,'canalkey')",$api,$blog_id);
 	}
-	mysql_query($sql);
+	$wpdb->query($sql);
 }
 
 if (isset($_POST["canalkey"]) && isset($_POST['RCK'])){
-	$r = mysql_query("Delete FROM ".CANALPLAN_OPTIONS." where blog_id=".$blog_id." and pref_code='canalkey'");
+	$sql = $wpdb->prepare("Delete FROM ".CANALPLAN_OPTIONS." where blog_id=%d and pref_code='canalkey'",$blog_id);
+	$r = $wpdb->query($sql);
 }
 
 if (isset($_POST["routeslug"])){
-	$routeslug=mysql_real_escape_string($_POST['routeslug']);
-	$r = mysql_query("SELECT pref_value FROM ".CANALPLAN_OPTIONS." where blog_id=".$blog_id." and pref_code='routeslug'");
-	$sql="update ".CANALPLAN_OPTIONS." set pref_value='".$routeslug."' where blog_id=".$blog_id." and pref_code='routeslug'";
-	if (mysql_num_rows($r)==0) {
-		$sql="insert into ".CANALPLAN_OPTIONS." (pref_value,blog_id,pref_code) values ('".$routeslug."','.$blog_id.','routeslug')";
+	$routeslug=preg_replace("/[^a-zA-Z0-9\s\p{P}]/", "", $_POST['routeslug']);
+	$sql=$wpdb->prepare("update ".CANALPLAN_OPTIONS." set pref_value='".$routeslug."' where where blog_id=%d and pref_code='routeslug'",$blog_id);
+	$sql2 =$wpdb->prepare("SELECT pref_value FROM ".CANALPLAN_OPTIONS." where where blog_id=%d and pref_code='routeslug'",$blog_id);
+	$r =$wpdb->get_results($sql2);
+	$sql=$wpdb->prepare("update ".CANALPLAN_OPTIONS." set pref_value=%s where blog_id=%d and pref_code='routeslug'",$routeslug,$blog_id);
+	if ($wpdb->num_rows==0) {
+		$sql=$wpdb->prepare("insert into ".CANALPLAN_OPTIONS." (pref_value,blog_id,pref_code) values (%s,%d,'routeslug')",$routeslug,$blog_id);
 	}
-	mysql_query($sql);
+	$wpdb->query($sql);
 }
 
 if (isset($_POST["update_data"])){
 	echo '<table border="1" cellpadding="10" ><tr><th>Table Name </th><th>Contained (Rows)</th><th>Now Contains (Rows)</th></tr>';
 	$sql="select count(*) from ".CANALPLAN_ALIASES.";";
-	$res = mysql_query($sql);
-	$res2=mysql_fetch_array($res);
+	$res = $wpdb->get_results($sql,ARRAY_N);
+	$res2=$res[0];
 		$params = array(
 			'redirection' => 0,
 			'httpversion' => '1.1',
@@ -123,94 +114,93 @@ if (isset($_POST["update_data"])){
 	$sqlGetView = 'SELECT placeid,name FROM place_aliases';
 	$result = $dbhandle->query($sqlGetView);
 	$sql= "truncate ".CANALPLAN_ALIASES.";";
-	$res = mysql_query($sql);
+	$res = $wpdb->query($sql);
 	foreach ($result as $entry) {
-	   $sql= "INSERT INTO ".CANALPLAN_ALIASES." (canalplan_id,place_name) VALUES ('".$entry['placeid']."','".mysql_real_escape_string($entry['name'])."');";
-	   $res = mysql_query($sql);
+	   $sql= $wpdb->prepare("INSERT INTO ".CANALPLAN_ALIASES." (canalplan_id,place_name) VALUES (%s,%s)",$entry['placeid'],$entry['name']);
+	   $res = $wpdb->query($sql);
 	}
 	$sql="select count(*) from ".CANALPLAN_ALIASES.";";
-	$res = mysql_query($sql);
-	$res3=mysql_fetch_array($res);
+	$res = $wpdb->get_results($sql,ARRAY_N);
+	$res3=$res[0];
 	print "<tr><td>Canalplan Aliases</td><td>".$res2[0]."</td><td>".$res3[0]."</td></tr>";
 	$sql="select count(*) from ".CANALPLAN_CODES.";";
-	$res = mysql_query($sql);
-	$res2=mysql_fetch_array($res);
+	$res = $wpdb->get_results($sql,ARRAY_N);
+	$res2=$res[0];
 
 	$sqlGetView = 'SELECT id,name,type,latitude,longitude,attributes FROM place';
 	$result = $dbhandle->query($sqlGetView);
 	foreach ($result as $entry) {
-	   $sql= "INSERT INTO ".CANALPLAN_CODES." (canalplan_id,place_name,size,lat,`long`,attributes,lat_lng_point) VALUES ('".$entry['id']."','".mysql_real_escape_string($entry['name'])."','".$entry['type']."','".$entry['latitude']."','".$entry['longitude']."','".$entry['attributes']."', GeomFromText('Point(".$entry['latitude']." ".$entry['longitude'].")')) ON DUPLICATE KEY UPDATE place_name='".mysql_real_escape_string($entry['name'])."', size='".$entry['type']."', lat='".$entry['latitude']."', `long`='".$entry['longitude']."', attributes='".$entry['attributes']."', lat_lng_point=GeomFromText('Point(".$entry['latitude']." ".$entry['longitude'].")'); ";
-	   $res = mysql_query($sql);
+	   $sql= $wpdb->prepare("INSERT INTO ".CANALPLAN_CODES." (canalplan_id,place_name,size,lat,`long`,attributes,lat_lng_point) VALUES (%s,%s,%d,%s,%s,%s, GeomFromText(%s)) ON DUPLICATE KEY UPDATE place_name=%s, size=%d, lat=%s, `long`=%s, attributes=%s, lat_lng_point=GeomFromText(%s)",$entry['id'],$entry['name'],$entry['type'],$entry['latitude'],$entry['longitude'],$entry['attributes'],"Point(".$entry['latitude'].' '.$entry['longitude'].")",$entry['name'],$entry['type'],$entry['latitude'],$entry['longitude'],$entry['attributes'],"Point(".$entry['latitude'].' '.$entry['longitude'].")");
+	   $res = $wpdb->query($sql);
 	}
 	$sql="select count(*) from ".CANALPLAN_CODES.";";
-	$res = mysql_query($sql);
-	$res3=mysql_fetch_array($res);
+	$res = $wpdb->get_results($sql,ARRAY_N);
+	$res3=$res[0];
 	print "<tr><td>Canalplan Places</td><td>".$res2[0]."</td><td>".$res3[0]."</td></tr>";
 	$sql="select count(*) from ".CANALPLAN_LINK.";";
-	$res = mysql_query($sql);
-	$res2=mysql_fetch_array($res);
+	$res = $wpdb->get_results($sql,ARRAY_N);
+	$res2=$res[0];
 	$sqlGetView = 'SELECT place1,place2,metres,locks,waterway FROM link';
 	$result = $dbhandle->query($sqlGetView);
 	foreach ($result as $entry) {
-	   $sql= "INSERT INTO ".CANALPLAN_LINK." (place1,place2,metres,locks,waterway) VALUES ('".$entry['place1']."','".$entry['place2']."','".$entry['metres']."','".$entry['locks']."','".$entry['waterway']."') ON DUPLICATE KEY UPDATE metres='".$entry['metres']."',locks='".$entry['locks']."', waterway='".$entry['waterway']."'; ";
-	   $res = mysql_query($sql);
+	   $sql= $wpdb->prepare("INSERT INTO ".CANALPLAN_LINK." (place1,place2,metres,locks,waterway) VALUES (%s,%s,%d,%d,%s) ON DUPLICATE KEY UPDATE metres=%d,locks=%d, waterway=%s",$entry['place1'],$entry['place2'],$entry['metres'],$entry['locks'],$entry['waterway'],$entry['metres'],$entry['locks'],$entry['waterway']);
+	   $res = $wpdb->query($sql);
 
 	}
 	$sql="select count(*) from ".CANALPLAN_LINK.";";
-	$res = mysql_query($sql);
-	$res3=mysql_fetch_array($res);
+	$res = $wpdb->get_results($sql,ARRAY_N);
+	$res3=$res[0];
 	print "<tr><td>Canalplan Links</td><td>".$res2[0]."</td><td>".$res3[0]."</td></tr>";
 
 	$sql="select count(*) from ".CANALPLAN_CANALS.";";
-	$res = mysql_query($sql);
-	$res2=mysql_fetch_array($res);
+	$res = $wpdb->get_results($sql,ARRAY_N);
+	$res2=$res[0];
 	$sqlGetView = 'SELECT id,parent,name,fullname FROM waterway';
 	$result = $dbhandle->query($sqlGetView);
 	foreach ($result as $entry) {
-	   $sql= "INSERT INTO ".CANALPLAN_CANALS." (id,parent,name,fullname) VALUES ('".$entry['id']."','".$entry['parent']."','".mysql_real_escape_string($entry['name'])."','".mysql_real_escape_string($entry['fullname'])."') ON DUPLICATE KEY UPDATE name='".mysql_real_escape_string($entry['name'])."',fullname='".mysql_real_escape_string($entry['fullname'])."', parent='".$entry['parent']."'; ";
-	   $res = mysql_query($sql);
+	  $sql= $wpdb->prepare("INSERT INTO ".CANALPLAN_CANALS." (id,parent,name,fullname) VALUES (%s,%s,%s,%s) ON DUPLICATE KEY UPDATE name=%s,fullname=%s, parent=%s", $entry['id'],$entry['parent'],$entry['name'],$entry['fullname'],$entry['name'],$entry['fullname'],$entry['parent']);
+	   $res = $wpdb->query($sql);
 	}
 	$sql="select count(*) from ".CANALPLAN_CANALS.";";
-	$res = mysql_query($sql);
-	$res3=mysql_fetch_array($res);
+	$res = $wpdb->get_results($sql,ARRAY_N);
+	$res3=$res[0];
 	print "<tr><td>Canalplan Waterways</td><td>".$res2[0]."</td><td>".$res3[0]."</td></tr>";
 
 	$sql="select count(*) from ".CANALPLAN_POLYLINES.";";
-	$res = mysql_query($sql);
-	$res2=mysql_fetch_array($res);
+	$res = $wpdb->get_results($sql,ARRAY_N);
+	$res2=$res[0];
 	$sqlGetView = 'SELECT id,pline,weights FROM polyline';
 	$result = $dbhandle->query($sqlGetView);
 	foreach ($result as $entry) {
-	   $sql= "INSERT INTO ".CANALPLAN_POLYLINES." (id,pline,weights) VALUES ('".$entry['id']."','".mysql_real_escape_string(addslashes($entry['pline']))."','".mysql_real_escape_string($entry['weights'])."') ON DUPLICATE KEY UPDATE pline='".mysql_real_escape_string(addslashes($entry['pline']))."',weights='".mysql_real_escape_string($entry['weights'])."'; ";
-	   $res = mysql_query($sql);
+	$sql= $wpdb->prepare("INSERT INTO ".CANALPLAN_POLYLINES." (id,pline,weights) VALUES (%s,%s,%s) ON DUPLICATE KEY UPDATE pline=%s,weights=%s", $entry['id'],addslashes($entry['pline']),$entry['weights'],addslashes($entry['pline']),$entry['weights']);
+	   $res = $wpdb->query($sql);
 	}
 	$sql="select count(*) from ".CANALPLAN_POLYLINES.";";
-	$res = mysql_query($sql);
-	$res3=mysql_fetch_array($res);
+	$res = $wpdb->get_results($sql,ARRAY_N);
+	$res3=$res[0];
 	print "<tr><td>Canalplan Polylines</td><td>".$res2[0]."</td><td>".$res3[0]."</td></tr>";
 
 	$sql="update ".CANALPLAN_OPTIONS." set pref_value='".time()."' where blog_id=-1 and pref_code='update_date'";
-	$res = mysql_query($sql);
+	$res = $wpdb->query($sql);
 
 	print "</table><br>All Done<br/><br/>";
 	$sql="update ".CANALPLAN_OPTIONS." set pref_value='".time()."' where blog_id=-1 and pref_code='update_date'";
-	$r = mysql_query("SELECT pref_value FROM  ".CANALPLAN_OPTIONS." where blog_id=-1 and pref_code='update_date'");
-	if (mysql_num_rows($r)==0) {
+	$r = $wpdb->query("SELECT pref_value FROM  ".CANALPLAN_OPTIONS." where blog_id=-1 and pref_code='update_date'");
+	if ($wpdb->num_rows==0) {
 	$sql="insert into  ".CANALPLAN_OPTIONS." (pref_value,blog_id,pref_code) values ('".time()."',-1,'update_date')";
 	}
-	mysql_query($sql);
+	$wpdb->query($sql);
 	sleep(2);
 }
 
-$r2 = mysql_query("SELECT (".time()." - pref_value) as age FROM  ".CANALPLAN_OPTIONS." where blog_id=-1 and pref_code='update_date'");
+$r2 = $wpdb->get_results("SELECT (".time()." - pref_value) as age FROM  ".CANALPLAN_OPTIONS." where blog_id=-1 and pref_code='update_date'",ARRAY_A);
 $do_update="no button";
-if (mysql_num_rows($r2)==0) {
+if ($wpdb->num_rows==0) {
  	    $updated="never";
 }
 else
 {
-	$rw = mysql_fetch_array($r2,MYSQL_ASSOC);
-	  $updated=$rw['age']/(3600*24);
+	  $updated=$r2[0]['age']/(3600*24);
 }
 // Un comment the following line to force Canalplan to think it's data is rather old
 //$updated=22;
@@ -242,14 +232,15 @@ if ($do_update!="no button"){
 <p>This is the default format that will be used when importing routes from Canalplan AC. It can be overridden on a route by route basis:</p>
 
 <?php
-$r = mysql_query("SELECT pref_value FROM  ".CANALPLAN_OPTIONS." where blog_id=".$blog_id." and pref_code='distance_format'");
-if (mysql_num_rows($r)==0) {
+$sql=$wpdb->prepare("SELECT pref_value FROM  ".CANALPLAN_OPTIONS." where blog_id=%d and pref_code='distance_format'",$blog_id);
+$r = $wpdb->get_results($sql,ARRAY_A);
+if ($wpdb->num_rows==0) {
      $df="f";
 }
 else
 {
-$rw = mysql_fetch_array($r,MYSQL_ASSOC);
-  $df=$rw['pref_value'];
+
+  $df=$r[0]['pref_value'];
 }
 ?>
 <form action="" name="distform" id="dist_form" method="post">
@@ -258,9 +249,8 @@ $rw = mysql_fetch_array($r,MYSQL_ASSOC);
 <?php
 $arr = array(k=> "Decimal Kilometres (3.8 kilometres)", M => "Kilometres and Metres (3 kilometres and 798 metres) ", m=>"Decimal miles (2.3 miles)", y=>"Miles and Yards (2 miles and 634 yards) ",f=>"Miles and Furlongs (  2 miles , 2 &#190; flg )");
 foreach ($arr as $i => $value) {
-if ($i==$df){ print '<option selected="yes" value="'.$i.'" >'.$arr[$i].'</option>';}
-else {print '<option value="'.$i.'" >'.$arr[$i].'</option>';}
-
+	if ($i==$df){ print '<option selected="yes" value="'.$i.'" >'.$arr[$i].'</option>';}
+	else {print '<option value="'.$i.'" >'.$arr[$i].'</option>';}
 }
 ?>
 </select>
@@ -271,32 +261,28 @@ else {print '<option value="'.$i.'" >'.$arr[$i].'</option>';}
 <input type="hidden" name="_submit_check" value="1"/>
 <input type="hidden" name="dataset" id="dataset" value="" />
 <p class="submit"> <input type="submit" onclick="showValue('general_options')"  value="Save Options" /></p>
-
 </form>
-
 </div>
-
 <hr>
-
 <h3><?php _e('Canalplan Key') ?></h3>
 This key allows Canalplan to link back to your blog posts.
 <form action="" name="canalapi" id="canalapi" method="post">
 
 <?php
-$r2 = mysql_query("SELECT pref_value FROM ".CANALPLAN_OPTIONS." where  blog_id=".$blog_id." and pref_code='canalkey'");
-if (mysql_num_rows($r2)==0) {
+$sql= $wpdb->prepare("SELECT pref_value FROM ".CANALPLAN_OPTIONS." where  blog_id=%d and pref_code='canalkey'",$blog_id);
+$r = $wpdb->get_results($sql,ARRAY_A);
+if ($wpdb->num_rows==0) {
      $api="";
 }
 else
 {
-$rw = mysql_fetch_array($r2,MYSQL_ASSOC);
-$api=$rw['pref_value'];
-} 
+$api=$r[0]['pref_value'];
+}
 
 $url=get_home_url();
 $sname=get_bloginfo('name');
 if (strlen($api)<4) {
-	$x=CANALPLAN_URL.'api.cgi?mode=register_blogger&domain='.$url.'&title='.urlencode($sname); 
+	$x=CANALPLAN_URL.'api.cgi?mode=register_blogger&domain='.$url.'&title='.urlencode($sname);
 	$fcheck=file_get_contents($x);
 	$cp_register=json_decode($fcheck,true);
 	$api=$cp_register['key'];
@@ -323,28 +309,28 @@ if (!defined('CANALPLAN_ROUTE_SLUG')) { ?>
 <form action="" name="routeslug" id="routeslug" method="post">
 
 <?php
-$r2 = mysql_query("SELECT pref_value FROM  ".CANALPLAN_OPTIONS." where blog_id=".$blog_id." and pref_code='routeslug'");
-if (mysql_num_rows($r2)==0) {
+$sql = $wpdb->prepare("SELECT pref_value FROM  ".CANALPLAN_OPTIONS." where blog_id=%d and pref_code='routeslug'",$blog_id);
+$r = $wpdb->get_results($sql);
+if ($wpdb->num_rows==0) {
      $routeslug="UNDEFINED!";
 }
 else
 {
-	$rw = mysql_fetch_array($r2,MYSQL_ASSOC);
-	$routeslug=$rw['pref_value'];
-} 
+	$routeslug=$r[0]['pref_value'];
+}
 echo '<input type="text" name="routeslug" maxlength="20" size="20" value="'.$routeslug.'">';
 ?>
 <input type="hidden" name="routes_slug" value="1"/>
 <p class="submit"> <input type="submit"  value="Save Route Page Slug" /></p>
 
 </form>
-Your current page slug for blogged routes is 
+Your current page slug for blogged routes is
 <?php
 if ($routeslug=="UNDEFINED!") { echo " <b> currently not defined </b> so please set one";} else {
 
 echo "'". $routeslug."' so you need to make sure that <a href='".get_home_url()."/".$routeslug."'>".get_home_url()."/".$routeslug."</a> exists";
 }}
-else { 
+else {
 ?>
 The Site Administrator has set the page slug for blogged routes to be  '
 <?php
@@ -354,16 +340,23 @@ echo CANALPLAN_ROUTE_SLUG."' so you need to make sure that <a href='".get_home_u
 
 function parse_data($data,$blid)
 {$i=1;
+global $wpdb;
   $containers = explode(":", $data);
   foreach($containers AS $container)
   {
       $values = explode(",", $container);
       if ( strlen($values[1])> 0) {
-       $sql="Delete from ".CANALPLAN_OPTIONS." where blog_id=".$blid." and pref_code='".$values[0]."'";
-	 $res = mysql_query($sql);
-     $sql="insert into ".CANALPLAN_OPTIONS." set blog_id=".$blid." ,pref_code='".$values[0]."', pref_value='".$values[1]."';";
-     $res = mysql_query($sql);
+       $sql=$wpdb->prepare("Delete from ".CANALPLAN_OPTIONS." where blog_id=%d and pref_code=%s",$blid,$values[0]);
+	 $res = $wpdb->query($sql);
+     $sql=$wpdb->prepare("insert into ".CANALPLAN_OPTIONS." set blog_id=%d ,pref_code=%s, pref_value=%s",$blid,$values[0],$values[1]);
+     $res = $wpdb->query($sql);
         }
   }
+}
+
+function canalplan_upgrade(){
+//ALTER TABLE `wp_canalplan_codes` CHANGE `lat` `lat` VARCHAR( 20 ) NOT NULL DEFAULT '0'
+//ALTER TABLE `wp_canalplan_codes` CHANGE `long` `long` VARCHAR( 20 ) NOT NULL DEFAULT '0'
+
 }
 ?>

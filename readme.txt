@@ -1,17 +1,17 @@
 === Canalplan ===
 
 Contributors: SteveAtty
-Tags: crosspost, Canalplan
+Tags: crosspost, Canalplan AC
 Requires at least: 3.0
-Tested up to: 3.4.2
-Stable tag: 2.8
+Tested up to: 3.5
+Stable tag: 3.0
 
 == Description ==
 
 This plugin allows you link your self hosted Wordpress blog to the Canalplan AC website. You can import routes from the route planner and link your blog posts to the canalplan  gazetteer.
 
 
-== IMPORTANT ==  
+== IMPORTANT ==
 
 This plugin creates 9 tables in your database which occupy about 6MB of space.
 
@@ -25,7 +25,7 @@ You also need to ensure that your PHP installation has the PDOs for SQLite V3 in
 1. [Download] (http://wordpress.org/extend/plugins/canalplan-ac/) the latest version of the Canaplan AC Plugin.
 1. Unzip the ZIP file.
 1. Upload the `canalplan` directory to the `/wp-content/plugins/` directory.
-1. Activate the plugin through the 'Plugins' menu in WordPress. 
+1. Activate the plugin through the 'Plugins' menu in WordPress.
 1. Navigate to `Options` &rarr; `Canalplan AC` for configuration and follow the on-screen prompts.
 
 
@@ -34,7 +34,7 @@ You also need to ensure that your PHP installation has the PDOs for SQLite V3 in
 - Imports data from the Canalplan AC website so you have an up to date list of all canalplan locations (currently standing at 17471 places)
 - Easy linking to Canalplan AC Gazetteer entries
 - Easy inclusion of Googlemaps related to Canalplan AC locations
-- Easy inclusion of maps of complete waterways or sections of waterways based on Canalplan AC Data 
+- Easy inclusion of maps of complete waterways or sections of waterways based on Canalplan AC Data
 - Import Planned routes from Canalplan AC and create a "Cruising Log" of blog entries for the trip.
 - Supports a "Trips" page which summarises all the sets of "Cruising Log" entries. This page also displays a map and a list of individual posts for a specific "Cruising Log"
 - Bulk export of links to Canalplan AC Gazetteer entries for when you publish cruising log
@@ -52,13 +52,20 @@ You also need to ensure that your PHP installation has the PDOs for SQLite V3 in
 
 == Changelog ==
 
+= Version 3.0 20/01/2013 =
+- Recoded all DB calls to use $wpdb calls
+- Recoded all functions using mysql_ functions
+- Recoded Google Map functions to make them work with JetPack
+- Removed a lot of old commented out code.
+
+
 = Version 2.8 13/10/2012 =
 - Changed a couple of fixed URLS to use constants to make url changes easier.
 - Added a couple of conditional checks to make things tidy.
 - Moved Data Pull from Canalplan to use wp_get - so fopen is not needed any more which makes things better.
 
 = Version 2.7 21/07/2012 =
-- Server work to reduce DB download size. 
+- Server work to reduce DB download size.
 - Recode data loader to use smaller fetch requests
 - Fixed a rogue 500 error in the place matching routine.
 - Changed all javascript urls to be relative rather than absolute to fix issue with running blog in a subdirectory
@@ -107,7 +114,7 @@ You also need to ensure that your PHP installation has the PDOs for SQLite V3 in
 
 = Version 0.9.1 12/07/2011 =
 - Added PDF user guide and added links to it
-- Moved Calendar javascript into its own file 
+- Moved Calendar javascript into its own file
 - Removed a lot of commented out code that wasn't needed any more
 - Added Code revision tag for version checking of live installations
 - Changed Bulk load limit back to 20 from 2 (left in by accident during testing)

@@ -2,7 +2,7 @@
 /*
 Extension Name: Canalplan Diagnstics
 Extension URI: http://blogs.canalplan.org.uk/canalplanac/canalplan-plug-in/
-Version: 2.8
+Version: 3.0
 Description: Diagnostics for the Canalplan AC Plugin
 Author: Steve Atty
 */
@@ -12,8 +12,8 @@ $parent_file = 'canalplan-manager.php';
 
 echo "<h2>";
  _e('Diagnostics & Support') ;
-echo "</h2>"; 
-global $blog_id;
+echo "</h2>";
+global $blog_id,$wpdb;
 $active_plugins = get_option('active_plugins');
 $plug_info=get_plugins();
 $phpvers = phpversion();
@@ -25,31 +25,26 @@ if (!phpversion('simplexml')) { $sxmlvers=" No version being returned";}
 $fopenstat="file_get_contents is not available ";
 if(function_exists("file_get_contents")){
 	$fopenstat="file_get_contents is available ";
-$x=CANALPLAN_URL.'api.cgi?mode=version '; 
-$mtime = microtime(); 
-$mtime = explode(' ', $mtime); 
-$mtime = $mtime[1] + $mtime[0]; 
-$starttime = $mtime; 
+$x=CANALPLAN_URL.'api.cgi?mode=version ';
+$mtime = microtime();
+$mtime = explode(' ', $mtime);
+$mtime = $mtime[1] + $mtime[0];
+$starttime = $mtime;
 $fcheck=file_get_contents($x);
-$mtime = microtime(); 
-$mtime = explode(" ", $mtime); 
-$mtime = $mtime[1] + $mtime[0]; 
-$endtime = $mtime; 
+$mtime = microtime();
+$mtime = explode(" ", $mtime);
+$mtime = $mtime[1] + $mtime[0];
+$endtime = $mtime;
 $totaltime = ($endtime - $starttime);
 $cp_version=json_decode($fcheck,true);
 $fopenstat2=' but cannot access Canalplan - This is a problem ';
 if (strlen($cp_version['version'])>3) {$fopenstat2='and can acccess the Canalplan Website - All is OK ( <i> Response Time was : '.$totaltime.' seconds </i> )';}
 }
 
-$mysqlvers = function_exists('mysql_get_client_info') ? mysql_get_client_info() :  'Unknown';
-# If we dont have the function then lets go and get the version the old way
-if ($mysqlvers=="Unknown") {
-	$t=mysql_query("select version() as ve");
-	$r=mysql_fetch_object($t);
-	$mysqlvers =  $r->ve;
-	}
+$t=$wpdb->get_results("select version() as ve",ARRAY_A);
+$mysqlvers =  $t[0]['ve'];
 
-$info = array(	
+$info = array(
 		'CanalPlan' => $plug_info['canalplan/canalplan.php']['Version']." (".CANALPLAN_CODE_RELEASE.")",
 		'File_open Status' => $fopenstat.$fopenstat2,
 		'CanalPlan AC (Website)'=> $cp_version['version']." ( ".$cp_version['date'].' )',
@@ -71,7 +66,7 @@ $info = array(
 	echo "<li>$key: <b>$value</b>$suffix</li>";
 	}
 	echo "<li> Server : <b>".$_SERVER['SERVER_SOFTWARE']."</b></li>";
-	_e("<li> Active Plugins : <b></li>");	
+	_e("<li> Active Plugins : <b></li>");
 	foreach($active_plugins as $name) {
 	if ( $plug_info[$name]['Title']!='Canalplan') {
 	echo "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;".$plug_info[$name]['Title']." ( ".$plug_info[$name]['Version']." ) <br />";}
@@ -81,22 +76,20 @@ $info = array(
 	$table_array= array (CANALPLAN_OPTIONS,CANALPLAN_ALIASES,CANALPLAN_CODES,CANALPLAN_FAVOURITES,CANALPLAN_LINK,CANALPLAN_CANALS,CANALPLAN_ROUTES,CANALPLAN_POLYLINES,CANALPLAN_ROUTE_DAY);
 	foreach ($table_array as $table) {
 		$sql="select count(*) from ".$table;
-		$result=@mysql_query($sql);
+		$result=$wpdb->get_results($sql,ARRAY_N);
 		if (!$result)
 	{
 	$tstat_string= sprintf("ERROR : table </b>'%s'<b> is missing ! - Please Deactivate and Re-activate the plugin from the Plugin Options Page", $table);
 	}
-	else {	
+	else {
 	$row=mysql_fetch_row($result);
-	$tstat_string= sprintf("&nbsp;&nbsp;&nbsp;Table </b>'%s'<b> is present and contains %s rows", $table,$row[0]);
+	$tstat_string= sprintf("&nbsp;&nbsp;&nbsp;Table </b>'%s'<b> is present and contains %s rows", $table,$result[0][0]);
 	 }
 	echo "&nbsp;&nbsp;&nbsp;".$tstat_string."<br />";
 	}
 	echo "</b></p><br /><br />";
-	
-	
 	_e('For feature requests, bug reports, and general support :'); ?>
-	<p><ul>	
+	<p><ul>
 	<li><?php _e('Check the '); ?><a href="../wp-content/plugins/canalplan/canalplan_ac_user_guide.pdf" target="wordpress"><?php _e('User Guide'); ?></a>.</li>
 	<li><?php _e('Check the '); ?><a href="http://wordpress.org/extend/plugins/canalplan-ac/other_notes/" target="wordpress"><?php _e('WordPress.org Notes'); ?></a>.</li>
 	<li><?php _e('Consider upgrading to the '); ?><a href="http://wordpress.org/download/"><?php _e('latest stable release'); ?></a> <?php _e(' of WordPress. '); ?></li>
@@ -104,8 +97,9 @@ $info = array(
 	<br />
 	 </b><br /><hr><h3>Donate</h3>
 	<?php
-	_e("If you've found this extension useful then please feel free to donate to its support and future development.<br "); 
-	  ?></h3><br />
+	_e("If you've found this extension useful then please feel free to donate to its support and future development.<br ");
+	  ?>
+	 </h3><br />
 		<form action="https://www.paypal.com/cgi-bin/webscr" method="post">
 		<input type="hidden" name="cmd" value="_s-xclick">
 		<input type="hidden" name="encrypted" value="-----BEGIN PKCS7-----MIIHPwYJKoZIhvcNAQcEoIIHMDCCBywCAQExggEwMIIBLAIBADCBlDCBjjELMAkGA1UEBhMCVVMxCzAJBgNVBAgTAkNBMRYwFAYDVQQHEw1Nb3VudGFpbiBWaWV3MRQwEgYDVQQKEwtQYXlQYWwgSW5jLjETMBEGA1UECxQKbGl2ZV9jZXJ0czERMA8GA1UEAxQIbGl2ZV9hcGkxHDAaBgkqhkiG9w0BCQEWDXJlQHBheXBhbC5jb20CAQAwDQYJKoZIhvcNAQEBBQAEgYBS1CS6j8gSPzUcHkKZ5UYKF2n97UX8EhSB+QgoExXlfJWLo6S7MJFvuzay0RhJNefA9Y1Jkz8UQahqaR7SuIDBkz0Ys4Mfx6opshuXQqxp17YbZSUlO6zuzdJT4qBny2fNWqutEpXe6GkCopRuOHCvI/Ogxc0QHtIlHT5TKRfpejELMAkGBSsOAwIaBQAwgbwGCSqGSIb3DQEHATAUBggqhkiG9w0DBwQIitf6nEQBOsSAgZgWnlCfjf2E3Yekw5n9DQrNMDoUZTckFlqkQaLYLwnSYbtKanICptkU2fkRQ3T9tYFMhe1LhAuHVQmbVmZWtPb/djud5uZW6Lp5kREe7c01YtI5GRlK63cAF6kpxDL9JT2GH10Cojt9UF15OH46Q+2V3gu98d0Lad77PXz3V1XY0cto29buKZZRfGG8u9NfpXZjv1utEG2CP6CCA4cwggODMIIC7KADAgECAgEAMA0GCSqGSIb3DQEBBQUAMIGOMQswCQYDVQQGEwJVUzELMAkGA1UECBMCQ0ExFjAUBgNVBAcTDU1vdW50YWluIFZpZXcxFDASBgNVBAoTC1BheVBhbCBJbmMuMRMwEQYDVQQLFApsaXZlX2NlcnRzMREwDwYDVQQDFAhsaXZlX2FwaTEcMBoGCSqGSIb3DQEJARYNcmVAcGF5cGFsLmNv
@@ -114,4 +108,4 @@ AkNBMRYwFAYDVQQHEw1Nb3VudGFpbiBWaWV3MRQwEgYDVQQKEwtQYXlQYWwgSW5jLjETMBEGA1UECxQK
 		<input type="image" src="https://www.paypal.com/en_US/GB/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online.">
 		<img alt="" border="0" src="https://www.paypal.com/en_GB/i/scr/pixel.gif" width="1" height="1">
 		</form><br /><br /><hr>
-</b><p>Canalplan AC is released under the GNU General Public Licence V2 and comes with absolutely no warranty. Wordbooker can be redistrubted under certain circumstances. Please read the <a href='../wp-content/plugins/canalplan/gpl.html' target='_new'> included copy of the GPL V2</a> for more information.</p>
+</b><p>Canalplan AC is released under the GNU General Public Licence V2 and comes with absolutely no warranty. Canalplan AC can be redistributed under certain circumstances. Please read the <a href='../wp-content/plugins/canalplan-ac/gpl.html' target='_new'> included copy of the GPL V2</a> for more information.</p>
