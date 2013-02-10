@@ -3,8 +3,8 @@
 Contributors: SteveAtty
 Tags: crosspost, Canalplan AC
 Requires at least: 3.0
-Tested up to: 3.5
-Stable tag: 3.0
+Tested up to: 3.5.1
+Stable tag: 3.2
 
 == Description ==
 
@@ -51,6 +51,18 @@ You also need to ensure that your PHP installation has the PDOs for SQLite V3 in
 
 
 == Changelog ==
+
+= Version 3.2 10/02/2013 =
+- Tidied up a lot of the array index references
+- Found some more mysql_ calls
+- Fixed obsolescent menu constructs
+- Confirmed Wordpress 3.5.1 compatible
+- Should work with relocated wp-content directories.
+
+
+= Version 3.1 22/01/2013 =
+- Missing ARRAY_A broke a setting
+
 
 = Version 3.0 20/01/2013 =
 - Recoded all DB calls to use $wpdb calls

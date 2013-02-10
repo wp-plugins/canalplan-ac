@@ -310,7 +310,7 @@ if (!defined('CANALPLAN_ROUTE_SLUG')) { ?>
 
 <?php
 $sql = $wpdb->prepare("SELECT pref_value FROM  ".CANALPLAN_OPTIONS." where blog_id=%d and pref_code='routeslug'",$blog_id);
-$r = $wpdb->get_results($sql);
+$r = $wpdb->get_results($sql,ARRAY_A);
 if ($wpdb->num_rows==0) {
      $routeslug="UNDEFINED!";
 }

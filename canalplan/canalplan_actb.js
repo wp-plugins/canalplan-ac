@@ -91,7 +91,7 @@ function setCaret(obj,l){
   if (obj.setSelectionRange){
     obj.setSelectionRange(l,l);
   }else if(obj.createTextRange){
-    m = obj.createTextRange();    
+    m = obj.createTextRange();
     m.moveStart('character',l);
     m.collapse();
     m.select();
@@ -102,7 +102,7 @@ function setSelection(obj,s,e){
   if (obj.setSelectionRange){
     obj.setSelectionRange(s,e);
   }else if(obj.createTextRange){
-    m = obj.createTextRange();    
+    m = obj.createTextRange();
     m.moveStart('character',s);
     m.moveEnd('character',e);
     m.select();
@@ -182,12 +182,12 @@ function canalplan_actb(obj,ca,path){
   var canalplan_actb_caretmove = false;
   this.canalplan_actb_keywords = new Array();
   /* ---- Private Variables---- */
-  
+
   this.canalplan_actb_keywords = ca;
   var canalplan_actb_self = this;
 
   canalplan_actb_curr = obj;
-  
+
   addEvent(canalplan_actb_curr,"focus",canalplan_actb_setup);
   function canalplan_actb_setup(){
     addEvent(document,"keydown",canalplan_actb_checkkey);
@@ -234,7 +234,7 @@ function canalplan_actb(obj,ca,path){
     return tobuild;
   }
   function canalplan_actb_generate(){
-    if (document.getElementById('tat_table')){ canalplan_actb_display = false;document.body.removeChild(document.getElementById('tat_table')); } 
+    if (document.getElementById('tat_table')){ canalplan_actb_display = false;document.body.removeChild(document.getElementById('tat_table')); }
     if (canalplan_actb_kwcount == 0){
       canalplan_actb_display = false;
       return;
@@ -571,7 +571,7 @@ function canalplan_actb(obj,ca,path){
         } else {
           return true;
         }
-        break;      
+        break;
       case 13:
         if (canalplan_actb_display) {
           canalplan_actb_caretmove = 1;
@@ -590,7 +590,7 @@ function canalplan_actb(obj,ca,path){
   function canalplan_actb_tocomplete(kc){
     if (kc == 38 || kc == 40 || kc == 13) return;
     var i;
-    if (canalplan_actb_display){ 
+    if (canalplan_actb_display){
       var word = 0;
       var c = 0;
       for (var i=0;i<=canalplan_actb_self.canalplan_actb_keywords.length;i++){
@@ -602,7 +602,7 @@ function canalplan_actb(obj,ca,path){
       }
       canalplan_actb_pre = word;
     }else{ canalplan_actb_pre = -1};
-    
+
     if (canalplan_actb_curr.value == ''){
       canalplan_actb_mouse_on_list = 0;
       canalplan_actb_removedisp();
@@ -611,7 +611,7 @@ function canalplan_actb(obj,ca,path){
     if (canalplan_actb_self.canalplan_actb_delimiter.length > 0){
       caret_pos_start = getCaretStart(canalplan_actb_curr);
       caret_pos_end = getCaretEnd(canalplan_actb_curr);
-      
+
       delim_split = '';
       for (i=0;i<canalplan_actb_self.canalplan_actb_delimiter.length;i++){
         delim_split += canalplan_actb_self.canalplan_actb_delimiter[i];
@@ -640,7 +640,7 @@ function canalplan_actb(obj,ca,path){
         }
         l+=canalplan_actb_delimwords[i].length + 1;
       }
-      var ot = canalplan_actb_delimwords[canalplan_actb_cdelimword].trim(); 
+      var ot = canalplan_actb_delimwords[canalplan_actb_cdelimword].trim();
       var t = canalplan_actb_delimwords[canalplan_actb_cdelimword].addslashes().trim();
     }else{
       var ot = canalplan_actb_curr.value;
@@ -660,7 +660,7 @@ function canalplan_actb(obj,ca,path){
       Download_Candidates(t,canalplan_actb_self);
     } else if(t.match(canalplan_actb_self.canalplan_actb_lastdownload) == null) {
       Download_Candidates(t,canalplan_actb_self);
-    }          
+    }
     canalplan_actb_total = 0;
     canalplan_actb_tomake = false;
     canalplan_actb_kwcount = 0;
@@ -700,21 +700,19 @@ function canalplan_actb(obj,ca,path){
             canalplan_actb_self.canalplan_actb_keywords = explode('#',response);
 	    canalplan_actb_self.canalplan_actb_lastdownload = t;
             canalplan_actb_tocomplete(0);  // dummy value
-          } 
+          }
         }
       };
-
-      xmlhttp.open("GET","../wp-content/plugins/canalplan-ac/canalplan/canalplan.php?match="+t,true)
+     xmlhttp.open("GET",wpcontent+"/canalplan-ac/canalplan/canalplan.php?match="+t,true)
       xmlhttp.send(null)
     }
   }
-  
+
   function explode(separator, string) {
     var list = new Array();
-  
     if (separator == null) return false;
     if (string == null) return false;
-  
+
     var currentStringPosition = 0;
     while (currentStringPosition<string.length) {
       var nextIndex = string.indexOf(separator, currentStringPosition);
@@ -733,41 +731,41 @@ function canalplan_actb(obj,ca,path){
   }
   return this;
 }
-  
+
 /* This table is made by merging and capitalising two tables by
  * Andreas Gohr(andi@splitbrain.org) taken from his UTF helper
  * functions.  These are released under the GPL. */
 
 var UTF8_table = {
-    'à':'a', 'ô':'o', 'ď':'d', 'ḟ':'f', 'ë':'e', 'š':'s', 'ơ':'o', 
-    'ß':'ss','ă':'a', 'ř':'r', 'ț':'t', 'ň':'n', 'ā':'a', 'ķ':'k', 
-    'ŝ':'s', 'ỳ':'y', 'ņ':'n', 'ĺ':'l', 'ħ':'h', 'ṗ':'p', 'ó':'o', 
-    'ú':'u', 'ě':'e', 'é':'e', 'ç':'c', 'ẁ':'w', 'ċ':'c', 'õ':'o', 
-    'ṡ':'s', 'ø':'o', 'ģ':'g', 'ŧ':'t', 'ș':'s', 'ė':'e', 'ĉ':'c', 
-    'ś':'s', 'î':'i', 'ű':'u', 'ć':'c', 'ę':'e', 'ŵ':'w', 'ṫ':'t', 
-    'ū':'u','č':'c', 'ö':'oe', 'è':'e', 'ŷ':'y', 'ą':'a', 'ł':'l', 
-    'ų':'u', 'ů':'u', 'ş':'s', 'ğ':'g', 'ļ':'l', 'ƒ':'f', 'ž':'z', 
-    'ẃ':'w', 'ḃ':'b', 'å':'a', 'ì':'i', 'ï':'i', 'ḋ':'d', 'ť':'t', 
-    'ŗ':'r', 'ä':'ae', 'í':'i', 'ŕ':'r', 'ê':'e', 'ü':'ue', 'ò':'o', 
-    'ē':'e','ñ':'n', 'ń':'n', 'ĥ':'h', 'ĝ':'g', 'đ':'d', 'ĵ':'j', 
-    'ÿ':'y', 'ũ':'u', 'ŭ':'u', 'ư':'u', 'ţ':'t', 'ý':'y', 'ő':'o', 
-    'â':'a', 'ľ':'l', 'ẅ':'w', 'ż':'z', 'ī':'i', 'ã':'a', 'ġ':'g', 
-    'ṁ':'m', 'ō':'o', 'ĩ':'i', 'ù':'u', 'į':'i', 'ź':'z', 'á':'a', 
+    'à':'a', 'ô':'o', 'ď':'d', 'ḟ':'f', 'ë':'e', 'š':'s', 'ơ':'o',
+    'ß':'ss','ă':'a', 'ř':'r', 'ț':'t', 'ň':'n', 'ā':'a', 'ķ':'k',
+    'ŝ':'s', 'ỳ':'y', 'ņ':'n', 'ĺ':'l', 'ħ':'h', 'ṗ':'p', 'ó':'o',
+    'ú':'u', 'ě':'e', 'é':'e', 'ç':'c', 'ẁ':'w', 'ċ':'c', 'õ':'o',
+    'ṡ':'s', 'ø':'o', 'ģ':'g', 'ŧ':'t', 'ș':'s', 'ė':'e', 'ĉ':'c',
+    'ś':'s', 'î':'i', 'ű':'u', 'ć':'c', 'ę':'e', 'ŵ':'w', 'ṫ':'t',
+    'ū':'u','č':'c', 'ö':'oe', 'è':'e', 'ŷ':'y', 'ą':'a', 'ł':'l',
+    'ų':'u', 'ů':'u', 'ş':'s', 'ğ':'g', 'ļ':'l', 'ƒ':'f', 'ž':'z',
+    'ẃ':'w', 'ḃ':'b', 'å':'a', 'ì':'i', 'ï':'i', 'ḋ':'d', 'ť':'t',
+    'ŗ':'r', 'ä':'ae', 'í':'i', 'ŕ':'r', 'ê':'e', 'ü':'ue', 'ò':'o',
+    'ē':'e','ñ':'n', 'ń':'n', 'ĥ':'h', 'ĝ':'g', 'đ':'d', 'ĵ':'j',
+    'ÿ':'y', 'ũ':'u', 'ŭ':'u', 'ư':'u', 'ţ':'t', 'ý':'y', 'ő':'o',
+    'â':'a', 'ľ':'l', 'ẅ':'w', 'ż':'z', 'ī':'i', 'ã':'a', 'ġ':'g',
+    'ṁ':'m', 'ō':'o', 'ĩ':'i', 'ù':'u', 'į':'i', 'ź':'z', 'á':'a',
     'û':'u', 'þ':'th', 'ð':'dh', 'æ':'ae', 'µ':'u',
-    'À':'A', 'Ô':'O', 'Ď':'D', 'Ḟ':'F', 'Ë':'E', 'Š':'S', 'Ơ':'O', 
-    'ß':'SS','Ă':'A', 'Ř':'R', 'Ț':'T', 'Ň':'N', 'ā':'A', 'Ķ':'K', 
-    'Ŝ':'S', 'Ỳ':'Y', 'Ņ':'N', 'Ĺ':'L', 'ħ':'H', 'Ṗ':'P', 'Ó':'O', 
-    'Ú':'U', 'ě':'E', 'É':'E', 'Ç':'C', 'Ẁ':'W', 'Ċ':'C', 'Õ':'O', 
-    'Ṡ':'S', 'Ø':'O', 'Ģ':'G', 'ŧ':'T', 'Ș':'S', 'Ė':'E', 'Ĉ':'C', 
-    'Ś':'S', 'Î':'I', 'Ű':'U', 'Ć':'C', 'Ę':'E', 'Ŵ':'W', 'Ṫ':'T', 
-    'ū':'U', 'Č':'C', 'Ö':'OE', 'È':'E', 'Ŷ':'Y', 'Ą':'A', 'ł':'L', 
-    'Ų':'U', 'Ů':'U', 'Ş':'S', 'Ğ':'G', 'Ļ':'L', 'Ƒ':'F', 'Ž':'Z', 
-    'Ẃ':'W', 'Ḃ':'B', 'Å':'A', 'Ì':'I', 'Ï':'I', 'Ḋ':'D', 'Ť':'T', 
-    'Ŗ':'R', 'Ä':'AE', 'Í':'I', 'Ŕ':'R', 'Ê':'E', 'Ü':'UE', 'Ò':'O', 
-    'ē':'E', 'Ñ':'N', 'Ń':'N', 'Ĥ':'H', 'Ĝ':'G', 'đ':'D', 'Ĵ':'J', 
-    'Ÿ':'Y', 'Ũ':'U', 'Ŭ':'U', 'Ư':'U', 'Ţ':'T', 'Ý':'Y', 'Ő':'O', 
-    'Â':'A', 'Ľ':'L', 'Ẅ':'W', 'Ż':'Z', 'ī':'I', 'Ã':'A', 'Ġ':'G', 
-    'Ṁ':'M', 'ō':'O', 'Ĩ':'I', 'Ù':'U', 'Į':'I', 'Ź':'Z', 'Á':'A', 
+    'À':'A', 'Ô':'O', 'Ď':'D', 'Ḟ':'F', 'Ë':'E', 'Š':'S', 'Ơ':'O',
+    'ß':'SS','Ă':'A', 'Ř':'R', 'Ț':'T', 'Ň':'N', 'ā':'A', 'Ķ':'K',
+    'Ŝ':'S', 'Ỳ':'Y', 'Ņ':'N', 'Ĺ':'L', 'ħ':'H', 'Ṗ':'P', 'Ó':'O',
+    'Ú':'U', 'ě':'E', 'É':'E', 'Ç':'C', 'Ẁ':'W', 'Ċ':'C', 'Õ':'O',
+    'Ṡ':'S', 'Ø':'O', 'Ģ':'G', 'ŧ':'T', 'Ș':'S', 'Ė':'E', 'Ĉ':'C',
+    'Ś':'S', 'Î':'I', 'Ű':'U', 'Ć':'C', 'Ę':'E', 'Ŵ':'W', 'Ṫ':'T',
+    'ū':'U', 'Č':'C', 'Ö':'OE', 'È':'E', 'Ŷ':'Y', 'Ą':'A', 'ł':'L',
+    'Ų':'U', 'Ů':'U', 'Ş':'S', 'Ğ':'G', 'Ļ':'L', 'Ƒ':'F', 'Ž':'Z',
+    'Ẃ':'W', 'Ḃ':'B', 'Å':'A', 'Ì':'I', 'Ï':'I', 'Ḋ':'D', 'Ť':'T',
+    'Ŗ':'R', 'Ä':'AE', 'Í':'I', 'Ŕ':'R', 'Ê':'E', 'Ü':'UE', 'Ò':'O',
+    'ē':'E', 'Ñ':'N', 'Ń':'N', 'Ĥ':'H', 'Ĝ':'G', 'đ':'D', 'Ĵ':'J',
+    'Ÿ':'Y', 'Ũ':'U', 'Ŭ':'U', 'Ư':'U', 'Ţ':'T', 'Ý':'Y', 'Ő':'O',
+    'Â':'A', 'Ľ':'L', 'Ẅ':'W', 'Ż':'Z', 'ī':'I', 'Ã':'A', 'Ġ':'G',
+    'Ṁ':'M', 'ō':'O', 'Ĩ':'I', 'Ù':'U', 'Į':'I', 'Ź':'Z', 'Á':'A',
     'Û':'U', 'Þ':'TH', 'Ð':'DH', 'Æ':'AE',
 };
 
