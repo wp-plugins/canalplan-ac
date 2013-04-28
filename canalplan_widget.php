@@ -42,11 +42,10 @@ class CanalPLanWidget extends WP_Widget {
 		$x=$Latitude->features[0]->geometry->coordinates;
 		$lng=$x[0];
 		$lat=$x[1];
-		$sql=$wpdb->prepare("SELECT place_name,canalplan_id,lat,`long`,GLength(LineString(lat_lng_point, GeomFromText('Point(".$lat." ".$lng.")'))) AS distance FROM ".CANALPLAN_CODES." where place_name not like %s ORDER BY distance ASC LIMIT 1", '%!%' );
+		$sql=$wpdb->prepare("SELECT place_name,canalplan_id,lat,`long`,GLength(LineString(lat_lng_point, GeomFromText('Point(".$lat." ".$lng.")'))) AS distance FROM ".CANALPLAN_CODES." where attributes != %s ORDER BY distance ASC LIMIT 1", 'm' );
 		$res = $wpdb->get_results($sql,ARRAY_A);
 		if(count($res)>0){
 			$row=$res[0];
-			$gazstring='http://www.canalplan.org.uk/cgi-bin/gazetteer.cgi?where=$';
 			print "Nearest Canalplan location is : <br /> <a href='".CANALPLAN_GAZ_URL.$row['canalplan_id']."' target='_new' > ".$row['place_name']."</a> <br /></div>";
 		}
 		echo "</p>".$after_widget;

@@ -3,7 +3,7 @@
 Plugin Name: CanalPlan Integration
 Plugin URI: http://blogs.canalplan.org.uk/canalplanac/canalplan-plug-in/
 Description: Provides features to integrate your blog with <a href="http://www.canalplan.eu">Canalplan AC</a> - the Canal Route Planner.
-Version: 3.2
+Version: 3.3
 Author: Steve Atty
 Author URI: http://blogs.canalplan.org.uk/steve/
  *
@@ -29,7 +29,7 @@ define ('CANALPLAN_BASE','http://www.canalplan.org.uk');
 define ('CANALPLAN_URL',CANALPLAN_BASE.'/cgi-bin/');
 define ('CANALPLAN_GAZ_URL',CANALPLAN_BASE.'/gazetteer/');
 define ('CANALPLAN_MAX_POST_PROCESS',20);
-define('CANALPLAN_CODE_RELEASE','3.2 r00');
+define('CANALPLAN_CODE_RELEASE','3.3 r00');
 
 global $table_prefix, $wp_version,$wpdb,$db_prefix,$canalplan_run_canal_link_maps,$canalplan_run_canal_route_maps,$canalplan_run_canal_place_maps;
 $canalplan_run = array();
@@ -184,6 +184,7 @@ function canal_route_maps($content,$mapblog_id=NULL,$post_id=NULL,$search=NULL) 
 	// First we check the content for tags:
 	if (preg_match_all('/' . preg_quote('[[CPRM') . '(.*?)' . preg_quote(']]') .'/',$content,$matches)) { $places_array=$matches[0]; }
 	// If the array is empty then we've no maps so don't do anything!
+	if (!isset($places_array)) {return $content;}
 	if (count($places_array)==0) {return $content;}
 	$canalplan_run_canal_route_maps[$post->ID]=$canalplan_run_canal_route_maps[$post->ID]+1;
         if (isset($mapblog_id)) {} else { $mapblog_id=$blog_id;}
@@ -211,11 +212,11 @@ function canal_route_maps($content,$mapblog_id=NULL,$post_id=NULL,$search=NULL) 
 	$row = $res[0];
 	$sql=$wpdb->prepare("select totalroute from ".CANALPLAN_ROUTES." cpr, ".CANALPLAN_ROUTE_DAY." crd where cpr.route_id= crd.route_id and cpr.blog_id=crd.blog_id and crd.blog_id=%d and  crd.post_id=%d",$mapblog_id,$post_id);
 	$res3 = $wpdb->get_results($sql,ARRAY_A) or trigger_error('Query failed: ' . $sql, E_USER_ERROR);
-	$mid_point=round($wpdb->num_rows/2,PHP_ROUND_HALF_UP);
 	$place_count=0;
 	$row3 = $res3[0];
 	$places=split(",",$row3[totalroute]);
 	$dayroute=array_slice($places,$row[start_id], ($row[end_id] - $row[start_id])+1);
+	$mid_point=round(count($dayroute)/2,0,PHP_ROUND_HALF_UP);
 	$pointstring = "";
 	$zoomstring = "";
 	$lat = 0;
@@ -328,6 +329,7 @@ function canal_link_maps($content) {
 	// First we check the content for tags:
         if (preg_match_all('/' . preg_quote('[[CPGMW:') . '(.*?)' . preg_quote(']]') .'/',$content,$matches)) { $places_array=$matches[1]; }
 	// If the array is empty then we've no maps so don't do anything!
+	if (!isset($places_array)) {return $content;}
 	if (count($places_array)==0) {return $content;}
 	$canalplan_run_canal_link_maps[$post->ID]=$canalplan_run_canal_link_maps[$post->ID]+1;
 	$canalplan_options = get_option('canalplan_options');
@@ -428,6 +430,7 @@ function canal_place_maps($content,$mapblog_id=NULL,$post_id=NULL) {
 	$canalplan_options = get_option('canalplan_options');;
     	if (preg_match_all('/' . preg_quote('[[CPGM:') . '(.*?)' . preg_quote(']]') .'/',$content,$matches)) { $places_array=$matches[1]; }
     	// If the array is empty then we've no links so don't do anything!
+    	if (!isset($places_array)) {return $content;}
    	if (count($places_array)==0) {return $content;}
    	$canalplan_run_canal_place_maps[$post->ID]=$canalplan_run_canal_place_maps[$post->ID]+1;
 	if (isset($mapblog_id)) {} else { $mapblog_id=$wpdb->blogid;}
@@ -486,6 +489,7 @@ function canal_place_maps($content,$mapblog_id=NULL,$post_id=NULL) {
 function canal_stats($content,$mapblog_id=NULL,$post_id=NULL) {
 	global $blog_id,$wpdb,$post;
 	if (preg_match_all('/' . preg_quote('[[CPRS') . '(.*?)' . preg_quote(']]') .'/',$content,$matches)) { $places_array=$matches[0]; }
+	if (!isset($places_array)) {return $content;}
 	if (count($places_array)==0) {return $content;}
 	if (isset($mapblog_id)) {} else { $mapblog_id=$blog_id;}
 	if (isset($post_id)) {} else {$post_id=$post->ID;
@@ -626,7 +630,7 @@ function blroute(){
 	{
 		$sql=$wpdb->prepare("select description, totalroute from ".CANALPLAN_ROUTES." where route_id=%d and blog_id=%d",$routeid,$wpdb->blogid);
 		$res = $wpdb->get_results($sql,ARRAY_A);
-		$mid_point=round($wpdb->num_rows/2,PHP_ROUND_HALF_UP);
+		$mid_point=round($wpdb->num_rows/2,0,PHP_ROUND_HALF_UP);
 		$place_count=0;
 		$row = $res[0];
 		$blroute .="<h2>".$row['description']."</h2><br/>";

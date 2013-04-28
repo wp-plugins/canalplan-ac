@@ -1,9 +1,5 @@
 <?php
-
 #This allows administrators of Networked Blogs to set some installation wide configuration options.
-
-
 # This is the page slug that Canalplan AC will use to display the routes on. You should set this up on your base blog and ensure that all users create a page with the same name in their blogs.
 define ('CANALPLAN_ROUTE_SLUG','trips');
-
 ?>
