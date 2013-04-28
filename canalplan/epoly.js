@@ -1,31 +1,3 @@
-/*********************************************************************\
-*                                                                     *
-* epolys.js                                          by Mike Williams *
-*                                                                     *
-* A Google Maps API Extension                                         *
-*                                                                     *
-* Adds various Methods to GPolygon and GPolyline                      *
-*                                                                     *
-* .Contains(latlng) returns true is the poly contains the specified   *
-*                   GLatLng                                           *
-*                                                                     *
-* .Area()           returns the approximate area of a poly that is    *
-*                   not self-intersecting                             *
-*                                                                     *
-* .Distance()       returns the length of the poly path               *
-*                                                                     *
-* .Bounds()         returns a GLatLngBounds that bounds the poly      *
-*                                                                     *
-***********************************************************************
-*                                                                     *
-* Version 1.0       8-May-2007                                        *
-*                                                                     *
-\*********************************************************************/
-
-
-// === A method for testing if a point is inside a polygon
-// === Returns true if poly contains point
-// === Algorithm shamelessly stolen from http://alienryderflex.com/polygon/ 
 GPolygon.prototype.Contains = function(point) {
   var j=0;
   var oddNodes = false;
