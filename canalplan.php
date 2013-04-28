@@ -3,7 +3,7 @@
 Plugin Name: CanalPlan Integration
 Plugin URI: http://blogs.canalplan.org.uk/canalplanac/canalplan-plug-in/
 Description: Provides features to integrate your blog with <a href="http://www.canalplan.eu">Canalplan AC</a> - the Canal Route Planner.
-Version: 3.3
+Version: 3.4
 Author: Steve Atty
 Author URI: http://blogs.canalplan.org.uk/steve/
  *
@@ -29,7 +29,7 @@ define ('CANALPLAN_BASE','http://www.canalplan.org.uk');
 define ('CANALPLAN_URL',CANALPLAN_BASE.'/cgi-bin/');
 define ('CANALPLAN_GAZ_URL',CANALPLAN_BASE.'/gazetteer/');
 define ('CANALPLAN_MAX_POST_PROCESS',20);
-define('CANALPLAN_CODE_RELEASE','3.3 r00');
+define('CANALPLAN_CODE_RELEASE','3.4 r00');
 
 global $table_prefix, $wp_version,$wpdb,$db_prefix,$canalplan_run_canal_link_maps,$canalplan_run_canal_route_maps,$canalplan_run_canal_place_maps;
 $canalplan_run = array();

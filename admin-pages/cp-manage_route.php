@@ -36,13 +36,12 @@ $_POST["route_list"]=0;
 $_POST["_submit_check"]=99;
 }
 if ($_POST['def_delete']){
-$sql =$wpdb->prepare("select post_id from ".CANALPLAN_ROUTE_DAY." where blog_id=$d and route_id=%s",$blog_id,$_POST["route_list"]);
+$sql =$wpdb->prepare("select post_id from ".CANALPLAN_ROUTE_DAY." where blog_id=%d and route_id=%s",$blog_id,$_POST["route_list"]);
 $r=$wpdb->get_results($sql,ARRAY_N);
-foreach($r as $rid)
-{
-	echo "<br />delete ".$rid['post_id'];
-}
-die();
+//foreach($r as $rid)
+//{
+//	echo "<br />delete ".$rid['post_id'];
+//}
 
 $sql=$wpdb->prepare("delete from ".CANALPLAN_ROUTES." where blog_id=%d and route_id=%d",$blog_id,$_POST["route_list"]);
 $r=$wpdb->query($sql);

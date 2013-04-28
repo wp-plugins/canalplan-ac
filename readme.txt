@@ -4,7 +4,7 @@ Contributors: SteveAtty
 Tags: crosspost, Canalplan AC
 Requires at least: 3.0
 Tested up to: 3.5.1
-Stable tag: 3.3
+Stable tag: 3.4
 
 == Description ==
 
@@ -51,6 +51,9 @@ You also need to ensure that your PHP installation has the PDOs for SQLite V3 in
 
 
 == Changelog ==
+
+= Version 3.4 28/04/2013 =
+- Fixed a couple of bugs in the Manage Route page.
 
 = Version 3.3 28/04/2013 =
 - Found a bug in the midpoint logic for maps.
