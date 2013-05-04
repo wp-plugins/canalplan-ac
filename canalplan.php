@@ -3,7 +3,7 @@
 Plugin Name: CanalPlan Integration
 Plugin URI: http://blogs.canalplan.org.uk/canalplanac/canalplan-plug-in/
 Description: Provides features to integrate your blog with <a href="http://www.canalplan.eu">Canalplan AC</a> - the Canal Route Planner.
-Version: 3.4
+Version: 3.5
 Author: Steve Atty
 Author URI: http://blogs.canalplan.org.uk/steve/
  *
@@ -29,7 +29,7 @@ define ('CANALPLAN_BASE','http://www.canalplan.org.uk');
 define ('CANALPLAN_URL',CANALPLAN_BASE.'/cgi-bin/');
 define ('CANALPLAN_GAZ_URL',CANALPLAN_BASE.'/gazetteer/');
 define ('CANALPLAN_MAX_POST_PROCESS',20);
-define('CANALPLAN_CODE_RELEASE','3.4 r00');
+define('CANALPLAN_CODE_RELEASE','3.5 r00');
 
 global $table_prefix, $wp_version,$wpdb,$db_prefix,$canalplan_run_canal_link_maps,$canalplan_run_canal_route_maps,$canalplan_run_canal_place_maps;
 $canalplan_run = array();
@@ -566,6 +566,40 @@ function canal_linkify($content) {
 			$words=split("\|",$place_code);
 			$names[] = "[[CPW:" .$place_code . "]]";
 			$links[] = "<a href='".$gazstring.$words[1]."' target='gazetteer'  title='Link to ".trim($words[0])."'>".trim($words[0])."</a>";
+		}
+	}
+	return str_ireplace($names, $links, $content);
+}
+
+function canal_linkify_name($content) {
+	global $post,$blog_id,$wpdb;
+	// First we check the content for tags:
+	if (preg_match_all('/' . preg_quote('[[CP') . '(.*?)' . preg_quote(']]') .'/',$content,$matches)) { $places_array=$matches[1]; }
+	// If the array is empty then we've no links so don't do anything!
+	#if (count($places_array)==0) {return $content;}
+	$names = array();
+	$links = array();
+	if (preg_match_all('/' . preg_quote('[[CP:') . '(.*?)' . preg_quote(']]') .'/',$content,$matches)) {
+		$places_array=$matches[1];
+		foreach ($places_array as $place_code) {
+			$words=split("\|",$place_code);
+			$names[] = "[[CP:" .$place_code . "]]";
+			if ($api[0]=="") {
+				$links[] = trim($words[0]);
+			}
+			 else
+			{
+				$links[] = trim($words[0]);
+			}
+		}
+	}
+	if (preg_match_all('/' . preg_quote('[[CPW:') . '(.*?)' . preg_quote(']]') .'/',$content,$matches)) {
+		$places_array=$matches[1];
+		$gazstring=CANALPLAN_URL.'waterway.cgi?id=';
+		foreach ($places_array as $place_code) {
+			$words=split("\|",$place_code);
+			$names[] = "[[CPW:" .$place_code . "]]";
+			$links[] = trim($words[0]);
 		}
 	}
 	return str_ireplace($names, $links, $content);

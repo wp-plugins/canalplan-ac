@@ -657,7 +657,7 @@ function canalplan_actb(obj,ca,path){
       var re = new RegExp(t, "i");
     }
     if(canalplan_actb_self.canalplan_actb_lastdownload == '') {
-      Download_Candidates(t,canalplan_actb_self);
+      Download_Candidates(t,canalplan_actb_self,cplogid);
     } else if(t.match(canalplan_actb_self.canalplan_actb_lastdownload) == null) {
       Download_Candidates(t,canalplan_actb_self);
     }
@@ -680,7 +680,7 @@ function canalplan_actb(obj,ca,path){
     canalplan_actb_generate();
   }
 
-  function Download_Candidates(t,canalplan_actb_self) {
+  function Download_Candidates(t,canalplan_actb_self,bid) {
     xmlhttp=null
     // clear keywords now, so we don't get stuff from old set
     canalplan_actb_self.canalplan_actb_keywords = new Array();
@@ -703,7 +703,8 @@ function canalplan_actb(obj,ca,path){
           }
         }
       };
-     xmlhttp.open("GET",wpcontent+"/canalplan-ac/canalplan/canalplan.php?match="+t,true)
+ //    xmlhttp.open("GET",wpcontent+"/canalplan-ac/canalplan/canalplan.php?match="+t,true)
+     xmlhttp.open("GET",wpcontent+"/canalplan-ac/canalplan/canalplan.php?match="+t+"&blogid="+bid,true)
       xmlhttp.send(null)
     }
   }

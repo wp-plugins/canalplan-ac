@@ -89,7 +89,7 @@ $info = array(
 	echo "</b></p><br /><br />";
 	_e('For feature requests, bug reports, and general support :'); ?>
 	<p><ul>
-	<li><?php _e('Check the '); ?><a href=plugins_url()."/canalplan/canalplan_ac_user_guide.pdf" target="wordpress"><?php _e('User Guide'); ?></a>.</li>
+	<li><?php _e('Check the '); ?><a href="<?php echo plugins_url(); ?>/canalplan-ac/canalplan_ac_user_guide.pdf" target="wordpress"><?php _e('User Guide'); ?></a>.</li>
 	<li><?php _e('Check the '); ?><a href="http://wordpress.org/extend/plugins/canalplan-ac/other_notes/" target="wordpress"><?php _e('WordPress.org Notes'); ?></a>.</li>
 	<li><?php _e('Consider upgrading to the '); ?><a href="http://wordpress.org/download/"><?php _e('latest stable release'); ?></a> <?php _e(' of WordPress. '); ?></li>
 	</ul></p>

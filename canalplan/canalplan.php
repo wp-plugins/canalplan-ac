@@ -1,10 +1,8 @@
 <?php
 require_once( '../../../../wp-config.php');
 global $wpdb,$user_ID;
-
 if (strlen($_GET['match'])>0){
 $match=$_GET['match'];
-
 $cp_blog_id=intval($_GET['blogid']);
 if ($cp_blog_id<1) {$cp_log_id=1;}
 	$sql =$wpdb->prepare("select canalplan_id, place_name from ".CANALPLAN_CODES." where substr(place_name,1,".strlen($match).")=%s",$match);
@@ -19,7 +17,7 @@ if ($cp_blog_id<1) {$cp_log_id=1;}
 }
 $place=$_GET['place'];
 if (strlen($place)>0){
-	$place=trim(urldecode($place));
+	$place=stripslashes(trim(urldecode($place)));
 	$cp_blog_id=intval($_GET['blogid']);
 	if ($cp_blog_id=="undefined") {unset($cp_blog_id);}
 	// If we have a blog_id passed in then we need to get back the favourites and then the main rows but remove any common names
@@ -36,7 +34,6 @@ if (strlen($place)>0){
 		$canalplaces = $wpdb->get_results($sql,ARRAY_A);
 		foreach($canalplaces as $canalplace) {  print "X".trim($canalplace['canalplan_id']); }
 		$sql = $wpdb->prepare("select id from ".CANALPLAN_CANALS." where fullname=%s",$place);
-
 		$canalplaces = $wpdb->get_results($sql,ARRAY_A);
 		foreach($canalplaces as $canalplace) { print "W".trim($canalplace[id]); }
 		}

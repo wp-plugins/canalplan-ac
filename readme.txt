@@ -4,7 +4,7 @@ Contributors: SteveAtty
 Tags: crosspost, Canalplan AC
 Requires at least: 3.0
 Tested up to: 3.5.1
-Stable tag: 3.4
+Stable tag: 3.5
 
 == Description ==
 
@@ -51,6 +51,11 @@ You also need to ensure that your PHP installation has the PDOs for SQLite V3 in
 
 
 == Changelog ==
+
+
+= Version 3.5 04/05/2013 =
+- Restored favourites per blog which had got lost somewhere (only affects multiblog installs)
+- Added new linkify function to just return raw text.
 
 = Version 3.4 28/04/2013 =
 - Fixed a couple of bugs in the Manage Route page.
