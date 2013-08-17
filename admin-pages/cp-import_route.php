@@ -194,7 +194,11 @@ $date=date('Y-m-d H:i:s',strtotime("+ ".$dc." days",strtotime($sd)));
 // Create post object
   $my_post = array();
   $my_post['post_title'] = 'Post for Day '.$dc2.' of Trip';
-  $my_post['post_content'] = '[[CPRM:]] [[CPRS:]] ';
+  $my_post['post_content'] = '[[CPRS:]]
+
+  [[CPRM:]]
+
+  ';
   $my_post['post_status'] = 'draft';
   $my_post['post_category'] = $category;
   $my_post['post_date']= $date;

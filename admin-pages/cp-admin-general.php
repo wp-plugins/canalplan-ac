@@ -29,7 +29,7 @@ x.options[param].text=listID;
     for (var i = 0; i < items.length; i++) {
         if (itemsString.length > 0) itemsString += ":";
         itemsString += items[i].value;
- 	itemsString += ',';
+ 	itemsString += '|';
         itemsString += items[i].innerHTML;
     }
 document.getElementById("dataset").value=itemsString;
@@ -56,7 +56,7 @@ if (isset($_POST["canalkey"]) && isset($_POST['SCK'])){
 	$sql=$wpdb->prepare("update ".CANALPLAN_OPTIONS." set pref_value=%s where blog_id=%d and pref_code='canalkey'",$api,$blog_id);
 	$r = $wpdb->get_results($sql2);
 	if ($wpdb->num_rows==0) {
-		$sql=$wpdb->prepare("insert into ".CANALPLAN_OPTIONS." (pref_value,blog_id,pref_code) values ($s,%d,'canalkey')",$api,$blog_id);
+		$sql=$wpdb->prepare("insert into ".CANALPLAN_OPTIONS." (pref_value,blog_id,pref_code) values (%s,%d,'canalkey')",$api,$blog_id);
 	}
 	$wpdb->query($sql);
 }
@@ -344,7 +344,7 @@ global $wpdb;
   $containers = explode(":", $data);
   foreach($containers AS $container)
   {
-      $values = explode(",", $container);
+      $values = explode("|", $container);
       if ( strlen($values[1])> 0) {
        $sql=$wpdb->prepare("Delete from ".CANALPLAN_OPTIONS." where blog_id=%d and pref_code=%s",$blid,$values[0]);
 	 $res = $wpdb->query($sql);

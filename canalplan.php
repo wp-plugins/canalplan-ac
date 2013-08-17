@@ -3,7 +3,7 @@
 Plugin Name: CanalPlan Integration
 Plugin URI: http://blogs.canalplan.org.uk/canalplanac/canalplan-plug-in/
 Description: Provides features to integrate your blog with <a href="http://www.canalplan.eu">Canalplan AC</a> - the Canal Route Planner.
-Version: 3.5
+Version: 3.6
 Author: Steve Atty
 Author URI: http://blogs.canalplan.org.uk/steve/
  *
@@ -29,7 +29,7 @@ define ('CANALPLAN_BASE','http://www.canalplan.org.uk');
 define ('CANALPLAN_URL',CANALPLAN_BASE.'/cgi-bin/');
 define ('CANALPLAN_GAZ_URL',CANALPLAN_BASE.'/gazetteer/');
 define ('CANALPLAN_MAX_POST_PROCESS',20);
-define('CANALPLAN_CODE_RELEASE','3.5 r00');
+define('CANALPLAN_CODE_RELEASE','3.6 r00');
 
 global $table_prefix, $wp_version,$wpdb,$db_prefix,$canalplan_run_canal_link_maps,$canalplan_run_canal_route_maps,$canalplan_run_canal_place_maps;
 $canalplan_run = array();
@@ -312,6 +312,7 @@ function canal_route_maps($content,$mapblog_id=NULL,$post_id=NULL,$search=NULL) 
 	$google_map_code2.='var bounds'.$dogooglemap.' = new google.maps.LatLngBounds();';
 	$google_map_code2.='line'.$dogooglemap.'_'.$i.'.getPath().forEach(function(latLng) {bounds'.$dogooglemap.'.extend(latLng);});';
 	$google_map_code2.='map'.$dogooglemap.'.fitBounds(bounds'.$dogooglemap.');';
+	$google_map_code2.='var resizer'.$dogooglemap.' = new CPResizeControl(map'.$dogooglemap.'); ';
 	$google_map_code2.=$turnaround.$markertext;
 	$names = array();
 	$links = array();
@@ -516,7 +517,7 @@ $sql=$wpdb->prepare("select place_name from ".CANALPLAN_FAVOURITES." where canal
 	foreach ($places_array as $place_code) {
 	$words=split(":",$place_code);
 		$names[] = $place_code;
-		$links[] = "From [[CP:".$start_name."|".$places[$row['start_id']]."]] to [[CP:".$end_name."|".$places[$row['end_id']]."]], ".format_distance($row['distance'],$row[locks],$dformat,2);
+		$links[] = "From [[CP:".$start_name."|".$places[$row['start_id']]."]] to [[CP:".$end_name."|".$places[$row['end_id']]."]], ".format_distance($row['distance'],$row[locks],$dformat,2).".";
 	}
 
 	return str_ireplace($names, $links, $content);
@@ -782,6 +783,7 @@ function wp_canalplan_admin_pages() {
 	add_submenu_page($base_dir.'cp-admin-menu.php', 'CanalPlan Options: Google Maps', 'Google Maps', 'activate_plugins',  $base_dir.'cp-admin-google.php');
 	add_submenu_page($base_dir.'cp-admin-menu.php', 'CanalPlan Options: Import Route', 'Import Routes', 'activate_plugins',  $base_dir.'cp-import_route.php');
 	add_submenu_page($base_dir.'cp-admin-menu.php', 'CanalPlan Options: Manage Routes', 'Manage Routes', 'activate_plugins',  $base_dir.'cp-manage_route.php');
+	add_submenu_page($base_dir.'cp-admin-menu.php', 'CanalPlan Options: Set Location', 'Set Location', 'activate_plugins',  $base_dir.'cp-admin-location.php');
 	add_submenu_page($base_dir.'cp-admin-menu.php', 'CanalPlan Options: Diagnostics', 'Diagnostics', 'activate_plugins',  $base_dir.'cp-admin-diagnostics.php');
 	add_submenu_page($base_dir.'cp-admin-menu.php', 'CanalPlan Options: Bulk Notify', 'Bulk Notify', 'activate_plugins',  $base_dir.'cp-admin-update.php');
 }
@@ -792,7 +794,7 @@ function canalplan_header($blah){
 	if (isset($canalplan_options['supress_google'])) {return;}
 	$header = '<meta name="viewport" content="initial-scale=1.0, user-scalable=no" /> <script type="text/javascript" src="//maps.google.com/maps/api/js?libraries=geometry&amp;sensor=false"> </script> ';
 	echo $header;
-	$google_map_code='<script type="text/javascript">  function initialize() {  ';
+	$google_map_code='<script type="text/javascript"> google.maps.visualRefresh = true; function initialize() {  ';
 	return $blah;
 }
 
@@ -804,6 +806,117 @@ function canalplan_footer($blah) {
 	$canalplan_options = get_option('canalplan_options');
 	if (isset($canalplan_options['supress_google'])) {return;}
 	echo "<script type='text/javascript'> google.maps.event.addDomListener(window, 'load', initialize); </script> ";
+?>
+<script type='text/javascript'>
+function CPResizeControl(map) {this.startUp(map)};
+CPResizeControl.RESIZE_BOTH = 0;
+CPResizeControl.RESIZE_WIDTH = 1;
+CPResizeControl.RESIZE_HEIGHT = 2;
+CPResizeControl.prototype.startUp = function(gMap) {
+		var that = this;
+		this._map = gMap;
+		this.resizing = false;
+
+		/* modes: 0 both, 1 only width, 2 only height */
+		this.mode = CPResizeControl.RESIZE_BOTH;
+		this.minWidth = 150;
+		this.minHeight = 150;
+		this.maxWidth = 0;
+		this.maxHeight = 0;
+
+		this.diffX = 0;
+		this.diffY = 0;
+		google.maps.event.addListenerOnce(gMap, "tilesloaded", function() {
+						var res_button = new CPResizeControl.ResizeControl(that,gMap);
+						res_button.index = 1;
+				});
+};
+
+CPResizeControl.ResizeControl = function(that,map) {
+		var resButton = document.createElement("div");
+		resButton.style.width = "20px";
+		resButton.style.height = "20px";
+		// embedded image does not work with IE < 8
+		resButton.style.backgroundImage = "url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUBAMAAAB/pwA+AAAAAXNSR0IArs4c6QAAAA9QTFRFMBg0f39/0dDN7eri/v7+XsdLVAAAAAF0Uk5TAEDm2GYAAABNSURBVAjXRcpBDcAwDEPRKAymImghuCUw/qTWJI7nk/X0zXquZ+tH6E5df3TngPBA+ELY7UW2gWwDq02sNjHbwmwLoyVGS7ytbw62tA8zTA85AeAv2wAAAABJRU5ErkJggg%3D%3D)";
+		resButton.style.position = "absolute";
+		resButton.style.right = "0px";
+		resButton.style.bottom = "0px";
+		google.maps.event.addDomListener(resButton, 'mousedown', function() {that.resizing = true;});
+		// if display is lagging we make sure we catch the event
+		google.maps.event.addDomListener(document, 'mouseup', function() {
+						if(that.resizing) {
+								that.resizing = false;
+								if(typeof(that.doneCallBack) == 'function')
+										that.doneCallBack(that._map);
+
+						}
+				});
+		google.maps.event.addDomListener(document, 'mousemove', function(evt) {that.mouseMoving(evt);});
+		var mapdiv = map.getDiv();
+		mapdiv.appendChild(resButton);
+
+		/* Move the 'Terms of Use' 25px to the left
+		 * to make sure that it's fully readable
+  */
+		var terms = mapdiv.firstChild.childNodes[2];
+		terms.style.marginRight = "25px";
+		return resButton;
+};
+
+ // Resizes the map's width and height by the given increment
+CPResizeControl.prototype.changeMapSize = function(dx, dy) {
+  var mapdiv = this._map.getDiv().style;
+  var width = parseInt(mapdiv.width);
+  var height =  parseInt(mapdiv.height);
+  var oldwidth = width, oldheight = height;
+
+  width += dx;
+  height += dy;
+
+ /* The map's width and height should not
+  * get too small or negative.
+  */
+  if (this.minWidth) { width = Math.max(this.minWidth, width); }
+  if (this.maxWidth) { width = Math.min(this.maxWidth, width); }
+  if (this.minHeight) { height = Math.max(this.minHeight, height); }
+  if (this.maxHeight) { height = Math.min(this.maxHeight, height); }
+	var changed = false;
+  if (this.mode != CPResizeControl.RESIZE_HEIGHT) {
+			mapdiv.width = width + "px";
+			changed = true;
+	}
+  if (this.mode != CPResizeControl.RESIZE_WIDTH) {
+			mapdiv.height= height + "px";
+			changed = true;
+	}
+	if(changed) {
+			if(typeof(this.changeCallBack) == 'function')
+					this.changeCallBack(this._map,width,height,width-oldwidth,height-oldheight);
+			google.maps.event.trigger(this._map, "resize");
+	}
+}
+
+CPResizeControl.prototype.mouseMoving = function(e) {  // Mouse move listener
+  // Include possible scroll values
+  var sx = window.scrollX || document.documentElement.scrollLeft|| 0;
+  var sy = window.scrollY || document.documentElement.scrollTop || 0;
+
+  if(!e) e = window.event; // IEs event definition
+  var mouseX = e.clientX + sx;
+  var mouseY = e.clientY + sy;
+
+  if(this.resizing) { // The resize button is being held
+			this.changeMapSize(mouseX-this.diffX, mouseY-this.diffY);
+  }
+  // Store current position in object's variables
+	this.diffX = mouseX;
+	this.diffY = mouseY;
+
+  return false;
+}
+</script>
+<?php
+
 	return $blah;
 }
 

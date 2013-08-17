@@ -45,7 +45,7 @@ function InsertCanalPlan(cptext)
     for (var i = 0; i < items.length; i++) {
         if (itemsString.length > 0) itemsString += ":";
         itemsString += items[i].value;
- 	itemsString += ',';
+ 	itemsString += '|';
         itemsString += items[i].innerHTML;
     }
 document.getElementById("dataset").value=itemsString;
@@ -79,7 +79,7 @@ $sql=$wpdb->prepare("SELECT distinct canalplan_id,place_name FROM ".CANALPLAN_FA
 $r = $wpdb->get_results($sql,ARRAY_A);
 foreach($r as $rw)
 {
-  echo '<option value="'.$rw['canalplan_id'].'">'.$rw['place_name'].'</option>';
+  echo '<option value="'.$rw['canalplan_id'].'">'.stripslashes($rw['place_name']).'</option>';
 }
 ?>
 </select></td>
@@ -118,7 +118,7 @@ $res = $wpdb->query($sql);
   $containers = explode(":", $data);
   foreach($containers AS $container)
   {
-      $values = explode(",", $container);
+      $values = explode("|", $container);
       $sql=$wpdb->prepare("insert into ".CANALPLAN_FAVOURITES." set blog_id=%s ,canalplan_id=%s, place_name=%s,place_order=%d",$blid,$values[0],$values[1],$i);
    	  $res = $wpdb->query($sql);
         $i ++;

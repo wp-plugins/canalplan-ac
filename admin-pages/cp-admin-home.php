@@ -37,7 +37,7 @@ function getCanalPlan2(tag)
         function showValue(cptext,cpid)
         {
 document.getElementById("current").value=cptext;
-document.getElementById("dataset").value=cpid+","+cptext;
+document.getElementById("dataset").value=cpid+"|"+cptext;
         }
 
 	//-->
@@ -91,7 +91,7 @@ $data=stripslashes($data);
 $sql="Delete from ".CANALPLAN_FAVOURITES." where blog_id=".$blid." and place_order=0";
 
 $res = $wpdb->query($sql);
-      $values = explode(",", $data);
+      $values = explode("|", $data);
      $sql=$wpdb->prepare("insert into ".CANALPLAN_FAVOURITES." set blog_id=%d ,canalplan_id=%s, place_name=%s,place_order=0",$blid,$values[0],$values[1]);
      $res = $wpdb->query($sql);
 }
