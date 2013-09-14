@@ -38,7 +38,6 @@ document.getElementById("dataset").value=itemsString;
 	</script>
 <?php
 nocache_headers();
-
 if(isset($_POST['_submit_check']))
 	{
 		parse_data($_POST['dataset'],$blog_id);
@@ -51,7 +50,7 @@ if(isset($_POST['_submit_check']))
 <h3><?php _e('CanalPlan Data') ?></h3>
 <?php
 if (isset($_POST["canalkey"]) && isset($_POST['SCK'])){
-	$api=preg_replace("/[^a-zA-Z0-9\s\p{P}]/", "", $_POST['canalkey']);
+	$api=preg_replace("/[^a-zA-Z0-9|\s\p{P}]/", "", $_POST['canalkey']);
 	$sql2 =$wpdb->prepare("SELECT pref_value FROM ".CANALPLAN_OPTIONS." where blog_id=%d and pref_code='canalkey'",$blog_id);
 	$sql=$wpdb->prepare("update ".CANALPLAN_OPTIONS." set pref_value=%s where blog_id=%d and pref_code='canalkey'",$api,$blog_id);
 	$r = $wpdb->get_results($sql2);
@@ -247,7 +246,7 @@ else
 <select id="DFSelect" name="dfsel" onchange="set_value(0,DFSelect.value);" >
 
 <?php
-$arr = array(k=> "Decimal Kilometres (3.8 kilometres)", M => "Kilometres and Metres (3 kilometres and 798 metres) ", m=>"Decimal miles (2.3 miles)", y=>"Miles and Yards (2 miles and 634 yards) ",f=>"Miles and Furlongs (  2 miles , 2 &#190; flg )");
+$arr = array('k'=> "Decimal Kilometres (3.8 kilometres)", 'M' => "Kilometres and Metres (3 kilometres and 798 metres) ", 'm'=>"Decimal miles (2.3 miles)", 'y'=>"Miles and Yards (2 miles and 634 yards) ",'f'=>"Miles and Furlongs (  2 miles , 2 &#190; flg )");
 foreach ($arr as $i => $value) {
 	if ($i==$df){ print '<option selected="yes" value="'.$i.'" >'.$arr[$i].'</option>';}
 	else {print '<option value="'.$i.'" >'.$arr[$i].'</option>';}
@@ -278,7 +277,6 @@ else
 {
 $api=$r[0]['pref_value'];
 }
-
 $url=get_home_url();
 $sname=get_bloginfo('name');
 if (strlen($api)<4) {
@@ -292,14 +290,16 @@ if (strlen($api)<4) {
 }
 
 else {
-$api=explode("|",$api);
-echo "<br/>API Key currently set to : <i> ".$api[0]." </i> and is valid for the blog titled:<b> '".$sname."' </b> on the following url : <b> ".$url.'</b><br />';
-echo '<p class="submit"><input type="submit" name="RCK" value="Reset Canalplan Key" /></p>';
+	$api=explode("|",$api);
+	$api=$api[0];
+	$uid=$api[1];
+	echo "<br/>API Key currently set to : <i> ".$api." </i> and is valid for the blog titled:<b> '".$sname."' </b> on the following url : <b> ".$url.'</b><br />';
+	echo '<p class="submit"><input type="submit" name="RCK" value="Reset Canalplan Key" /></p>';
 }
 
 echo '<input type="hidden" name="canalkey" value="'.$api.'|'.$uid.'">';
 ?>
-<input type="hidden" name="camalapi" value="1"/>
+
 </form>
 <hr>
 <h3><?php _e('Route Page Slug') ?></h3>

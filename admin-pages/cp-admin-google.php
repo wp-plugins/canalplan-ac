@@ -100,6 +100,7 @@ for ($i = 0; $i <= 21; $i++) {
        else {print '<option value="'.$i.'" >'.$i.'</option>';}}
 echo "</select> pixels <br />";
 echo "<h3>Other Map Options</h3>";
+if(!isset($canalplan_options["supress_google"])) {$canalplan_options["supress_google"]='off';}
 echo '<label for="cp_gmap_disable">'.__('Disable Google Map API load', 'canalplan').' :</label>';
 echo '<INPUT TYPE=CHECKBOX NAME="canalplan_options[supress_google]" '.$checked_flag[$canalplan_options["supress_google"]].' ><br />';
 echo '<br /><input type="submit" name="SBLO" value="'.__("Save Google Map Options", 'canalplan').'" class="button-primary"  />&nbsp;&nbsp;&nbsp;<input type="submit" name="RSD" value="'.__("Reset to System Defaults", 'wordbooker').'" class="button-primary" action="poo" /</p></form>';

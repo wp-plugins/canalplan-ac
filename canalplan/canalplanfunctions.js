@@ -40,3 +40,12 @@ tinyMCE.execCommand('mceReplaceContent', false, '[['+ tagcode +':' + tag + '|' +
 junk3.value=junk3.value+' [['+ tagcode +':' + tag + '|' + code_id +  ']]' + ' '
 return;
 }
+
+function getCanalRoute(tag) {
+junk2=document.getElementById("routetagtypeID");
+junk3=document.getElementById("content");
+tinyMCE.execCommand('mceReplaceContent', false, '[['+ junk2.value +':' + tag +  ']]' + ' ');
+// The next bit works if you are in HTML raw mode
+junk3.value=junk3.value+' [['+ junk2.value +':' + tag +  ']]' + ' '
+return;
+}

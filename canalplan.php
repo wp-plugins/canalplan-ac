@@ -3,7 +3,7 @@
 Plugin Name: CanalPlan Integration
 Plugin URI: http://blogs.canalplan.org.uk/canalplanac/canalplan-plug-in/
 Description: Provides features to integrate your blog with <a href="http://www.canalplan.eu">Canalplan AC</a> - the Canal Route Planner.
-Version: 3.6
+Version: 3.7
 Author: Steve Atty
 Author URI: http://blogs.canalplan.org.uk/steve/
  *
@@ -25,11 +25,12 @@ Author URI: http://blogs.canalplan.org.uk/steve/
  * Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 @include("multisite.php");
-define ('CANALPLAN_BASE','http://www.canalplan.org.uk');
+define ('CANALPLAN_BASE','http://canalplan.org.uk');
 define ('CANALPLAN_URL',CANALPLAN_BASE.'/cgi-bin/');
 define ('CANALPLAN_GAZ_URL',CANALPLAN_BASE.'/gazetteer/');
 define ('CANALPLAN_MAX_POST_PROCESS',20);
-define('CANALPLAN_CODE_RELEASE','3.6 r00');
+define('CANALPLAN_CODE_RELEASE','3.8 r00');
+//error_reporting (E_ALL | E_NOTICE | E_STRICT | E_DEPRECATED);
 
 global $table_prefix, $wp_version,$wpdb,$db_prefix,$canalplan_run_canal_link_maps,$canalplan_run_canal_route_maps,$canalplan_run_canal_place_maps;
 $canalplan_run = array();
@@ -106,9 +107,10 @@ function format_distance($distance,$locks,$format,$short){
 	if ($wholefurls==8) {$wholemiles=$wholemiles+1; $wholefurls=0;}
 	if (($fractfurls==0) && ($wholefurls==0)){$fracttext=""; $furltext="";}
 	if ($wholefurls==0) {$wholefurls="";}
-
+    $dist_text="";
 	$furltext.=$wholefurls.$fracttext;
 	if($short!=1) $dist_text="a distance of ";
+	if($short==3) $dist_text="A total distance of ";
 	switch ($format) {
 		case "k":
 			$dist_text.= round($distance/1000,2).$ktext;
@@ -160,45 +162,162 @@ function myplugin_inner_custom_box() {
 	print ' <input type="text" ID="CanalPlanID" align="LEFT" size="50" maxlength="100"/> as';
 	print '  <select name="tagtype" ID="tagtypeID"> <option value="CP" selected>Gazetteer Tag</option> <option value="CPGM">Google Map Tag</option> </select>';
 	print ' <INPUT TYPE="button" name="CPsub" VALUE="Insert tag"  onclick="getCanalPlan(CanalPlanID.value);"/>';
+	echo "<br />Insert : ";
+		$sql=$wpdb->prepare("SELECT route_id,title FROM ".CANALPLAN_ROUTES." where blog_id=%d order by route_id desc",$blog_id);
+	$blog_routes = $wpdb->get_results($sql);
+	if (count($blog_favourites)>0 ){
+		print '<select name="blogroute" onchange="CanalRouteID.value=blogroute.options[blogroute.selectedIndex].text">';
+		print '<option value="" selected>Select Route</option>';
+		foreach ($blog_routes as $route) {
+			print '<option value="'.$route->route_id.'" name="'.$route->title.'">'.$route->title.'</option>';
+	  	}
+		print "</select>";
+	}
+	print ' <input type="text" disabled="disabled" ID="CanalRouteID" align="LEFT" size="50" maxlength="100"/> as';
+	print '  <select name="routetagtype" ID="routetagtypeID"> <option value="CPTS" selected>Trip Statistics </option> <option value="CPTD" selected>Trip Details (Overnight Stops) </option> <option value="CPTM">Trip Map</option> <option value="CPTO">Trip Map (Overnight Stops)</option> </select>';
+	print ' <INPUT TYPE="button" name="CPsub2" VALUE="Insert tag"  onclick="getCanalRoute(blogroute.options[blogroute.selectedIndex].value);"/>';
 	print '<script>canalplan_actb(document.getElementById("CanalPlanID"),new Array());</script>';
 }
 
 function canal_init() {
 	add_filter('the_content',  'canal_stats');
+	add_filter('the_content',  'canal_trip_maps');
+	add_filter('the_content',  'canal_trip_stats');
 	add_filter('the_content',  'canal_route_maps');
 	add_filter('the_content',  'canal_place_maps');
 	add_filter('the_content',  'canal_link_maps');
 	add_filter('the_content',  'canal_linkify');
+	add_filter('the_content',  'canal_blogroute_insert');
 	add_filter('the_excerpt',  'canal_stats');
+	add_filter('the_excerpt',  'canal_trip_maps');
+	add_filter('the_excerpt',  'canal_trip_stats');
 	add_filter('the_excerpt',  'canal_route_maps');
 	add_filter('the_excerpt',  'canal_place_maps');
 	add_filter('the_excerpt',  'canal_link_maps');
 	add_filter('the_excerpt',  'canal_linkify');
+	add_filter('the_excerpt',  'canal_blogroute_insert');
+	add_action('wp_head', 'canalplan_header');
+	add_action('wp_footer', 'canalplan_footer');
    	global $dogooglemap;
    	$dogooglemap=0;
 }
 
-function canal_route_maps($content,$mapblog_id=NULL,$post_id=NULL,$search=NULL) {
-    	global $wpdb,$post,$blog_id,$google_map_code,$dogooglemap,$canalplan_run_canal_route_maps;
-    	//var_dump($wp_query);
+function canal_trip_maps($content,$mapblog_id=NULL,$post_id=NULL,$search='N') {
+    global $wpdb,$post,$blog_id,$google_map_code,$dogooglemap,$canalplan_run_canal_route_maps;
+    $tripdetail='N';
+    $tripsumm='N';
+    if (preg_match_all('/' . preg_quote('[[CPTM:') . '(.*?)' . preg_quote(']]') .'/',$content,$matches)) { $places_array=$matches[1]; $tripsumm='Y' ;}
+    if (preg_match_all('/' . preg_quote('[[CPTO:') . '(.*?)' . preg_quote(']]') .'/',$content,$matches2)) { $places_array2=$matches2[1]; $tripdetail='Y'; }
+	if($tripsumm=='Y'){
+		$names = array();
+		$links = array();
+		foreach ($places_array as $place_code) {
+			$names[] = "[[CPTM:" .$place_code . "]]";
+			$links[] = canal_bloggedroute($place_code,"N");
+		}
+		$content = str_ireplace($names,$links , $content);
+	}
+	if($tripdetail=='Y'){
+		$names = array();
+		$links = array();
+		foreach ($places_array2 as $place_code) {
+			$names[] = "[[CPTO:" .$place_code . "]]";
+			$links[] = canal_bloggedroute($place_code,"Y");
+		}
+		$content = str_ireplace($names,$links , $content);
+	}
+	return $content;
+}
+
+function canal_trip_stats($content,$mapblog_id=NULL,$post_id=NULL,$search='N') {
+    global $wpdb,$post,$blog_id,$google_map_code,$dogooglemap,$canalplan_run_canal_route_maps;
+    $tripdetail='N';
+    $tripsumm='N';
+    if (preg_match_all('/' . preg_quote('[[CPTS:') . '(.*?)' . preg_quote(']]') .'/',$content,$matches)) { $places_array=$matches[1];  $tripsumm='Y';}
+    if (preg_match_all('/' . preg_quote('[[CPTD:') . '(.*?)' . preg_quote(']]') .'/',$content,$matches2)) { $places_array2=$matches2[1]; $tripdetail='Y'; }
+	if($tripsumm=='Y'){
+		$names = array();
+		$links = array();
+		foreach ($places_array as $place_code) {
+			$sql=$wpdb->prepare("select totalroute,uom,total_distance,total_locks from ".CANALPLAN_ROUTES." cpr where cpr.route_id=%d and cpr.blog_id=%d",$place_code,$blog_id);
+			$res1 = $wpdb->get_results($sql,ARRAY_A);
+			$row1 = $res1[0];
+			$dformat=$row1['uom'];
+			$troute=explode(',',$row1['totalroute']);
+			$startp=$troute[0];
+			$endp=array_pop($troute);
+			$sql=$wpdb->prepare("select distinct place_name from ".CANALPLAN_FAVOURITES." where canalplan_id=%s and blog_id=%d union select place_name from ".CANALPLAN_CODES." where canalplan_id=%s and canalplan_id not in (select canalplan_id from ".CANALPLAN_FAVOURITES." where canalplan_id=%s and blog_id=%d)",$startp,$blog_id,$startp,$startp,$blog_id);;
+			$res2 = $wpdb->get_results($sql,ARRAY_A);
+			$row2 = $res2[0];
+			$sql=$wpdb->prepare("select distinct place_name from ".CANALPLAN_FAVOURITES." where canalplan_id=%s and blog_id=%d union select place_name from ".CANALPLAN_CODES." where canalplan_id=%s and canalplan_id not in (select canalplan_id from ".CANALPLAN_FAVOURITES." where canalplan_id=%s and blog_id=%d)",$endp,$blog_id,$endp,$endp,$blog_id);
+			$res3 = $wpdb->get_results($sql,ARRAY_A);
+			$row3 = $res3[0];
+			$names[] = "[[CPTS:" .$place_code . "]]";
+			$links[] = "From [[CP:".$row2['place_name']."|".$startp."]] to [[CP:".$row3['place_name']."|".$endp."]], ".format_distance($row1['total_distance'],$row1['total_locks'],$dformat,3).".";
+		}
+		$content = str_ireplace($names,$links , $content);
+	}
+	if($tripdetail=='Y'){
+	$names2 = array();
+	$links2 = array();
+	foreach ($places_array2 as $place_code) {
+		$sql=$wpdb->prepare("select totalroute,uom,total_distance,total_locks from ".CANALPLAN_ROUTES." cpr where cpr.route_id=%d and cpr.blog_id=%d",$place_code,$blog_id);
+		$res1 = $wpdb->get_results($sql,ARRAY_A);
+		$row1 = $res1[0];
+		$dformat=$row1['uom'];
+		$troute=explode(',',$row1['totalroute']);
+		$sql=$wpdb->prepare("select distance,`locks`,start_id,end_id from ".CANALPLAN_ROUTE_DAY." where blog_id=%d and  route_id=%d",$blog_id,$place_code);
+		$res = $wpdb->get_results($sql,ARRAY_A);
+		foreach($res as $dayresult){
+			$startp=$troute[$dayresult['start_id']];
+			$endp=$troute[$dayresult['end_id']];
+			$sql=$wpdb->prepare("select distinct canalplan_id, place_name from ".CANALPLAN_FAVOURITES." where canalplan_id=%s and blog_id=%d union select canalplan_id, place_name from ".CANALPLAN_CODES." where canalplan_id=%s and canalplan_id not in (select canalplan_id from ".CANALPLAN_FAVOURITES." where canalplan_id=%s and blog_id=%d)",$startp,$blog_id,$startp,$startp,$blog_id);
+			$res2 = $wpdb->get_results($sql,ARRAY_A);
+			$startplaces[] = $res2[0];
+			$sql=$wpdb->prepare("select distinct canalplan_id, place_name from ".CANALPLAN_FAVOURITES." where canalplan_id=%s and blog_id=%d union select canalplan_id, place_name from ".CANALPLAN_CODES." where canalplan_id=%s and canalplan_id not in (select canalplan_id from ".CANALPLAN_FAVOURITES." where canalplan_id=%s and blog_id=%d)",$endp,$blog_id,$endp,$endp,$blog_id);
+			$res3 = $wpdb->get_results($sql,ARRAY_A);
+			$endplaces[]  = $res3[0];
+		}
+		$endplace=array_pop($endplaces);
+		$penultimateplace=array_pop($endplaces);
+		$names[] = "[[CPTS:" .$place_code . "]]";
+		$stat_text = "Starting at [[CP:".$startplaces[0]['place_name']."|".$startplaces[0]['canalplan_id']."]] and finishing at [[CP:".$endplace['place_name']."|".$endplace['canalplan_id']." ]] with overnight stops at :";
+		foreach ($endplaces as $nightplace) {
+			$stat_text.=" [[CP:".$nightplace['place_name']."|".$nightplace['canalplan_id']."]],";
+		}
+		rtrim($stat_text, ",");
+		$stat_text.=" and [[CP:".$penultimateplace['place_name']."|".$penultimateplace['canalplan_id']."]].";
+		$stat_text.= " ".format_distance($row1['total_distance'],$row1['total_locks'],$dformat,3).".";
+		$names2[] = "[[CPTD:" .$place_code . "]]";
+		$links2[]= $stat_text;
+	}
+	$content = str_ireplace($names2,$links2 , $content);
+	}
+	return $content;
+}
+
+function canal_route_maps($content,$mapblog_id=NULL,$post_id=NULL,$search='N') {
+    global $wpdb,$post,$blog_id,$google_map_code,$dogooglemap,$canalplan_run_canal_route_maps;
 	// First we check the content for tags:
 	if (preg_match_all('/' . preg_quote('[[CPRM') . '(.*?)' . preg_quote(']]') .'/',$content,$matches)) { $places_array=$matches[0]; }
 	// If the array is empty then we've no maps so don't do anything!
 	if (!isset($places_array)) {return $content;}
 	if (count($places_array)==0) {return $content;}
-	$canalplan_run_canal_route_maps[$post->ID]=$canalplan_run_canal_route_maps[$post->ID]+1;
-        if (isset($mapblog_id)) {} else { $mapblog_id=$blog_id;}
-        if (isset($post_id)) {} else {$post_id=$post->ID;
-        if (isset($post->blog_id)) {$mapblog_id=$post->blog_id;}}
+	if(!isset($canalplan_run_canal_route_maps[$post->ID])) {$canalplan_run_canal_route_maps[$post->ID]=1;} else {
+		$canalplan_run_canal_route_maps[$post->ID]=$canalplan_run_canal_route_maps[$post->ID]+1;
+	}
+    if (isset($mapblog_id)) {} else { $mapblog_id=$blog_id;}
+    if (isset($post_id)) {} else {$post_id=$post->ID;
+    if (isset($post->blog_id)) {$mapblog_id=$post->blog_id;}}
 	if ( get_query_var('feed') || $search=='Y' || is_feed() )  {
 		$names = array();
 		$links = array();
 		foreach ($places_array as $place_code) {
-		$words=split(":",$place_code);
-		        $names[] = $place_code;
-		        $links[] ="<b>[Google Route Map embedded here]</b>" ;
+			$words=explode(":",$place_code);
+			$names[] = $place_code;
+			$links[] ="<b>[Google Route Map embedded here]</b>" ;
 		}
-		return str_replace($names,$links , $content);
+	return str_replace($names,$links , $content);
 	}
 	$google_map_code2='';
 	$mapstuff="<br />";
@@ -206,16 +325,16 @@ function canal_route_maps($content,$mapblog_id=NULL,$post_id=NULL,$search=NULL) 
 	$dogooglemap='CPRM'.$mapblog_id.'_'.$post->ID;
 	$canalplan_options = get_option('canalplan_options');
 	$post_id=$post->ID;
-	// if (!isset($post_id)) {return;}
  	$sql=$wpdb->prepare("select distance,`locks`,start_id,end_id from ".CANALPLAN_ROUTE_DAY." where blog_id=%d and  post_id=%d",$mapblog_id,$post_id);
 	$res = $wpdb->get_results($sql,ARRAY_A);
 	$row = $res[0];
 	$sql=$wpdb->prepare("select totalroute from ".CANALPLAN_ROUTES." cpr, ".CANALPLAN_ROUTE_DAY." crd where cpr.route_id= crd.route_id and cpr.blog_id=crd.blog_id and crd.blog_id=%d and  crd.post_id=%d",$mapblog_id,$post_id);
-	$res3 = $wpdb->get_results($sql,ARRAY_A) or trigger_error('Query failed: ' . $sql, E_USER_ERROR);
+	//$res3 = $wpdb->get_results($sql,ARRAY_A) or trigger_error('Query failed: ' . $sql, E_USER_ERROR);
+	$res3 = $wpdb->get_results($sql,ARRAY_A);
 	$place_count=0;
 	$row3 = $res3[0];
-	$places=split(",",$row3[totalroute]);
-	$dayroute=array_slice($places,$row[start_id], ($row[end_id] - $row[start_id])+1);
+	$places=explode(",",$row3['totalroute']);
+	$dayroute=array_slice($places,$row['start_id'], ($row['end_id'] - $row['start_id'])+1);
 	$mid_point=round(count($dayroute)/2,0,PHP_ROUND_HALF_UP);
 	$pointstring = "";
 	$zoomstring = "";
@@ -241,16 +360,19 @@ function canal_route_maps($content,$mapblog_id=NULL,$post_id=NULL,$search=NULL) 
 	$options['rgb']=$canalplan_options["canalplan_rm_r_hex"].$canalplan_options["canalplan_rm_g_hex"].$canalplan_options["canalplan_rm_b_hex"];
 	$options['brush']=$canalplan_options["canalplan_rm_weight"];
 	$words=substr($matches[1][0],1);
-	$opts=split(",",$words);
+	$opts=explode(",",$words);
 	foreach ($opts as $opt) {
-		 $opcode=split("=",$opt);
-		 $options[$opcode[0]]=strtoupper($opcode[1]);
+		 $opcode=explode("=",$opt);
+		 if (count($opcode)>1) {$options[$opcode[0]]=strtoupper($opcode[1]);}
 	}
 	$mapstuff.= '<div id="map_canvas_'.$dogooglemap.'" style="width: '.$options['width'].'px; height: '.$options['height'].'px"></div>';
 	foreach ($dayroute as $place) {
 		$sql=$wpdb->prepare("select `lat`,`long`,`place_name` from ".CANALPLAN_CODES." where canalplan_id=%s",$place);
 		$res =  $wpdb->get_results($sql,ARRAY_A);
-		$row = $res[0];
+		$row='';
+		if (count($res)>0) {
+			$row = $res[0];
+		}
 		if (count($row) > 2) {
 		if($place_count==$mid_point) {
 			$centre_lat=$row['lat'];
@@ -278,7 +400,7 @@ function canal_route_maps($content,$mapblog_id=NULL,$post_id=NULL,$search=NULL) 
 	        $long = $nlong;
 	        $cpoint=$row['place_name'].",".$row['lat'].",".$row['long'];
 	        if ($cpoint==$lpointb1) {
-			$lpoints=split(",",$lpoint);
+			$lpoints=explode(",",$lpoint);
 			$turnaround.='var marker_turn'.$dogooglemap.'_'.$x.' = new google.maps.Marker({ position: new google.maps.LatLng('.$lpoints[1].','.$lpoints[2].'), map: map'.$dogooglemap.',   title: "Turn Round here  : '.$lpoints[0].'" });';
 			$turnaround.='iconFile = "http://maps.google.com/mapfiles/ms/icons/blue-dot.png"; marker_turn'.$dogooglemap.'_'.$x.'.setIcon(iconFile) ; ';
 		 	$x=$x+1;
@@ -317,11 +439,11 @@ function canal_route_maps($content,$mapblog_id=NULL,$post_id=NULL,$search=NULL) 
 	$names = array();
 	$links = array();
 	foreach ($places_array as $place_code) {
-	$words=split(":",$place_code);
+	$words=explode(":",$place_code);
 		$names[] = $place_code;
 		$links[] =$mapstuff;
 	}
-if($canalplan_run_canal_route_maps[$post->ID]==1) {$google_map_code.=$google_map_code2;}
+	if($canalplan_run_canal_route_maps[$post->ID]==1) {$google_map_code.=$google_map_code2;}
 	return str_replace($names,$links , $content);
 }
 
@@ -332,24 +454,25 @@ function canal_link_maps($content) {
 	// If the array is empty then we've no maps so don't do anything!
 	if (!isset($places_array)) {return $content;}
 	if (count($places_array)==0) {return $content;}
-	$canalplan_run_canal_link_maps[$post->ID]=$canalplan_run_canal_link_maps[$post->ID]+1;
+	if(!isset($canalplan_run_canal_link_maps[$post->ID])) {$canalplan_run_canal_link_maps[$post->ID]=1;} else {
+	$canalplan_run_canal_link_maps[$post->ID]=$canalplan_run_canal_link_maps[$post->ID]+1;}
 	$canalplan_options = get_option('canalplan_options');
-	if ( get_query_var('feed') || $search=='Y' || is_feed() )  {
+	if ( get_query_var('feed') ||  is_feed() )  {
 		$names = array();
 		$links = array();
-		 foreach ($places_array as $place_code) {
-			$words=split("\|",$place_code);
-		        $names[] = "[[CPGMW:" .$place_code . "]]";
-		        $links[] = "<b>[Embedded Google Map for ".trim($words[0])."]</b>";
+		foreach ($places_array as $place_code) {
+			$words=explode("|",$place_code);
+		    $names[] = "[[CPGMW:" .$place_code . "]]";
+		    $links[] = "<b>[Embedded Google Map for ".trim($words[0])."]</b>";
 	    	}
 		return str_replace($names,$links , $content);
 	}
-   		$maptype['S']="SATELLITE";
-	   	$maptype['R']="ROADMAP";
-	   	$maptype['T']="TERRAIN";
-	   	$maptype['H']="HYBRID";
-	   	$google_map_code2='';
-	   	$mapc=0;
+	$maptype['S']="SATELLITE";
+   	$maptype['R']="ROADMAP";
+   	$maptype['T']="TERRAIN";
+   	$maptype['H']="HYBRID";
+   	$google_map_code2='';
+   	$mapc=0;
 	foreach ($places_array as $place_code) {
 	$mapc=$mapc+1;
 	$options['zoom']=$canalplan_options["canalplan_rm_zoom"];
@@ -361,11 +484,11 @@ function canal_link_maps($content) {
 	$options['rgb']=$canalplan_options["canalplan_rm_r_hex"].$canalplan_options["canalplan_rm_g_hex"].$canalplan_options["canalplan_rm_b_hex"];
 	$options['brush']=$canalplan_options["canalplan_rm_weight"];
 		$mapstuff="<br />";
-		$words=split("\|",$place_code);
-		$opts=split(",",$words[2]);
+		$words=explode("|",$place_code);
+		$opts=explode(",",$words[2]);
 		foreach ($opts as $opt) {
-			 $opcode=split("=",$opt);
-			 $options[$opcode[0]]=strtoupper($opcode[1]);
+			 $opcode=explode("=",$opt);
+			if (count($opcode)>1) { $options[$opcode[0]]=strtoupper($opcode[1]);}
 		}
 		if($canalplan_run_canal_link_maps[$post->ID]==1) {$dogooglemap=$dogooglemap+1;}
 		$dogooglemap='CPGMW'.$words[1].'_'.$post->ID.'_'.$mapc;
@@ -376,9 +499,7 @@ function canal_link_maps($content) {
 		unset($weights);
 		unset($polylines);
 		$missingpoly[]=$words[1];
-		#$sql=" select lat,`long` from ".CANALPLAN_CODES.' where canalplan_id in (select place1 from '.CANALPLAN_LINK.' where waterway="'.$words[1].'") limit 1';
-
-$sql2=$wpdb->prepare(' select lat,`long` from '.CANALPLAN_CODES.' where canalplan_id in (select place1 from '.CANALPLAN_LINK.' where waterway in (select id from '.CANALPLAN_CANALS.' where parent=%s or id=%s)) limit 1',$words[1],$words[1]);
+		$sql2=$wpdb->prepare(' select lat,`long` from '.CANALPLAN_CODES.' where canalplan_id in (select place1 from '.CANALPLAN_LINK.' where waterway in (select id from '.CANALPLAN_CANALS.' where parent=%s or id=%s)) limit 1',$words[1],$words[1]);
 		 $res = $wpdb->get_results($sql2,ARRAY_N);
 		$rw = $res[0];
 		$centre_lat=(float)$rw[0];
@@ -410,7 +531,6 @@ $sql2=$wpdb->prepare(' select lat,`long` from '.CANALPLAN_CODES.' where canalpla
 			$sql=$wpdb->prepare("select pline from ".CANALPLAN_POLYLINES." where id=%s",$polyline);
 			$res=$wpdb->get_results($sql,ARRAY_N);
 			 $rw = $res[0];
-			// var_dump($rw);
 		     $google_map_code2.=' var line'.$dogooglemap.'_'.$i.' = new google.maps.Polyline(polyOptions'.$dogooglemap.');';
 		 	$google_map_code2.=' line'.$dogooglemap.'_'.$i.'.setPath(google.maps.geometry.encoding.decodePath("'.$rw[0].'"));';
 		 	$google_map_code2.=' line'.$dogooglemap.'_'.$i.'.setMap(map'.$dogooglemap.');';
@@ -421,7 +541,7 @@ $sql2=$wpdb->prepare(' select lat,`long` from '.CANALPLAN_CODES.' where canalpla
       		$names[] = "[[CPGMW:" .$place_code . "]]";
       		$links[] = $mapstuff;
       	}
-      	if($canalplan_run_canal_link_maps[$post->ID]==1) {$google_map_code.=$google_map_code2;}
+    if($canalplan_run_canal_link_maps[$post->ID]==1) {$google_map_code.=$google_map_code2;}
 	return str_ireplace($matches[0], $links, $content);
 }
 
@@ -433,7 +553,8 @@ function canal_place_maps($content,$mapblog_id=NULL,$post_id=NULL) {
     	// If the array is empty then we've no links so don't do anything!
     	if (!isset($places_array)) {return $content;}
    	if (count($places_array)==0) {return $content;}
-   	$canalplan_run_canal_place_maps[$post->ID]=$canalplan_run_canal_place_maps[$post->ID]+1;
+   	if(!isset($canalplan_run_canal_place_maps[$post->ID])) {$canalplan_run_canal_place_maps[$post->ID]=1;} else {
+   	$canalplan_run_canal_place_maps[$post->ID]=$canalplan_run_canal_place_maps[$post->ID]+1;}
 	if (isset($mapblog_id)) {} else { $mapblog_id=$wpdb->blogid;}
 	if (isset($post_id)) {} else {$post_id=$post->ID;
         if (isset($post->blog_id)) {$mapblog_id=$post->blog_id;}}
@@ -442,7 +563,7 @@ function canal_place_maps($content,$mapblog_id=NULL,$post_id=NULL) {
 
     	if ( get_query_var('feed') || is_feed()) {
     		foreach ($places_array as $place_code) {
-    		$words=split("\|",$place_code);
+    		$words=explode("|",$place_code);
 	    	$names[] = "[[CPGM:" .$place_code . "]]";
 	    	$links[] = "<b>[Embedded Google Map for ".trim($words[0])."]</b>";
 	    }
@@ -455,25 +576,29 @@ function canal_place_maps($content,$mapblog_id=NULL,$post_id=NULL) {
 	   	$google_map_code2='';
 	   	$mapc=0;
 	foreach ($places_array as $place_code) {
-		$words=split("\|",$place_code);
+		$words=explode("|",$place_code);
 		$mapc=$mapc+1;
 		$sql=$wpdb->prepare("select lat,`long` from ".CANALPLAN_CODES." where canalplan_id=%s",$words[1]);;
 		$res = $wpdb->get_results($sql,ARRAY_A);
-	    $row = $res[0];
+	    if (count($res)>0) {
+			$row = $res[0];
+			$options['lat']=$row['lat'];
+			$options['long']=$row['long'];
+		}
+	    $options['height']=$canalplan_options["canalplan_pm_height"];
+		$options['width']=$canalplan_options["canalplan_pm_width"];
 		$options['zoom']=$canalplan_options["canalplan_pm_zoom"];
 		$options['type']=$canalplan_options["canalplan_pm_type"];
-		$options['lat']=$row[lat];
-		$options['long']=$row[long];
-		$options['height']=$canalplan_options["canalplan_pm_height"];
-		$options['width']=$canalplan_options["canalplan_pm_width"];
-		$opts=split(",",$words[2]);
-		foreach ($opts as $opt) {
-			 $opcode=split("=",$opt);
-			 $options[$opcode[0]]=strtoupper($opcode[1]);
+		if (count($words)>=3) {
+			$opts=explode(",",$words[2]);
+			foreach ($opts as $opt) {
+				 $opcode=explode("=",$opt);
+				if (count($opcode)>1) { $options[$opcode[0]]=strtoupper($opcode[1]);}
+			}
 		}
-	    	$mapstuff="<br />";
-	    	if($canalplan_run_canal_place_maps[$post->ID]==1) {$dogooglemap=$dogooglemap+1;}
-	    	$dogooglemap='CPGM'.$words[1].'_'.$post->ID.'_'.$mapc;
+		$mapstuff="<br />";
+		if($canalplan_run_canal_place_maps[$post->ID]==1) {$dogooglemap=$dogooglemap+1;}
+		$dogooglemap='CPGM'.$words[1].'_'.$post->ID.'_'.$mapc;
 		$mapstuff= '<div id="map_canvas_'.$dogooglemap.'" style="width: '.$options['width'].'px; height: '.$options['height'].'px"></div> ';
 		$names[] = "[[CPGM:" .$place_code . "]]";
 		$links[] = $mapstuff;
@@ -483,7 +608,7 @@ function canal_place_maps($content,$mapblog_id=NULL,$post_id=NULL) {
 		$google_map_code2.= 'var map'.$dogooglemap.' = new google.maps.Map(document.getElementById("map_canvas_'.$dogooglemap.'"),map_'.$dogooglemap.'_opts);';
 		$google_map_code2.= 'var marker'.$dogooglemap.' = new google.maps.Marker({ position: new google.maps.LatLng('.$options['lat'].','.$options['long'].'), map: map'.$dogooglemap.', title: "'.$words[0].'"  });  ';
      	}
-     	if($canalplan_run_canal_place_maps[$post->ID]==1) {$google_map_code.=$google_map_code2;}
+    if($canalplan_run_canal_place_maps[$post->ID]==1) {$google_map_code.=$google_map_code2;}
 	return str_ireplace($matches[0], $links, $content);
 }
 
@@ -503,23 +628,22 @@ function canal_stats($content,$mapblog_id=NULL,$post_id=NULL) {
 	$res3 = $wpdb->get_results($sql,ARRAY_A);
 	$row3 = $res3[0];
 	$dformat=$row3['uom'];
-	$places=split(",",$row3['totalroute']);
-	$sql=$wpdb->prepare("select place_name from ".CANALPLAN_FAVOURITES." where canalplan_id=%s and blog_id=%d union select place_name from ".CANALPLAN_CODES." where canalplan_id=%s and canalplan_id not in (select canalplan_id from ".CANALPLAN_FAVOURITES." where canalplan_id=%s and blog_id=%d)",$places[$row['start_id']],$mapblog_id,$places[$row['start_id']],$places[$row['start_id']],$mapblog_id);
+	$places=explode(",",$row3['totalroute']);
+	$sql=$wpdb->prepare("select distinct place_name from ".CANALPLAN_FAVOURITES." where canalplan_id=%s and blog_id=%d union select place_name from ".CANALPLAN_CODES." where canalplan_id=%s and canalplan_id not in (select canalplan_id from ".CANALPLAN_FAVOURITES." where canalplan_id=%s and blog_id=%d)",$places[$row['start_id']],$mapblog_id,$places[$row['start_id']],$places[$row['start_id']],$mapblog_id);
 	$res2 = $wpdb->get_results($sql,ARRAY_A);
 	$row2 = $res2[0];
 	$start_name=$row2['place_name'];
-$sql=$wpdb->prepare("select place_name from ".CANALPLAN_FAVOURITES." where canalplan_id=%s and blog_id=%d union select place_name from ".CANALPLAN_CODES." where canalplan_id=%s and canalplan_id not in (select canalplan_id from ".CANALPLAN_FAVOURITES." where canalplan_id=%s and blog_id=%d)",$places[$row['end_id']],$mapblog_id,$places[$row['end_id']],$places[$row['end_id']],$mapblog_id);
+	$sql=$wpdb->prepare("select distinct place_name from ".CANALPLAN_FAVOURITES." where canalplan_id=%s and blog_id=%d union select place_name from ".CANALPLAN_CODES." where canalplan_id=%s and canalplan_id not in (select canalplan_id from ".CANALPLAN_FAVOURITES." where canalplan_id=%s and blog_id=%d)",$places[$row['end_id']],$mapblog_id,$places[$row['end_id']],$places[$row['end_id']],$mapblog_id);
 	$res2 = $wpdb->get_results($sql,ARRAY_A);
 	$row2 = $res2[0];
 	$end_name=$row2['place_name'];
 	$names = array();
 	$links = array();
 	foreach ($places_array as $place_code) {
-	$words=split(":",$place_code);
+	$words=explode(":",$place_code);
 		$names[] = $place_code;
-		$links[] = "From [[CP:".$start_name."|".$places[$row['start_id']]."]] to [[CP:".$end_name."|".$places[$row['end_id']]."]], ".format_distance($row['distance'],$row[locks],$dformat,2).".";
+		$links[] = "From [[CP:".$start_name."|".$places[$row['start_id']]."]] to [[CP:".$end_name."|".$places[$row['end_id']]."]], ".format_distance($row['distance'],$row['locks'],$dformat,2).".";
 	}
-
 	return str_ireplace($names, $links, $content);
 }
 
@@ -549,7 +673,7 @@ function canal_linkify($content) {
 			$title=urlencode($post->post_title);
 		}
 		foreach ($places_array as $place_code) {
-			$words=split("\|",$place_code);
+			$words=explode("|",$place_code);
 			$names[] = "[[CP:" .$place_code . "]]";
 			if ($api[0]=="") {
 				$links[] = "<a href='".CANALPLAN_GAZ_URL.$words[1]."' target='gazetteer'  title='Link to ".trim($words[0])."'>".trim($words[0])."</a>";
@@ -564,7 +688,7 @@ function canal_linkify($content) {
 		$places_array=$matches[1];
 		$gazstring=CANALPLAN_URL.'waterway.cgi?id=';
 		foreach ($places_array as $place_code) {
-			$words=split("\|",$place_code);
+			$words=explode("|",$place_code);
 			$names[] = "[[CPW:" .$place_code . "]]";
 			$links[] = "<a href='".$gazstring.$words[1]."' target='gazetteer'  title='Link to ".trim($words[0])."'>".trim($words[0])."</a>";
 		}
@@ -583,22 +707,16 @@ function canal_linkify_name($content) {
 	if (preg_match_all('/' . preg_quote('[[CP:') . '(.*?)' . preg_quote(']]') .'/',$content,$matches)) {
 		$places_array=$matches[1];
 		foreach ($places_array as $place_code) {
-			$words=split("\|",$place_code);
+			$words=explode("|",$place_code);
 			$names[] = "[[CP:" .$place_code . "]]";
-			if ($api[0]=="") {
-				$links[] = trim($words[0]);
-			}
-			 else
-			{
-				$links[] = trim($words[0]);
-			}
+			$links[] = trim($words[0]);
 		}
 	}
 	if (preg_match_all('/' . preg_quote('[[CPW:') . '(.*?)' . preg_quote(']]') .'/',$content,$matches)) {
 		$places_array=$matches[1];
 		$gazstring=CANALPLAN_URL.'waterway.cgi?id=';
 		foreach ($places_array as $place_code) {
-			$words=split("\|",$place_code);
+			$words=explode("|",$place_code);
 			$names[] = "[[CPW:" .$place_code . "]]";
 			$links[] = trim($words[0]);
 		}
@@ -606,28 +724,19 @@ function canal_linkify_name($content) {
 	return str_ireplace($names, $links, $content);
 }
 
-function canal_options_page() {
-	global $wpdb;
-	if (!current_user_can('manage_options')) {
-		die('You don&#8217;t have sufficient permission to access this file.');
-	}
-	if (isset($_POST['update'])) {
-		check_admin_referer('canalplan-autolinker-update-options');
-		update_option('canalplan-autolinker-begin', $wpdb->escape($_POST['begin']));
-		update_option('canalplan-autolinker-end', $wpdb->escape($_POST['end']));
-		echo '<div id="message" class="updated fade"><p><strong>Options saved.</strong></p></div>';
-	}
-}
 
-function blroute(){
+function canal_bloggedroute($embed=0,$overnight="N"){
+	if (!isset($_GET['routeid'])){$_GET['routeid']=0;}
 	$routeid = $_GET['routeid'];
 	$routeid = preg_replace('{/$}', '', $routeid);
+	$blroute='';
 	if (!isset($routeid)){$routeid=0;}
 	if ($routeid<=0){$routeid=0;}
+	if ($embed>0) {$routeid=$embed;}
 	global $wpdb,$blog_id,$google_map_code,$dogooglemap;
 	$dogooglemap=1;
-	$blroute="";
 	$canalplan_options = get_option('canalplan_options');
+	if ($embed>=1) {$routeid=$embed;$dogooglemap=$embed;}
 	if ($routeid==0){
 		if ($wpdb->blogid==1) {
 			$sql="select route_id,title,blog_id from ".CANALPLAN_ROUTES." where status=3";
@@ -668,8 +777,8 @@ function blroute(){
 		$mid_point=round($wpdb->num_rows/2,0,PHP_ROUND_HALF_UP);
 		$place_count=0;
 		$row = $res[0];
-		$blroute .="<h2>".$row['description']."</h2><br/>";
-		$blroute.='<div id="map_canvas_'.$dogooglemap.'"  style="width: '.$canalplan_options["canalplan_rm_width"].'px; height: '.$canalplan_options["canalplan_rm_height"].'px"></div>';
+		if($embed==0) { $blroute .="<h2>".$row['description']."</h2><br/>"; }
+		$blroute.='<div id="map_canvas_'.$overnight.'_'.$dogooglemap.'"  style="width: '.$canalplan_options["canalplan_rm_width"].'px; height: '.$canalplan_options["canalplan_rm_height"].'px"></div>';
 		$pointstring = "";
 		$zoomstring = "";
 		$lat = 0;
@@ -678,15 +787,20 @@ function blroute(){
 		$lpointb1="";
 		$x=3;
 		$y=-1;
-		$places=split(",",$row['totalroute']);
+		$places=explode(",",$row['totalroute']);
 		$lastid=end($places);
 		$firstid=reset($places);
 		$turnaround="";
-  		$mapstuff='<div id="map_canvas_'.$dogooglemap.'"  style="width: '.$canalplan_options["canalplan_rm_width"].'px; height: '.$canalplan_options["canalplan_rm_height"].'px"></div>';
+		$firstname="";
+		$first_lat="";
+		$first_long="";
+  		$mapstuff='<div id="map_canvas_'.$overnight.'_'.$dogooglemap.'"  style="width: '.$canalplan_options["canalplan_rm_width"].'px; height: '.$canalplan_options["canalplan_rm_height"].'px"></div>';
 		foreach ($places as $place) {
 			$sql=$wpdb->prepare("select `lat`,`long`,`place_name` from ".CANALPLAN_CODES." where canalplan_id=%s",$place);
 			$res =  $wpdb->get_results($sql,ARRAY_A);
-			$row = $res[0];
+			$row='';
+			if (count($res)>0) {
+			$row = $res[0];}
 			if (count($row)> 2) {
 			if ($place==$firstid){
 				$firstname=$row['place_name'];
@@ -714,9 +828,9 @@ function blroute(){
 			$long = $nlong;
 			$cpoint=$row['place_name'].",".$row['lat'].",".$row['long'];
 			if ($cpoint==$lpointb1) {
-				$lpoints=split(",",$lpoint);
-				$turnaround.='var marker_turn'.$dogooglemap.'_'.$x.' = new google.maps.Marker({ position: new google.maps.LatLng('.$lpoints[1].','.$lpoints[2].'), map: map'.$dogooglemap.',   title: "Turn Round here  : '.$lpoints[0].'" });';
-				$turnaround.='iconFile = "http://maps.google.com/mapfiles/ms/icons/blue-dot.png"; marker_turn'.$dogooglemap.'_'.$x.'.setIcon(iconFile) ; ';
+				$lpoints=explode(",",$lpoint);
+				$turnaround.='var marker_turn_'.$overnight.'_'.$dogooglemap.'_'.$x.' = new google.maps.Marker({ position: new google.maps.LatLng('.$lpoints[1].','.$lpoints[2].'), map: map_'.$overnight.'_'.$dogooglemap.',   title: "Turn Round here  : '.$lpoints[0].'" });';
+				$turnaround.='iconFile = "http://maps.google.com/mapfiles/ms/icons/blue-dot.png"; marker_turn_'.$overnight.'_'.$dogooglemap.'_'.$x.'.setIcon(iconFile) ; ';
 			 	$x=$x+1;
 			}
 			$lpointb1=$lpoint;
@@ -724,15 +838,15 @@ function blroute(){
 			$lpoint=$cpoint;
 			}
 		if ($firstid==$lastid) {
-			$markertext='var marker_start'.$dogooglemap.' = new google.maps.Marker({ position: new google.maps.LatLng('.$first_lat.','.$first_long.'), map: map'.$dogooglemap.',   title: "Start / Finish : '.$firstname.'"});';
-			$markertext.='iconFile = "http://maps.google.com/mapfiles/ms/icons/yellow-dot.png"; marker_start'.$dogooglemap.'.setIcon(iconFile) ; ';
+			$markertext='var marker_start_'.$overnight.'_'.$dogooglemap.' = new google.maps.Marker({ position: new google.maps.LatLng('.$first_lat.','.$first_long.'), map: map_'.$overnight.'_'.$dogooglemap.',   title: "Start / Finish : '.$firstname.'"});';
+			$markertext.='iconFile = "http://maps.google.com/mapfiles/ms/icons/yellow-dot.png"; marker_start_'.$overnight.'_'.$dogooglemap.'.setIcon(iconFile) ; ';
 		}
 		else
 		{
-			$markertext='var marker_start'.$dogooglemap.' = new google.maps.Marker({ position: new google.maps.LatLng('.$first_lat.','.$first_long.'), map: map'.$dogooglemap.',   title: "Start : '.$firstname.'" });';
-			$markertext.='var marker_stop'.$dogooglemap.' = new google.maps.Marker({ position: new google.maps.LatLng('.$last_lat.','.$last_long.'), map: map'.$dogooglemap.',  title: "Stop : '.$lastname.'" });';
-			$markertext.='iconFile = "http://maps.google.com/mapfiles/ms/icons/green-dot.png"; marker_start'.$dogooglemap.'.setIcon(iconFile) ; ';
-			$markertext.='iconFile = "http://maps.google.com/mapfiles/ms/icons/red-dot.png"; marker_stop'.$dogooglemap.'.setIcon(iconFile) ; ';
+			$markertext='var marker_start_'.$overnight.'_'.$dogooglemap.' = new google.maps.Marker({ position: new google.maps.LatLng('.$first_lat.','.$first_long.'), map: map'.$overnight.'_'.$dogooglemap.',   title: "Start : '.$firstname.'" });';
+			$markertext.='var marker_stop_'.$overnight.'_'.$dogooglemap.' = new google.maps.Marker({ position: new google.maps.LatLng('.$last_lat.','.$last_long.'), map: map'.$overnight.'_'.$dogooglemap.',  title: "Stop : '.$lastname.'" });';
+			$markertext.='iconFile = "http://maps.google.com/mapfiles/ms/icons/green-dot.png"; marker_start_'.$overnight.'_'.$dogooglemap.'.setIcon(iconFile) ; ';
+			$markertext.='iconFile = "http://maps.google.com/mapfiles/ms/icons/red-dot.png"; marker_stop_'.$overnight.'_'.$dogooglemap.'.setIcon(iconFile) ; ';
 		}}
 		#$blroute .=$pointstring;
 		$options['size']=200;
@@ -745,22 +859,45 @@ function blroute(){
 	   	$maptype['R']="ROADMAP";
 	   	$maptype['T']="TERRAIN";
 	   	$maptype['H']="HYBRID";
-		$google_map_code.= 'var map_'.$dogooglemap.'_opts = { zoom: '.$options['zoom'].',center: new google.maps.LatLng('.$centre_lat.','.$centre_long.'),';
-	      	$google_map_code.='  scrollwheel: false, navigationControl: true, mapTypeControl: true, scaleControl: false, draggable: false,';
-	      	$google_map_code.= ' mapTypeId: google.maps.MapTypeId.'.$maptype[$options['type']].' };';
-	      	$google_map_code.= 'var map'.$dogooglemap.' = new google.maps.Map(document.getElementById("map_canvas_'.$dogooglemap.'"),map_'.$dogooglemap.'_opts);';
-	      	$google_map_code.='  var polyOptions'.$dogooglemap.' = {strokeColor: "#'.$options['rgb'].'", strokeOpacity: 1.0,strokeWeight: '.$canalplan_options["canalplan_rm_weight"].' }; ';
+		$google_map_code.= 'var map_'.$overnight.'_'.$dogooglemap.'_opts = { zoom: '.$options['zoom'].',center: new google.maps.LatLng('.$centre_lat.','.$centre_long.'),';
+	    $google_map_code.='  scrollwheel: false, navigationControl: true, mapTypeControl: true, scaleControl: false, draggable: false,';
+	    $google_map_code.= ' mapTypeId: google.maps.MapTypeId.'.$maptype[$options['type']].' };';
+	    $google_map_code.= 'var map_'.$overnight.'_'.$dogooglemap.' = new google.maps.Map(document.getElementById("map_canvas_'.$overnight.'_'.$dogooglemap.'"),map_'.$overnight.'_'.$dogooglemap.'_opts);';
+	    $google_map_code.='  var polyOptions_'.$overnight.'_'.$dogooglemap.' = {strokeColor: "#'.$options['rgb'].'", strokeOpacity: 1.0,strokeWeight: '.$canalplan_options["canalplan_rm_weight"].' }; ';
 		$i=1;
-		$google_map_code.=' var line'.$dogooglemap.'_'.$i.' = new google.maps.Polyline(polyOptions'.$dogooglemap.');';
-	 	$google_map_code.=' line'.$dogooglemap.'_'.$i.'.setPath(google.maps.geometry.encoding.decodePath("'.$pointstring.'"));';
-	 	$google_map_code.=' line'.$dogooglemap.'_'.$i.'.setMap(map'.$dogooglemap.');';
-		$google_map_code.='var bounds'.$dogooglemap.' = new google.maps.LatLngBounds();';
-		$google_map_code.='line'.$dogooglemap.'_'.$i.'.getPath().forEach(function(latLng) {bounds'.$dogooglemap.'.extend(latLng);});';
-		$google_map_code.='map'.$dogooglemap.'.fitBounds(bounds'.$dogooglemap.');';
+		$google_map_code.=' var line_'.$overnight.'_'.$dogooglemap.'_'.$i.' = new google.maps.Polyline(polyOptions_'.$overnight.'_'.$dogooglemap.');';
+	 	$google_map_code.=' line_'.$overnight.'_'.$dogooglemap.'_'.$i.'.setPath(google.maps.geometry.encoding.decodePath("'.$pointstring.'"));';
+	 	$google_map_code.=' line_'.$overnight.'_'.$dogooglemap.'_'.$i.'.setMap(map_'.$overnight.'_'.$dogooglemap.');';
+		$google_map_code.='var bounds_'.$overnight.'_'.$dogooglemap.' = new google.maps.LatLngBounds();';
+		$google_map_code.='line_'.$overnight.'_'.$dogooglemap.'_'.$i.'.getPath().forEach(function(latLng) {bounds_'.$overnight.'_'.$dogooglemap.'.extend(latLng);});';
+		$google_map_code.='map_'.$overnight.'_'.$dogooglemap.'.fitBounds(bounds_'.$overnight.'_'.$dogooglemap.');';
 		$google_map_code.=$turnaround.$markertext;
-		$blroute .= $page;
-		$blroute .= $page2;
-		$blroute .= $page3;
+	}
+	if ($overnight=='Y'){
+		$sql=$wpdb->prepare("select day_id,end_id from ".CANALPLAN_ROUTE_DAY." where blog_id=%d and  route_id=%d",$blog_id,$routeid);
+		$res = $wpdb->get_results($sql,ARRAY_A);
+		$markertext2='';
+		foreach($res as $dayresult){
+
+		$endp=$places[$dayresult['end_id']];
+		$sql=$wpdb->prepare("select distinct canalplan_id, place_name from ".CANALPLAN_FAVOURITES." where canalplan_id=%s and blog_id=%d union select canalplan_id, place_name from ".CANALPLAN_CODES." where canalplan_id=%s and canalplan_id not in (select canalplan_id from ".CANALPLAN_FAVOURITES." where canalplan_id=%s and blog_id=%d)",$endp,$blog_id,$endp,$endp,$blog_id);
+			$res3 = $wpdb->get_results($sql,ARRAY_A);
+			$endplaces[]  = $res3[0];
+		}
+		$endplace=array_pop($endplaces);
+		foreach ($endplaces as $dayid=>$onplace) {
+			$sql=$wpdb->prepare("select `lat`,`long`,`place_name` from ".CANALPLAN_CODES." where canalplan_id=%s",$onplace);
+			$res =  $wpdb->get_results($sql,ARRAY_A);
+			$row='';
+			if (count($res)>0) {
+				$row = $res[0];
+			}
+			$markertext2.='var marker_onight'.($dayid+1).'_'.$overnight.'_'.$dogooglemap.' = new google.maps.Marker({ position: new google.maps.LatLng('.$row['lat'].','.$row['long'].'), map: map_'.$overnight.'_'.$dogooglemap.',   title: "Overnight at : '.$row['place_name'].'"});';
+			$markertext2.='iconFile = "http:/wp-content/plugins/canalplan-ac/canalplan/markers/cp_'.($dayid+1).'.png"; marker_onight'.($dayid+1).'_'.$overnight.'_'.$dogooglemap.'.setIcon(iconFile) ; ';
+		}
+		$google_map_code.=$markertext2;
+	}
+	if($embed==0 && $routeid>0) {
 		$blroute .= "<p><h2>Blog Entries for this trip</h2>";
 		$sql="select id, post_title from ".$wpdb->posts." where id in (select post_id from ".CANALPLAN_ROUTE_DAY." where blog_id=".$wpdb->blogid." and  route_id=".$routeid." ) order by post_date";
 		$res = $wpdb->get_results($sql,ARRAY_A);
@@ -808,123 +945,17 @@ function canalplan_footer($blah) {
 	echo "<script type='text/javascript'> google.maps.event.addDomListener(window, 'load', initialize); </script> ";
 ?>
 <script type='text/javascript'>
-function CPResizeControl(map) {this.startUp(map)};
-CPResizeControl.RESIZE_BOTH = 0;
-CPResizeControl.RESIZE_WIDTH = 1;
-CPResizeControl.RESIZE_HEIGHT = 2;
-CPResizeControl.prototype.startUp = function(gMap) {
-		var that = this;
-		this._map = gMap;
-		this.resizing = false;
-
-		/* modes: 0 both, 1 only width, 2 only height */
-		this.mode = CPResizeControl.RESIZE_BOTH;
-		this.minWidth = 150;
-		this.minHeight = 150;
-		this.maxWidth = 0;
-		this.maxHeight = 0;
-
-		this.diffX = 0;
-		this.diffY = 0;
-		google.maps.event.addListenerOnce(gMap, "tilesloaded", function() {
-						var res_button = new CPResizeControl.ResizeControl(that,gMap);
-						res_button.index = 1;
-				});
-};
-
-CPResizeControl.ResizeControl = function(that,map) {
-		var resButton = document.createElement("div");
-		resButton.style.width = "20px";
-		resButton.style.height = "20px";
-		// embedded image does not work with IE < 8
-		resButton.style.backgroundImage = "url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUBAMAAAB/pwA+AAAAAXNSR0IArs4c6QAAAA9QTFRFMBg0f39/0dDN7eri/v7+XsdLVAAAAAF0Uk5TAEDm2GYAAABNSURBVAjXRcpBDcAwDEPRKAymImghuCUw/qTWJI7nk/X0zXquZ+tH6E5df3TngPBA+ELY7UW2gWwDq02sNjHbwmwLoyVGS7ytbw62tA8zTA85AeAv2wAAAABJRU5ErkJggg%3D%3D)";
-		resButton.style.position = "absolute";
-		resButton.style.right = "0px";
-		resButton.style.bottom = "0px";
-		google.maps.event.addDomListener(resButton, 'mousedown', function() {that.resizing = true;});
-		// if display is lagging we make sure we catch the event
-		google.maps.event.addDomListener(document, 'mouseup', function() {
-						if(that.resizing) {
-								that.resizing = false;
-								if(typeof(that.doneCallBack) == 'function')
-										that.doneCallBack(that._map);
-
-						}
-				});
-		google.maps.event.addDomListener(document, 'mousemove', function(evt) {that.mouseMoving(evt);});
-		var mapdiv = map.getDiv();
-		mapdiv.appendChild(resButton);
-
-		/* Move the 'Terms of Use' 25px to the left
-		 * to make sure that it's fully readable
-  */
-		var terms = mapdiv.firstChild.childNodes[2];
-		terms.style.marginRight = "25px";
-		return resButton;
-};
-
- // Resizes the map's width and height by the given increment
-CPResizeControl.prototype.changeMapSize = function(dx, dy) {
-  var mapdiv = this._map.getDiv().style;
-  var width = parseInt(mapdiv.width);
-  var height =  parseInt(mapdiv.height);
-  var oldwidth = width, oldheight = height;
-
-  width += dx;
-  height += dy;
-
- /* The map's width and height should not
-  * get too small or negative.
-  */
-  if (this.minWidth) { width = Math.max(this.minWidth, width); }
-  if (this.maxWidth) { width = Math.min(this.maxWidth, width); }
-  if (this.minHeight) { height = Math.max(this.minHeight, height); }
-  if (this.maxHeight) { height = Math.min(this.maxHeight, height); }
-	var changed = false;
-  if (this.mode != CPResizeControl.RESIZE_HEIGHT) {
-			mapdiv.width = width + "px";
-			changed = true;
-	}
-  if (this.mode != CPResizeControl.RESIZE_WIDTH) {
-			mapdiv.height= height + "px";
-			changed = true;
-	}
-	if(changed) {
-			if(typeof(this.changeCallBack) == 'function')
-					this.changeCallBack(this._map,width,height,width-oldwidth,height-oldheight);
-			google.maps.event.trigger(this._map, "resize");
-	}
-}
-
-CPResizeControl.prototype.mouseMoving = function(e) {  // Mouse move listener
-  // Include possible scroll values
-  var sx = window.scrollX || document.documentElement.scrollLeft|| 0;
-  var sy = window.scrollY || document.documentElement.scrollTop || 0;
-
-  if(!e) e = window.event; // IEs event definition
-  var mouseX = e.clientX + sx;
-  var mouseY = e.clientY + sy;
-
-  if(this.resizing) { // The resize button is being held
-			this.changeMapSize(mouseX-this.diffX, mouseY-this.diffY);
-  }
-  // Store current position in object's variables
-	this.diffX = mouseX;
-	this.diffY = mouseY;
-
-  return false;
-}
+function CPResizeControl(e){this.startUp(e)}CPResizeControl.RESIZE_BOTH=0;CPResizeControl.RESIZE_WIDTH=1;CPResizeControl.RESIZE_HEIGHT=2;CPResizeControl.prototype.startUp=function(e){var t=this;this._map=e;this.resizing=false;this.mode=CPResizeControl.RESIZE_BOTH;this.minWidth=150;this.minHeight=150;this.maxWidth=0;this.maxHeight=0;this.diffX=0;this.diffY=0;google.maps.event.addListenerOnce(e,"tilesloaded",function(){var n=new CPResizeControl.ResizeControl(t,e);n.index=1})};CPResizeControl.ResizeControl=function(e,t){var n=document.createElement("div");n.style.width="20px";n.style.height="20px";n.style.backgroundImage="url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUBAMAAAB/pwA+AAAAAXNSR0IArs4c6QAAAA9QTFRFMBg0f39/0dDN7eri/v7+XsdLVAAAAAF0Uk5TAEDm2GYAAABNSURBVAjXRcpBDcAwDEPRKAymImghuCUw/qTWJI7nk/X0zXquZ+tH6E5df3TngPBA+ELY7UW2gWwDq02sNjHbwmwLoyVGS7ytbw62tA8zTA85AeAv2wAAAABJRU5ErkJggg%3D%3D)";n.style.position="absolute";n.style.right="0px";n.style.bottom="0px";google.maps.event.addDomListener(n,"mousedown",function(){e.resizing=true});google.maps.event.addDomListener(document,"mouseup",function(){if(e.resizing){e.resizing=false;if(typeof e.doneCallBack=="function")e.doneCallBack(e._map)}});google.maps.event.addDomListener(document,"mousemove",function(t){e.mouseMoving(t)});var r=t.getDiv();r.appendChild(n);var i=r.firstChild.childNodes[2];i.style.marginRight="25px";return n};CPResizeControl.prototype.changeMapSize=function(e,t){var n=this._map.getDiv().style;var r=parseInt(n.width);var i=parseInt(n.height);var s=r,o=i;r+=e;i+=t;if(this.minWidth){r=Math.max(this.minWidth,r)}if(this.maxWidth){r=Math.min(this.maxWidth,r)}if(this.minHeight){i=Math.max(this.minHeight,i)}if(this.maxHeight){i=Math.min(this.maxHeight,i)}var u=false;if(this.mode!=CPResizeControl.RESIZE_HEIGHT){n.width=r+"px";u=true}if(this.mode!=CPResizeControl.RESIZE_WIDTH){n.height=i+"px";u=true}if(u){if(typeof this.changeCallBack=="function")this.changeCallBack(this._map,r,i,r-s,i-o);google.maps.event.trigger(this._map,"resize")}};CPResizeControl.prototype.mouseMoving=function(e){var t=window.scrollX||document.documentElement.scrollLeft||0;var n=window.scrollY||document.documentElement.scrollTop||0;if(!e)e=window.event;var r=e.clientX+t;var i=e.clientY+n;if(this.resizing){this.changeMapSize(r-this.diffX,i-this.diffY)}this.diffX=r;this.diffY=i;return false}
 </script>
 <?php
-
 	return $blah;
 }
 
-function blogroute_insert($content)
+function canal_blogroute_insert($content)
 {
   if (preg_match('{BLOGGEDROUTES}',$content))
     {
-      $content = str_replace('{BLOGGEDROUTES}',blroute(),$content);
+      $content = str_replace('{BLOGGEDROUTES}',canal_bloggedroute(0),$content);
     }
   return $content;
 }
@@ -1044,7 +1075,6 @@ function canal_activate() {
 		}
 		return;
 	}
-
 }
 
 function canalplan_option_init(){
@@ -1077,12 +1107,6 @@ function save_error(){
 }
 
 add_action('activated_plugin','save_error');
-if (!is_admin()){
-add_filter('the_content','blogroute_insert');
-add_filter('the_excerpt','blogroute_insert');
-add_action('wp_head', 'canalplan_header');
-add_action('wp_footer', 'canalplan_footer');
-}
 add_action('admin_menu', 'canalplan_add_custom_box');
 add_action('init', 'canal_init');
 register_activation_hook(__FILE__, 'canal_activate');

@@ -3,8 +3,8 @@
 Contributors: SteveAtty
 Tags: crosspost, Canalplan AC
 Requires at least: 3.0
-Tested up to: 3.6
-Stable tag: 3.6
+Tested up to: 3.6.1
+Stable tag: 3.8
 
 == Description ==
 
@@ -52,6 +52,15 @@ You also need to ensure that your PHP installation has the PDOs for SQLite V3 in
 
 == Changelog ==
 
+= Version 3.8 14/09/2013 =
+- Wordpress 3.6.1 compatibility check
+- Added new Route Summary Tag codes
+- Recoded some of the admin pages to make string parsing more robust.
+
+= Version 3.7 17/08/2013 =
+- Added Location Options screen to the page menu
+- Added the ability to re-import a route from canalplan.
+
 = Version 3.6 17/08/2013 =
 - New Location Options screen
 - Location Widget recoded to use Location Options Screen
@@ -59,15 +68,12 @@ You also need to ensure that your PHP installation has the PDOs for SQLite V3 in
 - Minor tweaks to the Day Stats code
 - Minor changes to the format of draft posts created during route importing.
 
-
 = Version 3.5 04/05/2013 =
 - Restored favourites per blog which had got lost somewhere (only affects multiblog installs)
 - Added new linkify function to just return raw text.
 
-
 = Version 3.4 28/04/2013 =
 - Fixed a couple of bugs in the Manage Route page.
-
 
 = Version 3.3 28/04/2013 =
 - Found a bug in the midpoint logic for maps.

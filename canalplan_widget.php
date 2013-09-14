@@ -31,7 +31,9 @@ class CanalPLanWidget extends WP_Widget {
 		echo $after_title;
 		$sql=$wpdb->prepare("select * from ".CANALPLAN_OPTIONS." where blog_id=%d and pref_code='Location'",$blog_id);
 		$res = $wpdb->get_results($sql,ARRAY_A);
-		$values=explode('|',$res[0]['pref_value']);
+		$values=explode("|","none|none");
+		if (count($res)>0) {
+		$values=explode('|',$res[0]['pref_value']);}
 		switch($values[0]) {
 	case 'none':
         unset($values);
@@ -63,9 +65,7 @@ class CanalPLanWidget extends WP_Widget {
 		$google_map_code.='  scrollwheel: false, navigationControl: true, mapTypeControl: true, scaleControl: false, draggable: false,';
 		$google_map_code.= ' mapTypeId: google.maps.MapTypeId.'.$maptype[$instance['mf']].' };';
 		$google_map_code.= 'var map_widget_'.$blog_id.' = new google.maps.Map(document.getElementById("map_canvas_widget_'.$blog_id.'"),map_widget_'.$blog_id.'_opts);';
-		$google_map_code.= 'var marker_widget_'.$blog_id.' = new google.maps.Marker({ position: new google.maps.LatLng('.$values[1].','.$values[2].'), map: map_widget_'.$blog_id.', title: "'.$words[0].'"  });  ';
-		$lng=$x[0];
-		$lat=$x[1];
+		$google_map_code.= 'var marker_widget_'.$blog_id.' = new google.maps.Marker({ position: new google.maps.LatLng('.$values[1].','.$values[2].'), map: map_widget_'.$blog_id.', title: "'.$instance['pin_title'].'"  });  ';
 		$sql=$wpdb->prepare("SELECT place_name,canalplan_id,lat,`long`,GLength(LineString(lat_lng_point, GeomFromText('Point(".$values[1]." ".$values[2].")'))) AS distance FROM ".CANALPLAN_CODES." where attributes != %s ORDER BY distance ASC LIMIT 1", 'm' );
 		$res = $wpdb->get_results($sql,ARRAY_A);
 		if(count($res)>0){
@@ -80,10 +80,9 @@ class CanalPLanWidget extends WP_Widget {
 		$instance = $old_instance;
 		$instance['title'] = strip_tags($new_instance['title']);
 		$instance['snorl'] = $new_instance['snorl'];
-		$instance['google'] = strip_tags($new_instance['google']);
+		$instance['pin_title'] = strip_tags($new_instance['pin_title']);
 		$instance['mf'] = strip_tags($new_instance['mf']);
 		$instance['zl'] = strip_tags($new_instance['zl']);
-		$instance['header'] = strip_tags($new_instance['header']);
 		$instance['height'] = strip_tags($new_instance['height']);
 		$instance['width'] = strip_tags($new_instance['width']);
 		return $instance;
@@ -91,12 +90,12 @@ class CanalPLanWidget extends WP_Widget {
 
 	function form($instance) {
 		global $user_ID;
-		$default = array( 'title' =>'Where Am I', 'snorl'=>$user_ID, 'width'=>250, 'height'=>300,'maptype'=>'road','zoom'=>0);
+		$default = array( 'title' =>'Where Am I', 'snorl'=>$user_ID, 'width'=>250, 'height'=>300,'maptype'=>'road','zoom'=>0,'pin_title'=>"I'm Here",'mf'=>"S",'zl'=>'17');
 		$instance = wp_parse_args( (array) $instance, $default );
 		$title_id = $this->get_field_id('title');
 		$title_name = $this->get_field_name('title');
-		$google_id = $this->get_field_id('google');
-		$google_name = $this->get_field_name('google');
+		$pin_title_id = $this->get_field_id('pin_title');
+		$pin_title_name = $this->get_field_name('pin_title');
 		$snorl_id = $this->get_field_id('snorl');
 		$snorl_name = $this->get_field_name('snorl');
 		$width_id = $this->get_field_id('width');
@@ -109,8 +108,9 @@ class CanalPLanWidget extends WP_Widget {
 		$zl_name = $this->get_field_name('zl');
 		$zoom_id = $this->get_field_id('zoom');
 		$zoom_name = $this->get_field_name('zoom');
+		echo '<input type="hidden" class="widefat" id="'.$snorl_id.'" name="'.$snorl_name.'" value="'.attribute_escape( $instance['snorl'] ).'" /></p>';
 		echo '<p><label for="'.$title_id.'">Title of Widget: </label> <input type="text" class="widefat" id="'.$title_id.'" name="'.$title_name.'" value="'.attribute_escape( $instance['title'] ).'" /></p>';
-		echo '<p><label for="'.$google_id.'">Latitude ID: </label> <input type="text" class="widefat" id="'.$google_id.'" name="'.$google_name.'" value="'.attribute_escape( $instance['google'] ).'" /></p>';
+		echo '<p><label for="'.$pin_title_id.'">Pin Title: </label> <input type="text" class="widefat" id="'.$pin_title_id.'" name="'.$pin_title_name.'" value="'.attribute_escape( $instance['pin_title'] ).'" /></p>';
 		echo '<p><label for="'.$width_id.'">Widget Width : </label> <input type="text" size="7" id="'.$width_id.'" name="'.$width_name.'" value="'.attribute_escape( $instance['width'] ).'" /></p>';
 
 		echo '<p><label for="'.$height_id.'">Widget Height: </label> <input type="text" size="7" id="'.$height_id.'" name="'.$height_name.'" value="'.attribute_escape( $instance['height'] ).'" /></p>';
@@ -118,6 +118,7 @@ class CanalPLanWidget extends WP_Widget {
 		echo '<select id=id="'.$mf_id.'" name="'.$mf_name.'" >';
 
 		$arr = array("R"=>"Road","T"=>"Terrain","H"=>"Hybrid","S"=>"Satellite");
+
 		foreach ($arr as $i => $value) {
 		if ($i==attribute_escape( $instance['mf'])){ print '<option selected="yes" value="'.$i.'" >'.$arr[$i].'</option>';}
 		else {print '<option value="'.$i.'" >'.$arr[$i].'</option>';}

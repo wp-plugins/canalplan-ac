@@ -43,9 +43,8 @@ if (strlen($cp_version['version'])>3) {$fopenstat2='and can acccess the Canalpla
 
 $t=$wpdb->get_results("select version() as ve",ARRAY_A);
 $mysqlvers =  $t[0]['ve'];
-
 $info = array(
-		'CanalPlan' => $plug_info['canalplan/canalplan.php']['Version']." (".CANALPLAN_CODE_RELEASE.")",
+		'CanalPlan' => $plug_info['canalplan-ac/canalplan.php']['Version']." (".CANALPLAN_CODE_RELEASE.")",
 		'File_open Status' => $fopenstat.$fopenstat2,
 		'CanalPlan AC (Website)'=> $cp_version['version']." ( ".$cp_version['date'].' )',
 		'WordPress' => $wp_version,

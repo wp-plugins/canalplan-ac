@@ -1,6 +1,9 @@
 <?php
 require_once( '../../../../wp-config.php');
 global $wpdb,$user_ID;
+if (!isset($_GET['match'])) {$_GET['match']='';}
+if (!isset($_GET['place'])) {$_GET['place']='';}
+if (!isset($_GET['blogid'])) {$_GET['blogid']=1;}
 if (strlen($_GET['match'])>0){
 $match=$_GET['match'];
 $cp_blog_id=intval($_GET['blogid']);
@@ -25,7 +28,7 @@ if (strlen($place)>0){
 		// Get Check Favourites
 		$sql = $wpdb->prepare('select  canalplan_id from '.CANALPLAN_FAVOURITES.' where place_name=%s and blog_id=%d', $place, $cp_blog_id);
 		$canalplaces = $wpdb->get_results($sql,ARRAY_A);
-		foreach($canalplaces as $canalplace) {  print "X".trim($canalplace[canalplan_id]); }
+		foreach($canalplaces as $canalplace) {  print "X".trim($canalplace['canalplan_id']); }
 		// Now check the rest
 		$sql = $wpdb->prepare('select  cc.canalplan_id from '.CANALPLAN_CODES.' cc where  cc.place_name=%s and  cc.canalplan_id not in (select cf.canalplan_id from '.CANALPLAN_FAVOURITES.' cf where cf.blog_id=%d and cf.place_name=%s)', $place, $cp_blog_id,$place);
 		$canalplaces = $wpdb->get_results($sql,ARRAY_A);

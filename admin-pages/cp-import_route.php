@@ -80,6 +80,7 @@ echo "<script>DateInput('startdate', true, 'DD-MON-YYYY','".$sd."')</script>";
 </td></tr><tr><td>Route title : </td><td>
  <?php echo '<input type="text" name="rtitle" value="'.$places['title'].'" size=100/>' ?> </td></tr>
 <tr><td>Route Description : </td><td><input type="text" name="rdesc" value="" size=100></td></tr>
+<tr><td><input type="checkbox" name="summary" value="summary">Create a Trip Summary Post</td></tr>
 <?php
 echo "<input type='hidden' name='cpsessid' value='".$cpsessionid."'/>";
 unset($_GET['cpsessionid']);
@@ -95,8 +96,6 @@ unset($_GET['cpsessionid']);
 $cpsession=$_POST['cpsessid'];
 #cptable can be one of 'detail','durations','extremes','places','route' and 'stops');
 $cptable='durations';
-
-
 # for Durations we need to load the value of jdata['value'] into jdata['name']
 $url=CANALPLAN_URL."api.cgi?session=".$cpsession."&mode=table&table=".$cptable;
 $handle = fopen ($url , 'r');
@@ -160,6 +159,7 @@ $routestring=implode(",", $route);
 # Get the start date from the places array
 $sd=$places['start_date'];
 $sd=$_POST['startdate'];
+$summary=$_POST['summary'];
 #Get the number of days from the stops array, removing 1 because we've forced a fake value into the start of it
 $duration=count($stops)-1;
 
@@ -185,7 +185,24 @@ else
 $sql=$wpdb->prepare("insert into ".CANALPLAN_ROUTES." set title=%s, description=%s, start_date=%s, duration=%d, totalroute=%s, total_distance=%d, total_locks=%d, blog_id=%d, route_id=%d, status=1, uom=%s",$_POST['rtitle'],$_POST['rdesc'],date('Y-m-d',strtotime($sd)),$duration,$routestring,$totaldistance,$totallocks,$blog_id,$route_id,$df);
 #print "<br>".$sql."<br>";
 $r=$wpdb->query($sql);
+if (isset($summary)) {
 
+$date=date('Y-m-d H:i:s',strtotime("+ 0 days",strtotime($sd)));
+// Create post object
+  $my_post = array();
+  $my_post['post_title'] = $_POST['rtitle'];
+  $my_post['post_content'] = '[[CPTO:'.$route_id.']]
+
+[[CPTD:'.$route_id.']]
+ ';
+  $my_post['post_status'] = 'draft';
+  $my_post['post_category'] = $category;
+  $my_post['post_date']= $date;
+  $my_post['post_date_gmt'] = $date;
+
+// Insert the post into the database
+$newpostid=wp_insert_post( $my_post );
+}
 $offset=0;
 $category[]=$_POST['category_select'];
 for ( $dc = 0; $dc < $duration; $dc += 1) {
@@ -196,9 +213,9 @@ $date=date('Y-m-d H:i:s',strtotime("+ ".$dc." days",strtotime($sd)));
   $my_post['post_title'] = 'Post for Day '.$dc2.' of Trip';
   $my_post['post_content'] = '[[CPRS:]]
 
-  [[CPRM:]]
+[[CPRM:]]
 
-  ';
+ ';
   $my_post['post_status'] = 'draft';
   $my_post['post_category'] = $category;
   $my_post['post_date']= $date;
@@ -244,7 +261,7 @@ $sql=$wpdb->prepare("insert into ".CANALPLAN_ROUTE_DAY." set route_id=%d, day_id
 $r=mysql_query($sql);
 }
 
-print "<br><br>Draft Posts created. You can now go and <a href='/wp-admin/edit.php'>edit</a> the posts or <a href='?page=canalplan-ac/admin-pages/cp-manage_route.php'>change the daily subtotals</a>";
+print "<br><br>Draft Posts created. You can now go and <a href='wp-admin/edit.php'>edit</a> the posts or <a href='?page=canalplan-ac/admin-pages/cp-manage_route.php'>change the daily subtotals</a>";
 break;
 }
 if ($i>10){

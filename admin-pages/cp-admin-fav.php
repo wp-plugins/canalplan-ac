@@ -43,7 +43,7 @@ function InsertCanalPlan(cptext)
     var itemsString = "";
     var itemsString2 = "";
     for (var i = 0; i < items.length; i++) {
-        if (itemsString.length > 0) itemsString += ":";
+        if (itemsString.length > 0) itemsString += "^";
         itemsString += items[i].value;
  	itemsString += '|';
         itemsString += items[i].innerHTML;
@@ -115,7 +115,7 @@ function parse_data($data,$blid)
 global $wpdb;
 $sql=$wpdb->prepare("Delete from ".CANALPLAN_FAVOURITES." where blog_id=%d and place_order>0",$blid);
 $res = $wpdb->query($sql);
-  $containers = explode(":", $data);
+  $containers = explode("^", $data);
   foreach($containers AS $container)
   {
       $values = explode("|", $container);
