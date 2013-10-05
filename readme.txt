@@ -52,10 +52,10 @@ You also need to ensure that your PHP installation has the PDOs for SQLite V3 in
 
 == Changelog ==
 
-= Version 3.8 14/09/2013 =
-- Wordpress 3.6.1 compatibility check
-- Added new Route Summary Tag codes
-- Recoded some of the admin pages to make string parsing more robust.
+= Version 3.8 05/10/2013 =
+- Added better support for RSS feeds - CP Links now work in RSS feeds
+- Added better support for WPMU's Global Posts / Network RSS Feed
+- Added New Short Codes to support Trip Summaries and Trip Maps
 
 = Version 3.7 17/08/2013 =
 - Added Location Options screen to the page menu

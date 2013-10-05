@@ -77,20 +77,20 @@ function getCanalPlan2(tag)
  code_id=Canalplan_Download_Code(tag);
  document.getElementById("CanalPlanText").value=tag
 }
-if("geolocation" in navigator) { } else {
- document.getElementById("geobut").disabled = true;
- document.getElementById("geobut").value="Get from Browser - Disabled";
- }
+
 function GetLocation() {
-document.getElementById("lati").value="-1";
-document.getElementById("longi").value='0.343';
 if("geolocation" in navigator) {
 	navigator.geolocation.getCurrentPosition(function(position) {
 		document.getElementById("lati").value=position.coords.latitude;
 		document.getElementById("longi").value=position.coords.longitude;
 	});
 }
+ else {
+ document.getElementById("geobut").disabled = true;
+ document.getElementById("geobut").value="Get from Browser - Disabled";
+ }
 }
+
 
 function showValue(cptext,cpid)
 {

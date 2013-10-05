@@ -3,7 +3,7 @@
 Plugin Name: CanalPlan Integration
 Plugin URI: http://blogs.canalplan.org.uk/canalplanac/canalplan-plug-in/
 Description: Provides features to integrate your blog with <a href="http://www.canalplan.eu">Canalplan AC</a> - the Canal Route Planner.
-Version: 3.7
+Version: 3.8
 Author: Steve Atty
 Author URI: http://blogs.canalplan.org.uk/steve/
  *
@@ -28,7 +28,7 @@ Author URI: http://blogs.canalplan.org.uk/steve/
 define ('CANALPLAN_BASE','http://canalplan.org.uk');
 define ('CANALPLAN_URL',CANALPLAN_BASE.'/cgi-bin/');
 define ('CANALPLAN_GAZ_URL',CANALPLAN_BASE.'/gazetteer/');
-define ('CANALPLAN_MAX_POST_PROCESS',20);
+define ('CANALPLAN_MAX_POST_PROCESS',100);
 define('CANALPLAN_CODE_RELEASE','3.8 r00');
 //error_reporting (E_ALL | E_NOTICE | E_STRICT | E_DEPRECATED);
 
@@ -188,6 +188,22 @@ function canal_init() {
 	add_filter('the_content',  'canal_link_maps');
 	add_filter('the_content',  'canal_linkify');
 	add_filter('the_content',  'canal_blogroute_insert');
+    add_filter('the_content_feed',  'canal_stats');
+	add_filter('the_content_feed',  'canal_trip_maps');
+	add_filter('the_content_feed',  'canal_trip_stats');
+	add_filter('the_content_feed',  'canal_route_maps');
+	add_filter('the_content_feed',  'canal_place_maps');
+	add_filter('the_content_feed',  'canal_link_maps');
+	add_filter('the_content_feed',  'canal_linkify');
+	add_filter('the_content_feed ',  'canal_blogroute_insert');
+	add_filter('network_the_content_feed',  'canal_stats');
+	add_filter('network_the_content_feed',  'canal_trip_maps');
+	add_filter('network_the_content_feed',  'canal_trip_stats');
+	add_filter('network_the_content_feed',  'canal_route_maps');
+	add_filter('network_the_content_feed',  'canal_place_maps');
+	add_filter('network_the_content_feed',  'canal_link_maps');
+	add_filter('network_the_content_feed',  'canal_linkify');
+	add_filter('network_the_content_feed ',  'canal_blogroute_insert');
 	add_filter('the_excerpt',  'canal_stats');
 	add_filter('the_excerpt',  'canal_trip_maps');
 	add_filter('the_excerpt',  'canal_trip_stats');
@@ -196,6 +212,22 @@ function canal_init() {
 	add_filter('the_excerpt',  'canal_link_maps');
 	add_filter('the_excerpt',  'canal_linkify');
 	add_filter('the_excerpt',  'canal_blogroute_insert');
+	add_filter('the_excerpt_rss',  'canal_stats');
+	add_filter('the_excerpt_rss',  'canal_trip_maps');
+	add_filter('the_excerpt_rss',  'canal_trip_stats');
+	add_filter('the_excerpt_rss',  'canal_route_maps');
+	add_filter('the_excerpt_rss',  'canal_place_maps');
+	add_filter('the_excerpt_rss',  'canal_link_maps');
+	add_filter('the_excerpt_rss',  'canal_linkify');
+	add_filter('the_excerpt_rss',  'canal_blogroute_insert');
+	add_filter('network_the_excerpt_rss',  'canal_stats');
+	add_filter('network_the_excerpt_rss',  'canal_trip_maps');
+	add_filter('network_the_excerpt_rss',  'canal_trip_stats');
+	add_filter('network_the_excerpt_rss',  'canal_route_maps');
+	add_filter('network_the_excerpt_rss',  'canal_place_maps');
+	add_filter('network_the_excerpt_rss',  'canal_link_maps');
+	add_filter('network_the_excerpt_rss',  'canal_linkify');
+	add_filter('network_the_excerpt_rss',  'canal_blogroute_insert');
 	add_action('wp_head', 'canalplan_header');
 	add_action('wp_footer', 'canalplan_footer');
    	global $dogooglemap;
@@ -230,7 +262,14 @@ function canal_trip_maps($content,$mapblog_id=NULL,$post_id=NULL,$search='N') {
 }
 
 function canal_trip_stats($content,$mapblog_id=NULL,$post_id=NULL,$search='N') {
-    global $wpdb,$post,$blog_id,$google_map_code,$dogooglemap,$canalplan_run_canal_route_maps;
+    global $wpdb,$post,$blog_id,$google_map_code,$dogooglemap,$canalplan_run_canal_route_maps,$network_post;
+    if (isset($network_post)) {
+		$post_id=$network_post->ID;
+		$mapblog_id=$network_post->BLOG_ID;
+	}
+	if (!isset($mapblog_id)){
+		$mapblog_id=$blog_id;
+	}
     $tripdetail='N';
     $tripsumm='N';
     if (preg_match_all('/' . preg_quote('[[CPTS:') . '(.*?)' . preg_quote(']]') .'/',$content,$matches)) { $places_array=$matches[1];  $tripsumm='Y';}
@@ -239,17 +278,17 @@ function canal_trip_stats($content,$mapblog_id=NULL,$post_id=NULL,$search='N') {
 		$names = array();
 		$links = array();
 		foreach ($places_array as $place_code) {
-			$sql=$wpdb->prepare("select totalroute,uom,total_distance,total_locks from ".CANALPLAN_ROUTES." cpr where cpr.route_id=%d and cpr.blog_id=%d",$place_code,$blog_id);
+			$sql=$wpdb->prepare("select totalroute,uom,total_distance,total_locks from ".CANALPLAN_ROUTES." cpr where cpr.route_id=%d and cpr.blog_id=%d",$place_code,$mapblog_id);
 			$res1 = $wpdb->get_results($sql,ARRAY_A);
 			$row1 = $res1[0];
 			$dformat=$row1['uom'];
 			$troute=explode(',',$row1['totalroute']);
 			$startp=$troute[0];
 			$endp=array_pop($troute);
-			$sql=$wpdb->prepare("select distinct place_name from ".CANALPLAN_FAVOURITES." where canalplan_id=%s and blog_id=%d union select place_name from ".CANALPLAN_CODES." where canalplan_id=%s and canalplan_id not in (select canalplan_id from ".CANALPLAN_FAVOURITES." where canalplan_id=%s and blog_id=%d)",$startp,$blog_id,$startp,$startp,$blog_id);;
+			$sql=$wpdb->prepare("select distinct place_name from ".CANALPLAN_FAVOURITES." where canalplan_id=%s and blog_id=%d union select place_name from ".CANALPLAN_CODES." where canalplan_id=%s and canalplan_id not in (select canalplan_id from ".CANALPLAN_FAVOURITES." where canalplan_id=%s and blog_id=%d)",$startp,$mapblog_id,$startp,$startp,$mapblog_id);;
 			$res2 = $wpdb->get_results($sql,ARRAY_A);
 			$row2 = $res2[0];
-			$sql=$wpdb->prepare("select distinct place_name from ".CANALPLAN_FAVOURITES." where canalplan_id=%s and blog_id=%d union select place_name from ".CANALPLAN_CODES." where canalplan_id=%s and canalplan_id not in (select canalplan_id from ".CANALPLAN_FAVOURITES." where canalplan_id=%s and blog_id=%d)",$endp,$blog_id,$endp,$endp,$blog_id);
+			$sql=$wpdb->prepare("select distinct place_name from ".CANALPLAN_FAVOURITES." where canalplan_id=%s and blog_id=%d union select place_name from ".CANALPLAN_CODES." where canalplan_id=%s and canalplan_id not in (select canalplan_id from ".CANALPLAN_FAVOURITES." where canalplan_id=%s and blog_id=%d)",$endp,$mapblog_id,$endp,$endp,$mapblog_id);
 			$res3 = $wpdb->get_results($sql,ARRAY_A);
 			$row3 = $res3[0];
 			$names[] = "[[CPTS:" .$place_code . "]]";
@@ -261,20 +300,20 @@ function canal_trip_stats($content,$mapblog_id=NULL,$post_id=NULL,$search='N') {
 	$names2 = array();
 	$links2 = array();
 	foreach ($places_array2 as $place_code) {
-		$sql=$wpdb->prepare("select totalroute,uom,total_distance,total_locks from ".CANALPLAN_ROUTES." cpr where cpr.route_id=%d and cpr.blog_id=%d",$place_code,$blog_id);
+		$sql=$wpdb->prepare("select totalroute,uom,total_distance,total_locks from ".CANALPLAN_ROUTES." cpr where cpr.route_id=%d and cpr.blog_id=%d",$place_code,$mapblog_id);
 		$res1 = $wpdb->get_results($sql,ARRAY_A);
 		$row1 = $res1[0];
 		$dformat=$row1['uom'];
 		$troute=explode(',',$row1['totalroute']);
-		$sql=$wpdb->prepare("select distance,`locks`,start_id,end_id from ".CANALPLAN_ROUTE_DAY." where blog_id=%d and  route_id=%d",$blog_id,$place_code);
+		$sql=$wpdb->prepare("select distance,`locks`,start_id,end_id from ".CANALPLAN_ROUTE_DAY." where blog_id=%d and  route_id=%d",$mapblog_id,$place_code);
 		$res = $wpdb->get_results($sql,ARRAY_A);
 		foreach($res as $dayresult){
 			$startp=$troute[$dayresult['start_id']];
 			$endp=$troute[$dayresult['end_id']];
-			$sql=$wpdb->prepare("select distinct canalplan_id, place_name from ".CANALPLAN_FAVOURITES." where canalplan_id=%s and blog_id=%d union select canalplan_id, place_name from ".CANALPLAN_CODES." where canalplan_id=%s and canalplan_id not in (select canalplan_id from ".CANALPLAN_FAVOURITES." where canalplan_id=%s and blog_id=%d)",$startp,$blog_id,$startp,$startp,$blog_id);
+			$sql=$wpdb->prepare("select distinct canalplan_id, place_name from ".CANALPLAN_FAVOURITES." where canalplan_id=%s and blog_id=%d union select canalplan_id, place_name from ".CANALPLAN_CODES." where canalplan_id=%s and canalplan_id not in (select canalplan_id from ".CANALPLAN_FAVOURITES." where canalplan_id=%s and blog_id=%d)",$startp,$mapblog_id,$startp,$startp,$mapblog_id);
 			$res2 = $wpdb->get_results($sql,ARRAY_A);
 			$startplaces[] = $res2[0];
-			$sql=$wpdb->prepare("select distinct canalplan_id, place_name from ".CANALPLAN_FAVOURITES." where canalplan_id=%s and blog_id=%d union select canalplan_id, place_name from ".CANALPLAN_CODES." where canalplan_id=%s and canalplan_id not in (select canalplan_id from ".CANALPLAN_FAVOURITES." where canalplan_id=%s and blog_id=%d)",$endp,$blog_id,$endp,$endp,$blog_id);
+			$sql=$wpdb->prepare("select distinct canalplan_id, place_name from ".CANALPLAN_FAVOURITES." where canalplan_id=%s and blog_id=%d union select canalplan_id, place_name from ".CANALPLAN_CODES." where canalplan_id=%s and canalplan_id not in (select canalplan_id from ".CANALPLAN_FAVOURITES." where canalplan_id=%s and blog_id=%d)",$endp,$mapblog_id,$endp,$endp,$mapblog_id);
 			$res3 = $wpdb->get_results($sql,ARRAY_A);
 			$endplaces[]  = $res3[0];
 		}
@@ -315,7 +354,7 @@ function canal_route_maps($content,$mapblog_id=NULL,$post_id=NULL,$search='N') {
 		foreach ($places_array as $place_code) {
 			$words=explode(":",$place_code);
 			$names[] = $place_code;
-			$links[] ="<b>[Google Route Map embedded here]</b>" ;
+			$links[] ="<b>[ Google Route Map embedded here ]</b>" ;
 		}
 	return str_replace($names,$links , $content);
 	}
@@ -613,14 +652,22 @@ function canal_place_maps($content,$mapblog_id=NULL,$post_id=NULL) {
 }
 
 function canal_stats($content,$mapblog_id=NULL,$post_id=NULL) {
-	global $blog_id,$wpdb,$post;
+	global $blog_id,$wpdb,$post,$network_post;
 	if (preg_match_all('/' . preg_quote('[[CPRS') . '(.*?)' . preg_quote(']]') .'/',$content,$matches)) { $places_array=$matches[0]; }
 	if (!isset($places_array)) {return $content;}
 	if (count($places_array)==0) {return $content;}
 	if (isset($mapblog_id)) {} else { $mapblog_id=$blog_id;}
 	if (isset($post_id)) {} else {$post_id=$post->ID;
+	if ($post_id<=1) {$post_id=$post->ID;}
 	if (isset($post->blog_id)) {$mapblog_id=$post->blog_id;}}
+	if ( get_query_var('feed') || $search=='Y' || is_feed() )  {
+		if (isset($network_post)) {
+			$post_id=$network_post->ID;
+			$mapblog_id=$network_post->BLOG_ID;
+		}
+	}
 	if (!isset($post_id)) {return;}
+	if (!isset($mapblog_id)) {return;}
 	$sql=$wpdb->prepare("select distance,`locks`,start_id,end_id from ".CANALPLAN_ROUTE_DAY." where blog_id=%d and  post_id=%d",$mapblog_id,$post_id);
 	$res = $wpdb->get_results($sql,ARRAY_A);
 	$row = $res[0];
@@ -648,7 +695,26 @@ function canal_stats($content,$mapblog_id=NULL,$post_id=NULL) {
 }
 
 function canal_linkify($content) {
-	global $post,$blog_id,$wpdb;
+	global $post,$blog_id,$wpdb,$network_post;
+	if ( get_query_var('feed') || $search=='Y' || is_feed() )  {
+		if (isset($network_post)) {
+			$post_id=$network_post->ID;
+			$mapblog_id=$network_post->BLOG_ID;
+			$date=date("Ymd",strtotime($network_post->post_date));
+			$title=urlencode($network_post->post_title);
+			switch_to_blog( $network_post->BLOG_ID );
+			$blog_url=get_bloginfo('url');
+			$link=urlencode(str_replace($blog_url,"",get_permalink($network_post->ID)));
+			restore_current_blog();
+		}
+	}
+	if (!isset($mapblog_id)){
+		$blog_url=get_bloginfo('url');
+		$date = date("Ymd",strtotime($post->post_date));
+		$link=urlencode(str_replace($blog_url,"",get_permalink($post->ID)));
+		$title=urlencode($post->post_title);
+		$mapblog_id=$blog_id;
+	}
 	// First we check the content for tags:
 	if (preg_match_all('/' . preg_quote('[[CP') . '(.*?)' . preg_quote(']]') .'/',$content,$matches)) { $places_array=$matches[1]; }
 	// If the array is empty then we've no links so don't do anything!
@@ -658,7 +724,7 @@ function canal_linkify($content) {
 	if (preg_match_all('/' . preg_quote('[[CP:') . '(.*?)' . preg_quote(']]') .'/',$content,$matches)) {
 		$places_array=$matches[1];
 		$gazstring=CANALPLAN_URL.'gazetteer.cgi?id=';
-		$sql=$wpdb->prepare("SELECT pref_value FROM ".CANALPLAN_OPTIONS." where blog_id=%d and pref_code='canalkey'",$blog_id);
+		$sql=$wpdb->prepare("SELECT pref_value FROM ".CANALPLAN_OPTIONS." where blog_id=%d and pref_code='canalkey'",$mapblog_id);
 		$r2 = $wpdb->get_results($sql,ARRAY_A);
 		if ($wpdb->num_rows==0) {
 		     $api="";
@@ -667,10 +733,7 @@ function canal_linkify($content) {
 		{
 			$rw = $r2[0];
 			$api=explode("|",$rw['pref_value']);
-			$blog_url=get_bloginfo('url');
-			$date = date("Ymd",strtotime($post->post_date));
-			$link=urlencode(str_replace($blog_url,"",get_permalink($post->ID)));
-			$title=urlencode($post->post_title);
+
 		}
 		foreach ($places_array as $place_code) {
 			$words=explode("|",$place_code);
@@ -680,7 +743,7 @@ function canal_linkify($content) {
 			}
 			 else
 			{
-				$links[] = "<a href='". CANALPLAN_GAZ_URL .$words[1]. "?blogkey=".$api[0]."&title=".$title."&blogid=".$api[1]."&date=".$date."&url=".$link."' target='gazetteer' title='Link to ".trim($words[0])."'>".trim($words[0])."</a>";
+				$links[] ="<a href='". CANALPLAN_GAZ_URL .$words[1]. "?blogkey=".$api[0]."&title=".$title."&blogid=".$api[1]."&date=".$date."&url=".$link."' target='gazetteer' title='Link to ".trim($words[0])."'>".trim($words[0])."</a>";
 			}
 		}
 	}
@@ -690,7 +753,7 @@ function canal_linkify($content) {
 		foreach ($places_array as $place_code) {
 			$words=explode("|",$place_code);
 			$names[] = "[[CPW:" .$place_code . "]]";
-			$links[] = "<a href='".$gazstring.$words[1]."' target='gazetteer'  title='Link to ".trim($words[0])."'>".trim($words[0])."</a>";
+			$links[] ="<a href='".$gazstring.$words[1]."' target='gazetteer'  title='Link to ".trim($words[0])."'>".trim($words[0])."</a>";
 		}
 	}
 	return str_ireplace($names, $links, $content);
@@ -735,6 +798,9 @@ function canal_bloggedroute($embed=0,$overnight="N"){
 	if ($embed>0) {$routeid=$embed;}
 	global $wpdb,$blog_id,$google_map_code,$dogooglemap;
 	$dogooglemap=1;
+	if ( get_query_var('feed') || $search=='Y' || is_feed() )  {
+			$links[] ="<b>[ Google Route Map embedded here ]</b>" ;
+		} else {
 	$canalplan_options = get_option('canalplan_options');
 	if ($embed>=1) {$routeid=$embed;$dogooglemap=$embed;}
 	if ($routeid==0){
@@ -897,6 +963,7 @@ function canal_bloggedroute($embed=0,$overnight="N"){
 		}
 		$google_map_code.=$markertext2;
 	}
+}
 	if($embed==0 && $routeid>0) {
 		$blroute .= "<p><h2>Blog Entries for this trip</h2>";
 		$sql="select id, post_title from ".$wpdb->posts." where id in (select post_id from ".CANALPLAN_ROUTE_DAY." where blog_id=".$wpdb->blogid." and  route_id=".$routeid." ) order by post_date";
