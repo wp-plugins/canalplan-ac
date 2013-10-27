@@ -1,9 +1,8 @@
 <?php
-
 /*
 Extension Name: Canalplan Bulk update
 Extension URI: http://blogs.canalplan.org.uk/canalplanac/canalplan-plug-in/
-Version: 0.9
+Version: 3.0
 Description: Bulk notifier page for the Canalplan AC Plugin
 Author: Steve Atty
 */
@@ -15,15 +14,13 @@ global $blog_id,$wpdb;
 ?>
 <div class="wrap">
 <h2><?php _e('Bulk Link Notifier') ?> </h2>
-
-
 <?php
 if (isset($_POST["bulkprocess"])){
-	$query="SELECT ID FROM $wpdb->posts WHERE post_status='publish' and (post_type='post' or post_type='page') order by ID desc limit ".$_POST['plselect'];;
-	$res = mysql_query($query);
+	$query=$wpdb->prepare("SELECT ID FROM $wpdb->posts WHERE post_status='publish' and (post_type='post' or post_type='page') order by ID desc limit %d",$_POST['plselect']);
+	$r = $wpdb->get_results($query,ARRAY_A);
 	$api=explode("|",$_POST["bulkprocess"]);
 	$blog_url=get_bloginfo('url');
-	while ( $rw = mysql_fetch_array($res,MYSQL_ASSOC)) {
+	foreach ($r as $rw) {
 		$bulkpost=get_post($rw['ID']);
 		$date = date("Ymd",strtotime($bulkpost->post_date));
 		$link=urlencode(str_replace($blog_url,"",get_permalink($rw['ID'])));
@@ -32,12 +29,12 @@ if (isset($_POST["bulkprocess"])){
 			$places_array=$matches[1];
 			foreach ($places_array as $place) {
 				$placeinfo=explode('|',$place);
-				$x=CANALPLAN_URL.'api.cgi?mode=add_bloglink&id='.$api[1].'&key='.$api[0].'&title='.urlencode($bulkpost->post_title).'&placeid='.$placeinfo[1]; 
+				$x=CANALPLAN_URL.'api.cgi?mode=add_bloglink&id='.$api[1].'&key='.$api[0].'&title='.urlencode($bulkpost->post_title).'&placeid='.$placeinfo[1];
 				$x.='&url='.$link.'&date='.$date;
 				$fcheck=file_get_contents($x);
 				$cp_bulk=json_decode($fcheck,true);
 				echo "&nbsp;&nbsp;&nbsp;Found link to <i>".$placeinfo[0]."</i>";
-				if ($cp_bulk['status']=='OK') { 
+				if ($cp_bulk['status']=='OK') {
 					echo " and ",$cp_bulk['detail'].' the link ';
 					echo ($cp_bulk['detail']=='added') ? "to" : "in";
  					echo' CanalPlan AC<br />';
@@ -50,9 +47,9 @@ if (isset($_POST["bulkprocess"])){
 		}
 		else {
 			echo "&nbsp;&nbsp;&nbsp;No Canalplan Links Found<br />"; }
-		} 
+		}
 echo "<br /> <b>All Done !</b><br /><br />";
-	} 
+	}
 
 
 $r2 = mysql_query("SELECT pref_value FROM ".CANALPLAN_OPTIONS." where  blog_id=".$blog_id." and pref_code='canalkey'");
@@ -74,13 +71,11 @@ Normally Canalplan AC will find out about links into its gazetteer entries from 
 <br />
 <?php
 if (strlen($api)>4 ) {
-
 ?>
-
 <form action="" name="bulkform" id="bulk_form" method="post">
-<p>Number of posts to Process : 
+<p>Number of posts to Process :
 <select id="plselect" name="plselect">
-<?php 
+<?php
 for ($i = 1; $i <= CANALPLAN_MAX_POST_PROCESS; $i++) {
 echo '<option ';
 echo ($i==10) ? 'selected="yes"' : '';
@@ -91,8 +86,8 @@ echo ' value="'.$i.'">'.$i.'</option>';
 <input type="hidden" name="bulkprocess" id="bulkprocess" value="<? echo $api ?>" />
 </p><p class="submit"> <input type="submit"   value="Bulk Notify" /></p>
 <?php
-	} 
-	else 
+	}
+	else
 	{
 		echo "<br><i>You have not obtained an API Key from Canalplan so you cannot use this option. Go to the General Settings page and obtain one.>/i>"; }
 }
