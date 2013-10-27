@@ -78,10 +78,6 @@ if (isset($_POST["routeslug"])){
 }
 
 if (isset($_POST["update_data"])){
-	echo '<table border="1" cellpadding="10" ><tr><th>Table Name </th><th>Contained (Rows)</th><th>Now Contains (Rows)</th></tr>';
-	$sql="select count(*) from ".CANALPLAN_ALIASES.";";
-	$res = $wpdb->get_results($sql,ARRAY_N);
-	$res2=$res[0];
 		$params = array(
 			'redirection' => 0,
 			'httpversion' => '1.1',
@@ -110,22 +106,43 @@ if (isset($_POST["update_data"])){
 	}
 	fclose($handle2);
 	$dbhandle = new PDO("sqlite:../wp-content/uploads/canalplan_data.sqlite");
+	echo '<table border="1" cellpadding="10" ><tr><th>Table Name </th><th>Contained (Rows)</th><th>Now Contains (Rows)</th></tr>';
 	$sqlGetView = 'SELECT placeid,name FROM place_aliases';
 	$result = $dbhandle->query($sqlGetView);
-	$sql= "truncate ".CANALPLAN_ALIASES.";";
+	$sql="select count(*) from ".CANALPLAN_ALIASES." where substring(canalplan_id,1,1)!='!';";
+	$res = $wpdb->get_results($sql,ARRAY_N);
+	$res2=$res[0];
+	$sql= "delete from ".CANALPLAN_ALIASES." where substring(canalplan_id,1,1)!='!';";
 	$res = $wpdb->query($sql);
 	foreach ($result as $entry) {
 	   $sql= $wpdb->prepare("INSERT INTO ".CANALPLAN_ALIASES." (canalplan_id,place_name) VALUES (%s,%s)",$entry['placeid'],$entry['name']);
 	   $res = $wpdb->query($sql);
 	}
-	$sql="select count(*) from ".CANALPLAN_ALIASES.";";
+	$sql="select count(*) from ".CANALPLAN_ALIASES." where substring(canalplan_id,1,1)!='!';";
 	$res = $wpdb->get_results($sql,ARRAY_N);
 	$res3=$res[0];
 	print "<tr><td>Canalplan Aliases</td><td>".$res2[0]."</td><td>".$res3[0]."</td></tr>";
+
+	$sqlGetView = 'SELECT key,name FROM structure';
+	$result = $dbhandle->query($sqlGetView);
+	$sql="select count(*) from ".CANALPLAN_ALIASES." where substring(canalplan_id,1,1)='!';";
+	$res = $wpdb->get_results($sql,ARRAY_N);
+	$res2=$res[0];
+	$sql= "delete from ".CANALPLAN_ALIASES." where substring(canalplan_id,1,1)='!';";
+	$res = $wpdb->query($sql);
+	foreach ($result as $entry) {
+	   $sql= $wpdb->prepare("INSERT INTO ".CANALPLAN_ALIASES." (canalplan_id,place_name) VALUES (%s,%s)",'!'.$entry['key'],$entry['name']);
+	   $res = $wpdb->query($sql);
+	}
+	$sql="select count(*) from ".CANALPLAN_ALIASES." where substring(canalplan_id,1,1)='!';";
+	$res = $wpdb->get_results($sql,ARRAY_N);
+	$res3=$res[0];
+	print "<tr><td>Canalplan Features</td><td>".$res2[0]."</td><td>".$res3[0]."</td></tr>";
+
+
 	$sql="select count(*) from ".CANALPLAN_CODES.";";
 	$res = $wpdb->get_results($sql,ARRAY_N);
 	$res2=$res[0];
-
 	$sqlGetView = 'SELECT id,name,type,latitude,longitude,attributes FROM place';
 	$result = $dbhandle->query($sqlGetView);
 	foreach ($result as $entry) {

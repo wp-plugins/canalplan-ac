@@ -3,8 +3,8 @@
 Contributors: SteveAtty
 Tags: crosspost, Canalplan AC
 Requires at least: 3.0
-Tested up to: 3.6.1
-Stable tag: 3.8
+Tested up to: 3.7
+Stable tag: 3.9
 
 == Description ==
 
@@ -51,6 +51,10 @@ You also need to ensure that your PHP installation has the PDOs for SQLite V3 in
 
 
 == Changelog ==
+
+= Version 3.9 27/10/2013 =
+- Tidied up the links to use the Canalplan shorter urls (/waterway /gazetteer )
+- Added code to support Features
 
 = Version 3.8 05/10/2013 =
 - Added better support for RSS feeds - CP Links now work in RSS feeds

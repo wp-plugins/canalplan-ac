@@ -3,7 +3,7 @@
 Plugin Name: CanalPlan Integration
 Plugin URI: http://blogs.canalplan.org.uk/canalplanac/canalplan-plug-in/
 Description: Provides features to integrate your blog with <a href="http://www.canalplan.eu">Canalplan AC</a> - the Canal Route Planner.
-Version: 3.8
+Version: 3.9
 Author: Steve Atty
 Author URI: http://blogs.canalplan.org.uk/steve/
  *
@@ -24,12 +24,16 @@ Author URI: http://blogs.canalplan.org.uk/steve/
  * this program; if not, write to the Free Software Foundation, Inc., 51
  * Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
-@include("multisite.php");
+if (file_exists(WP_CONTENT_DIR."/uploads/canalplan_multisite.php")){
+	@include(WP_CONTENT_DIR."/uploads/canalplan_multisite.php");
+}
 define ('CANALPLAN_BASE','http://canalplan.org.uk');
 define ('CANALPLAN_URL',CANALPLAN_BASE.'/cgi-bin/');
 define ('CANALPLAN_GAZ_URL',CANALPLAN_BASE.'/gazetteer/');
+define ('CANALPLAN_WAT_URL',CANALPLAN_BASE.'/waterway/');
+define ('CANALPLAN_FEA_URL',CANALPLAN_BASE.'/feature/');
 define ('CANALPLAN_MAX_POST_PROCESS',100);
-define('CANALPLAN_CODE_RELEASE','3.8 r00');
+define('CANALPLAN_CODE_RELEASE','3.9 r00');
 //error_reporting (E_ALL | E_NOTICE | E_STRICT | E_DEPRECATED);
 
 global $table_prefix, $wp_version,$wpdb,$db_prefix,$canalplan_run_canal_link_maps,$canalplan_run_canal_route_maps,$canalplan_run_canal_place_maps;
@@ -133,15 +137,15 @@ function format_distance($distance,$locks,$format,$short){
 }
 
 function canalplan_add_custom_box() {
-    add_meta_box( 'myplugin_sectionid', __( 'CanalPlan Tags', 'myplugin_textdomain' ),
-                'myplugin_inner_custom_box', 'post', 'advanced' );
-    add_meta_box( 'myplugin_sectionid', __( 'CanalPlan Tags', 'myplugin_textdomain' ),
-                'myplugin_inner_custom_box', 'page', 'advanced' );
+    add_meta_box( 'canalplan_sectionid', __( 'CanalPlan Tags', 'canalplan_textdomain' ),
+                'canalplan_inner_custom_box', 'post', 'advanced' );
+    add_meta_box( 'canalplan_sectionid', __( 'CanalPlan Tags', 'canalplan_textdomain' ),
+                'canalplan_inner_custom_box', 'page', 'advanced' );
 }
 
 /* Prints the inner fields for the custom post/page section */
-function myplugin_inner_custom_box() {
- 	echo '<input type="hidden" name="myplugin_noncename" id="myplugin_noncename" value="' .
+function canalplan_inner_custom_box() {
+ 	echo '<input type="hidden" name="canalplan_noncename" id="canalplan_noncename" value="' .
     	wp_create_nonce( plugin_basename(__FILE__) ) . '" />';
 	global $wpdb,$blog_id;
 	echo '<script type="text/javascript"> var linktype=1; cplogid='.$blog_id.'</script>';
@@ -723,7 +727,7 @@ function canal_linkify($content) {
 	$links = array();
 	if (preg_match_all('/' . preg_quote('[[CP:') . '(.*?)' . preg_quote(']]') .'/',$content,$matches)) {
 		$places_array=$matches[1];
-		$gazstring=CANALPLAN_URL.'gazetteer.cgi?id=';
+		$gazstring=CANALPLAN_GAZ_URL;
 		$sql=$wpdb->prepare("SELECT pref_value FROM ".CANALPLAN_OPTIONS." where blog_id=%d and pref_code='canalkey'",$mapblog_id);
 		$r2 = $wpdb->get_results($sql,ARRAY_A);
 		if ($wpdb->num_rows==0) {
@@ -749,10 +753,20 @@ function canal_linkify($content) {
 	}
 	if (preg_match_all('/' . preg_quote('[[CPW:') . '(.*?)' . preg_quote(']]') .'/',$content,$matches)) {
 		$places_array=$matches[1];
-		$gazstring=CANALPLAN_URL.'waterway.cgi?id=';
+		$gazstring=CANALPLAN_WAT_URL;
 		foreach ($places_array as $place_code) {
 			$words=explode("|",$place_code);
 			$names[] = "[[CPW:" .$place_code . "]]";
+			$links[] ="<a href='".$gazstring.$words[1]."' target='gazetteer'  title='Link to ".trim($words[0])."'>".trim($words[0])."</a>";
+		}
+	}
+
+		if (preg_match_all('/' . preg_quote('[[CPF:') . '(.*?)' . preg_quote(']]') .'/',$content,$matches)) {
+		$places_array=$matches[1];
+		$gazstring=CANALPLAN_FEA_URL;
+		foreach ($places_array as $place_code) {
+			$words=explode("|",$place_code);
+			$names[] = "[[CPF:" .$place_code . "]]";
 			$links[] ="<a href='".$gazstring.$words[1]."' target='gazetteer'  title='Link to ".trim($words[0])."'>".trim($words[0])."</a>";
 		}
 	}
@@ -777,10 +791,17 @@ function canal_linkify_name($content) {
 	}
 	if (preg_match_all('/' . preg_quote('[[CPW:') . '(.*?)' . preg_quote(']]') .'/',$content,$matches)) {
 		$places_array=$matches[1];
-		$gazstring=CANALPLAN_URL.'waterway.cgi?id=';
 		foreach ($places_array as $place_code) {
 			$words=explode("|",$place_code);
 			$names[] = "[[CPW:" .$place_code . "]]";
+			$links[] = trim($words[0]);
+		}
+	}
+	if (preg_match_all('/' . preg_quote('[[CPF:') . '(.*?)' . preg_quote(']]') .'/',$content,$matches)) {
+		$places_array=$matches[1];
+		foreach ($places_array as $place_code) {
+			$words=explode("|",$place_code);
+			$names[] = "[[CPF:" .$place_code . "]]";
 			$links[] = trim($words[0]);
 		}
 	}
