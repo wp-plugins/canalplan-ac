@@ -3,8 +3,8 @@
 Contributors: SteveAtty
 Tags: crosspost, Canalplan AC
 Requires at least: 3.0
-Tested up to: 3.7
-Stable tag: 3.9
+Tested up to: 3.8
+Stable tag: 3.10
 
 == Description ==
 
@@ -51,6 +51,9 @@ You also need to ensure that your PHP installation has the PDOs for SQLite V3 in
 
 
 == Changelog ==
+
+= Version 3.10 15/12/2013 =
+- Confirms Wordpress 3.8 Compatibility
 
 = Version 3.9 27/10/2013 =
 - Tidied up the links to use the Canalplan shorter urls (/waterway /gazetteer )
