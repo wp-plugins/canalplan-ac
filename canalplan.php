@@ -3,12 +3,12 @@
 Plugin Name: CanalPlan Integration
 Plugin URI: http://blogs.canalplan.org.uk/canalplanac/canalplan-plug-in/
 Description: Provides features to integrate your blog with <a href="http://www.canalplan.eu">Canalplan AC</a> - the Canal Route Planner.
-Version: 3.10
+Version: 3.11
 Author: Steve Atty
 Author URI: http://blogs.canalplan.org.uk/steve/
  *
  *
- * Copyright 2011 - 2012 Steve Atty (email : posty@tty.org.uk)
+ * Copyright 2011 - 2014 Steve Atty (email : posty@tty.org.uk)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -33,7 +33,7 @@ define ('CANALPLAN_GAZ_URL',CANALPLAN_BASE.'/gazetteer/');
 define ('CANALPLAN_WAT_URL',CANALPLAN_BASE.'/waterway/');
 define ('CANALPLAN_FEA_URL',CANALPLAN_BASE.'/feature/');
 define ('CANALPLAN_MAX_POST_PROCESS',100);
-define('CANALPLAN_CODE_RELEASE','3.10 r00');
+define('CANALPLAN_CODE_RELEASE','3.11 r00');
 //error_reporting (E_ALL | E_NOTICE | E_STRICT | E_DEPRECATED);
 
 global $table_prefix, $wp_version,$wpdb,$db_prefix,$canalplan_run_canal_link_maps,$canalplan_run_canal_route_maps,$canalplan_run_canal_place_maps;
