@@ -3,8 +3,8 @@
 Contributors: SteveAtty
 Tags: crosspost, Canalplan AC
 Requires at least: 3.0
-Tested up to: 3.8.1
-Stable tag: 3.11
+Tested up to: 3.9.1
+Stable tag: 3.12
 
 == Description ==
 
@@ -51,6 +51,11 @@ You also need to ensure that your PHP installation has the PDOs for SQLite V3 in
 
 
 == Changelog ==
+
+= Version 3.12 17/05/2014 =
+- Introduces Location updating using Backitude (an Android App) - allows you to automatically update your location using your mobile phone.
+- Caches location so that the "where am I widget" doesn't have to keep doing the intensive distance look ups.
+
 
 = Version 3.11 25/01/2014 =
 - Confirms Wordpress 3.8.1 Compatibility

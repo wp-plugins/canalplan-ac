@@ -51,19 +51,11 @@ if (isset($_POST["bulkprocess"])){
 echo "<br /> <b>All Done !</b><br /><br />";
 	}
 
-
-$r2 = mysql_query("SELECT pref_value FROM ".CANALPLAN_OPTIONS." where  blog_id=".$blog_id." and pref_code='canalkey'");
-	if (mysql_num_rows($r2)==0) {
-	     $api="";
+$sql=$wpdb->prepare("SELECT pref_value FROM ".CANALPLAN_OPTIONS." where  blog_id=%s and pref_code='canalkey'",$blog_id);
+$r2 = $wpdb->get_results($sql,ARRAY_A);
+if ($wpdb->num_rows>0) {
+		$api=$r2[0]['pref_value'];
 	}
-	else
-	{
-	while($rw = mysql_fetch_array($r2))
-	{
-		$api=$rw['pref_value'];
-	}
-	}
-
  if (!isset($_POST["bulkprocess"])){
 ?>
 <br>

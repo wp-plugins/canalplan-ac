@@ -34,19 +34,33 @@ class CanalPLanWidget extends WP_Widget {
 		$values=explode("|","none|none");
 		if (count($res)>0) {
 		$values=explode('|',$res[0]['pref_value']);}
+	//	var_dump($values);
 		switch($values[0]) {
 	case 'none':
         unset($values);
         break;
     case 'Browser':
         $values=explode('|',$res[0]['pref_value']);
+        $cp_lat=$values[1];
+		$cp_long=$values[2];
+		$cp_id=$values[5];
+		$cp_name=$values[6];
+        break;
+        case 'Backitude':
+        $values=explode('|',$res[0]['pref_value']);
+        $cp_lat=$values[1];
+		$cp_long=$values[2];
+		$cp_id=$values[5];
+		$cp_name=$values[6];
         break;
     case 'Canalplan':
         $sql=$wpdb->prepare("select lat,`long` from ".CANALPLAN_CODES." where canalplan_id=%s",$values[1]);
 		$res = $wpdb->get_results($sql,ARRAY_A);
 	    $row = $res[0];
-	    $values[1]=$row[lat];
-		$values[2]=$row[long];
+	    $cp_lat=$row['lat'];
+		$cp_long=$row['long'];
+		$cp_id=$values[1];
+		$cp_name=$values[2];
         break;
 	default :
 		unset($values);
@@ -61,17 +75,17 @@ class CanalPLanWidget extends WP_Widget {
 	   	$maptype['T']="TERRAIN";
 	   	$maptype['H']="HYBRID";
 		echo '<div id="map_canvas_widget_'.$blog_id.'"  style="width: '.$instance['width'].'px; height: '.$instance['height'].'px"></div>';
-		$google_map_code.= 'var map_widget_'.$blog_id.'_opts = { zoom: '.$instance['zl'].',center: new google.maps.LatLng('.$values[1].','.$values[2].'),';
-		$google_map_code.='  scrollwheel: false, navigationControl: true, mapTypeControl: true, scaleControl: false, draggable: false,';
+		$google_map_code.= 'var map_widget_'.$blog_id.'_opts = { zoom: '.$instance['zl'].',center: new google.maps.LatLng('.$cp_lat.','.$cp_long.'),';
+		$google_map_code.=' scrollwheel: false, navigationControl: true, mapTypeControl: true, scaleControl: false, draggable: false,';
 		$google_map_code.= ' mapTypeId: google.maps.MapTypeId.'.$maptype[$instance['mf']].' };';
 		$google_map_code.= 'var map_widget_'.$blog_id.' = new google.maps.Map(document.getElementById("map_canvas_widget_'.$blog_id.'"),map_widget_'.$blog_id.'_opts);';
-		$google_map_code.= 'var marker_widget_'.$blog_id.' = new google.maps.Marker({ position: new google.maps.LatLng('.$values[1].','.$values[2].'), map: map_widget_'.$blog_id.', title: "'.$instance['pin_title'].'"  });  ';
-		$sql=$wpdb->prepare("SELECT place_name,canalplan_id,lat,`long`,GLength(LineString(lat_lng_point, GeomFromText('Point(".$values[1]." ".$values[2].")'))) AS distance FROM ".CANALPLAN_CODES." where attributes != %s ORDER BY distance ASC LIMIT 1", 'm' );
-		$res = $wpdb->get_results($sql,ARRAY_A);
-		if(count($res)>0){
-			$row=$res[0];
-			print "Nearest Canalplan location is : <br /> <a href='".CANALPLAN_GAZ_URL.$row['canalplan_id']."' target='_new' > ".$row['place_name']."</a> <br />";
-		}
+		$google_map_code.= 'var marker_widget_'.$blog_id.' = new google.maps.Marker({ position: new google.maps.LatLng('.$cp_lat.','.$cp_long.'), map: map_widget_'.$blog_id.', title: "'.$instance['pin_title'].'"  });  ';
+		//$sql=$wpdb->prepare("SELECT place_name,canalplan_id,lat,`long`,GLength(LineString(lat_lng_point, GeomFromText('Point(".$values[1]." ".$values[2].")'))) AS distance FROM ".CANALPLAN_CODES." where attributes != %s ORDER BY distance ASC LIMIT 1", 'm' );
+		//$res = $wpdb->get_results($sql,ARRAY_A);
+	//	if(count($res)>0){
+		//	$row=$res[0];
+			print "Nearest Canalplan location is : <br /> <a href='".CANALPLAN_GAZ_URL.$cp_id."' target='_new' > ".$cp_name."</a> <br />";
+		//}
 	}
 		echo "</div></p>".$after_widget;
 	}

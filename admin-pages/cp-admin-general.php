@@ -208,7 +208,7 @@ if (isset($_POST["update_data"])){
 	$wpdb->query($sql);
 	sleep(2);
 }
-
+$dbhandle = null;
 $r2 = $wpdb->get_results("SELECT (".time()." - pref_value) as age FROM  ".CANALPLAN_OPTIONS." where blog_id=-1 and pref_code='update_date'",ARRAY_A);
 $do_update="no button";
 if ($wpdb->num_rows==0) {

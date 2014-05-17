@@ -26,7 +26,7 @@ This is the starting point for importing a route from Canalplan AC and creating 
 <p><a href="?page=canalplan-ac/admin-pages/cp-manage_route.php"> Manage Imported Routes </a><br />
 Once you've imported a route you might need to make adjustments to the daily totals - this page allows you to do that</p>
 <p><a href="?page=canalplan-ac/admin-pages/cp-admin-location.php"> Set Location </a><br />
-This page allows you to set your location using either Latitude and Longitude co-ordinates or from a Canalplan Location
+This page allows you to set your location using either Latitude and Longitude co-ordinates, from a Canalplan Location, or, if you have an Android Device, using Backitude
 <p><a href="?page=canalplan-ac/admin-pages/cp-admin-diagnostics.php"> Diagnostics / Version Information </a><br />
 Provides information and diagnostics - You'll need to refer to this page if you've got problems.
 </p>

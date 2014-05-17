@@ -3,7 +3,7 @@
 Plugin Name: CanalPlan Integration
 Plugin URI: http://blogs.canalplan.org.uk/canalplanac/canalplan-plug-in/
 Description: Provides features to integrate your blog with <a href="http://www.canalplan.eu">Canalplan AC</a> - the Canal Route Planner.
-Version: 3.11
+Version: 3.12
 Author: Steve Atty
 Author URI: http://blogs.canalplan.org.uk/steve/
  *
@@ -33,7 +33,7 @@ define ('CANALPLAN_GAZ_URL',CANALPLAN_BASE.'/gazetteer/');
 define ('CANALPLAN_WAT_URL',CANALPLAN_BASE.'/waterway/');
 define ('CANALPLAN_FEA_URL',CANALPLAN_BASE.'/feature/');
 define ('CANALPLAN_MAX_POST_PROCESS',100);
-define('CANALPLAN_CODE_RELEASE','3.11 r00');
+define('CANALPLAN_CODE_RELEASE','3.12 r00');
 //error_reporting (E_ALL | E_NOTICE | E_STRICT | E_DEPRECATED);
 
 global $table_prefix, $wp_version,$wpdb,$db_prefix,$canalplan_run_canal_link_maps,$canalplan_run_canal_route_maps,$canalplan_run_canal_place_maps;
@@ -192,6 +192,14 @@ function canal_init() {
 	add_filter('the_content',  'canal_link_maps');
 	add_filter('the_content',  'canal_linkify');
 	add_filter('the_content',  'canal_blogroute_insert');
+	add_filter('network_the_content',  'canal_stats');
+	add_filter('network_the_content',  'canal_trip_maps');
+	add_filter('network_the_content',  'canal_trip_stats');
+	add_filter('network_the_content',  'canal_route_maps');
+	add_filter('network_the_content',  'canal_place_maps');
+	add_filter('network_the_content',  'canal_link_maps');
+	add_filter('network_the_content',  'canal_linkify');
+	add_filter('network_the_content',  'canal_blogroute_insert');
     add_filter('the_content_feed',  'canal_stats');
 	add_filter('the_content_feed',  'canal_trip_maps');
 	add_filter('the_content_feed',  'canal_trip_stats');
@@ -664,12 +672,12 @@ function canal_stats($content,$mapblog_id=NULL,$post_id=NULL) {
 	if (isset($post_id)) {} else {$post_id=$post->ID;
 	if ($post_id<=1) {$post_id=$post->ID;}
 	if (isset($post->blog_id)) {$mapblog_id=$post->blog_id;}}
-	if ( get_query_var('feed') || $search=='Y' || is_feed() )  {
+	//if ( get_query_var('feed') || $search=='Y' || is_feed() )  {
 		if (isset($network_post)) {
 			$post_id=$network_post->ID;
 			$mapblog_id=$network_post->BLOG_ID;
 		}
-	}
+	//}
 	if (!isset($post_id)) {return;}
 	if (!isset($mapblog_id)) {return;}
 	$sql=$wpdb->prepare("select distance,`locks`,start_id,end_id from ".CANALPLAN_ROUTE_DAY." where blog_id=%d and  post_id=%d",$mapblog_id,$post_id);

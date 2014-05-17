@@ -153,7 +153,7 @@ if ($cpsession!="0"){
 		}
 		$sql=$wpdb->prepare("update ".CANALPLAN_ROUTE_DAY." set start_id=%d, end_id=%d, distance=%d, `locks`=%d where route_id=%d and blog_id=%d and day_id=%d",$first,$last,$newdistance,$newlocks,$reimported,$blog_id,$dc2);
 		//print $sql."<br />";
-		$r=mysql_query($sql);
+		$r=$wpdb->get_results($sql,ARRAY_A);
 		}
 
 	$_POST["route_list"]=$reimported;

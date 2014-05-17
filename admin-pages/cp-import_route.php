@@ -258,7 +258,7 @@ if ($placeindex==0) {$newlocks=$newlocks;} elseif ($placeindex==count($dayroute)
 $newlocks=$newlocks+$rw['locks'];
 }
 $sql=$wpdb->prepare("insert into ".CANALPLAN_ROUTE_DAY." set route_id=%d, day_id=%d, blog_id=%d, post_id=%d, route_date=%s,start_id=%d, end_id=%d, distance=%d, `locks`=%d",$route_id,$dc2,$blog_id,$newpostid,date('Y-m-d',strtotime($date)),$first,$last,$newdistance,$newlocks);
-$r=mysql_query($sql);
+$r = $wpdb->query($sql);
 }
 
 print "<br><br>Draft Posts created. You can now go and <a href='wp-admin/edit.php'>edit</a> the posts or <a href='?page=canalplan-ac/admin-pages/cp-manage_route.php'>change the daily subtotals</a>";
