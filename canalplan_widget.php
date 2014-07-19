@@ -69,7 +69,6 @@ class CanalPLanWidget extends WP_Widget {
 		if (!isset($values)) {
 			echo "<br /> No Location Set <br />";
 		} else {
-		#var_dump($latfile);
 		$maptype['S']="SATELLITE";
 	   	$maptype['R']="ROADMAP";
 	   	$maptype['T']="TERRAIN";
@@ -80,10 +79,6 @@ class CanalPLanWidget extends WP_Widget {
 		$google_map_code.= ' mapTypeId: google.maps.MapTypeId.'.$maptype[$instance['mf']].' };';
 		$google_map_code.= 'var map_widget_'.$blog_id.' = new google.maps.Map(document.getElementById("map_canvas_widget_'.$blog_id.'"),map_widget_'.$blog_id.'_opts);';
 		$google_map_code.= 'var marker_widget_'.$blog_id.' = new google.maps.Marker({ position: new google.maps.LatLng('.$cp_lat.','.$cp_long.'), map: map_widget_'.$blog_id.', title: "'.$instance['pin_title'].'"  });  ';
-		//$sql=$wpdb->prepare("SELECT place_name,canalplan_id,lat,`long`,GLength(LineString(lat_lng_point, GeomFromText('Point(".$values[1]." ".$values[2].")'))) AS distance FROM ".CANALPLAN_CODES." where attributes != %s ORDER BY distance ASC LIMIT 1", 'm' );
-		//$res = $wpdb->get_results($sql,ARRAY_A);
-	//	if(count($res)>0){
-		//	$row=$res[0];
 			print "Nearest Canalplan location is : <br /> <a href='".CANALPLAN_GAZ_URL.$cp_id."' target='_new' > ".$cp_name."</a> <br />";
 		//}
 	}

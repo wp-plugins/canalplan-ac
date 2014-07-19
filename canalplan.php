@@ -3,7 +3,7 @@
 Plugin Name: CanalPlan Integration
 Plugin URI: http://blogs.canalplan.org.uk/canalplanac/canalplan-plug-in/
 Description: Provides features to integrate your blog with <a href="http://www.canalplan.eu">Canalplan AC</a> - the Canal Route Planner.
-Version: 3.12
+Version: 3.13
 Author: Steve Atty
 Author URI: http://blogs.canalplan.org.uk/steve/
  *
@@ -33,7 +33,7 @@ define ('CANALPLAN_GAZ_URL',CANALPLAN_BASE.'/gazetteer/');
 define ('CANALPLAN_WAT_URL',CANALPLAN_BASE.'/waterway/');
 define ('CANALPLAN_FEA_URL',CANALPLAN_BASE.'/feature/');
 define ('CANALPLAN_MAX_POST_PROCESS',100);
-define('CANALPLAN_CODE_RELEASE','3.12 r00');
+define('CANALPLAN_CODE_RELEASE','3.13 r00');
 //error_reporting (E_ALL | E_NOTICE | E_STRICT | E_DEPRECATED);
 
 global $table_prefix, $wp_version,$wpdb,$db_prefix,$canalplan_run_canal_link_maps,$canalplan_run_canal_route_maps,$canalplan_run_canal_place_maps;
@@ -178,7 +178,7 @@ function canalplan_inner_custom_box() {
 		print "</select>";
 	}
 	print ' <input type="text" disabled="disabled" ID="CanalRouteID" align="LEFT" size="50" maxlength="100"/> as';
-	print '  <select name="routetagtype" ID="routetagtypeID"> <option value="CPTS" selected>Trip Statistics </option> <option value="CPTD" selected>Trip Details (Overnight Stops) </option> <option value="CPTM">Trip Map</option> <option value="CPTO">Trip Map (Overnight Stops)</option> </select>';
+	print '  <select name="routetagtype" ID="routetagtypeID"> <option value="CPTS" selected>Trip Statistics </option> <option value="CPTD" selected>Trip Details (Overnight Stops) </option> <option value="CPTM">Trip Map</option> <option value="CPTO">Trip Map (Overnight Stops)</option> <option value="CPTL">List of Links to Trip Blog Posts</option></select>';
 	print ' <INPUT TYPE="button" name="CPsub2" VALUE="Insert tag"  onclick="getCanalRoute(blogroute.options[blogroute.selectedIndex].value);"/>';
 	print '<script>canalplan_actb(document.getElementById("CanalPlanID"),new Array());</script>';
 }
@@ -252,9 +252,11 @@ function canal_trip_maps($content,$mapblog_id=NULL,$post_id=NULL,$search='N') {
     $tripsumm='N';
     if (preg_match_all('/' . preg_quote('[[CPTM:') . '(.*?)' . preg_quote(']]') .'/',$content,$matches)) { $places_array=$matches[1]; $tripsumm='Y' ;}
     if (preg_match_all('/' . preg_quote('[[CPTO:') . '(.*?)' . preg_quote(']]') .'/',$content,$matches2)) { $places_array2=$matches2[1]; $tripdetail='Y'; }
+    if (preg_match_all('/' . preg_quote('[[CPTL:') . '(.*?)' . preg_quote(']]') .'/',$content,$matches2)) { $places_array3=$matches2[1]; $triplink='Y'; }
 	if($tripsumm=='Y'){
 		$names = array();
 		$links = array();
+	//	$place_code=$places_array[0];
 		foreach ($places_array as $place_code) {
 			$names[] = "[[CPTM:" .$place_code . "]]";
 			$links[] = canal_bloggedroute($place_code,"N");
@@ -264,10 +266,32 @@ function canal_trip_maps($content,$mapblog_id=NULL,$post_id=NULL,$search='N') {
 	if($tripdetail=='Y'){
 		$names = array();
 		$links = array();
+		//$place_code=$places_array2[0];
 		foreach ($places_array2 as $place_code) {
 			$names[] = "[[CPTO:" .$place_code . "]]";
 			$links[] = canal_bloggedroute($place_code,"Y");
+	}
+		$content = str_ireplace($names,$links , $content);
+	}
+	if($triplink=='Y'){
+       $format_type=array('B'=>'ul','N'=>'ol');
+       foreach ($places_array3 as $place_code) {
+		$x=explode(':',$place_code);
+		$routeid=addslashes($x[0]);
+		$format=strtoupper($x[1]);
+		if (!in_array($format,array("B", "N"))) $format='N';
+		$list_type=$format_type[$format];
+		$sql="select id, post_title from ".$wpdb->posts." where id in (select post_id from ".CANALPLAN_ROUTE_DAY." where blog_id=".$wpdb->blogid." and  route_id=".$routeid." ) and post_status='publish' order by post_date";
+		$res = $wpdb->get_results($sql,ARRAY_A);
+		$blroute ="<$list_type>";
+		foreach ($res as $row) {
+			$link = get_blog_permalink( $blog_id, $row['id'] ) ;
+			$blroute .="<li><a href=\"$link\" target=\"_new\">$row[post_title]</a> </li>";
 		}
+		$blroute .="</$list_type>";
+		$links[]=$blroute;
+		$names[] = "[[CPTL:" .$place_code . "]]";
+	}
 		$content = str_ireplace($names,$links , $content);
 	}
 	return $content;
@@ -404,6 +428,8 @@ function canal_route_maps($content,$mapblog_id=NULL,$post_id=NULL,$search='N') {
    	$maptype['H']="HYBRID";
 	$options['zoom']=$canalplan_options["canalplan_rm_zoom"];
 	$options['type']=$canalplan_options["canalplan_rm_type"];
+	if (!isset($options['type'])) {$options['type']='H';}
+	if (!isset($options['zoom'])) {$options['zoom']=9;}
 	$options['lat']=53.4;
 	$options['long']=-2.8;
 	$options['height']=$canalplan_options["canalplan_rm_height"];
@@ -528,6 +554,8 @@ function canal_link_maps($content) {
 	$mapc=$mapc+1;
 	$options['zoom']=$canalplan_options["canalplan_rm_zoom"];
 	$options['type']=$canalplan_options["canalplan_rm_type"];
+	if (!isset($options['type'])) {$options['type']='H';}
+	if (!isset($options['zoom'])) {$options['zoom']=9;}
 	$options['lat']=53.4;
 	$options['long']=-2.8;
 	$options['height']=$canalplan_options["canalplan_rm_height"];
@@ -599,10 +627,15 @@ function canal_link_maps($content) {
 function canal_place_maps($content,$mapblog_id=NULL,$post_id=NULL) {
 	global $dogooglemap,$wpdb,$post,$google_map_code,$canalplan_run_canal_place_maps;
 	$gazstring=CANALPLAN_URL.'gazetteer.cgi?id=';
-	$canalplan_options = get_option('canalplan_options');;
-    	if (preg_match_all('/' . preg_quote('[[CPGM:') . '(.*?)' . preg_quote(']]') .'/',$content,$matches)) { $places_array=$matches[1]; }
-    	// If the array is empty then we've no links so don't do anything!
-    	if (!isset($places_array)) {return $content;}
+	$canalplan_options = get_option('canalplan_options');
+
+	// We don't support maps for features so lets just clean it from the content and return;
+	if (preg_match_all('/' . preg_quote('[[CPGMF:') . '(.*?)' . preg_quote(']]') .'/',$content,$matches2)) { $null_link[]=''; return str_ireplace($matches2[0], $null_link, $content);}
+
+	if (preg_match_all('/' . preg_quote('[[CPGM:') . '(.*?)' . preg_quote(']]') .'/',$content,$matches)) { $places_array=$matches[1]; }
+	// If the array is empty then we've no links so don't do anything!
+	if (!isset($places_array)) {return $content;}
+
    	if (count($places_array)==0) {return $content;}
    	if(!isset($canalplan_run_canal_place_maps[$post->ID])) {$canalplan_run_canal_place_maps[$post->ID]=1;} else {
    	$canalplan_run_canal_place_maps[$post->ID]=$canalplan_run_canal_place_maps[$post->ID]+1;}
@@ -640,6 +673,8 @@ function canal_place_maps($content,$mapblog_id=NULL,$post_id=NULL) {
 		$options['width']=$canalplan_options["canalplan_pm_width"];
 		$options['zoom']=$canalplan_options["canalplan_pm_zoom"];
 		$options['type']=$canalplan_options["canalplan_pm_type"];
+		if (!isset($options['type'])) {$options['type']='H';}
+		if (!isset($options['zoom'])) {$options['zoom']=9;}
 		if (count($words)>=3) {
 			$opts=explode(",",$words[2]);
 			foreach ($opts as $opt) {
@@ -869,7 +904,8 @@ function canal_bloggedroute($embed=0,$overnight="N"){
 	{
 		$sql=$wpdb->prepare("select description, totalroute from ".CANALPLAN_ROUTES." where route_id=%d and blog_id=%d",$routeid,$wpdb->blogid);
 		$res = $wpdb->get_results($sql,ARRAY_A);
-		$mid_point=round($wpdb->num_rows/2,0,PHP_ROUND_HALF_UP);
+//		$mid_point=round($wpdb->num_rows/2,0,PHP_ROUND_HALF_UP);
+		$mid_point=round(count($row['totalroute'])/2,0,PHP_ROUND_HALF_UP);
 		$place_count=0;
 		$row = $res[0];
 		if($embed==0) { $blroute .="<h2>".$row['description']."</h2><br/>"; }
@@ -947,6 +983,8 @@ function canal_bloggedroute($embed=0,$overnight="N"){
 		$options['size']=200;
 		$options['zoom']=$canalplan_options["canalplan_rm_zoom"];
 		$options['type']=$canalplan_options["canalplan_rm_type"];
+		if (!isset($options['type'])) {$options['type']='H';}
+		if (!isset($options['zoom'])) {$options['zoom']=9;}
 		$options['lat']=53.4;
 		$options['long']=-2.8;
 		$options['rgb']=$canalplan_options["canalplan_rm_r_hex"].$canalplan_options["canalplan_rm_g_hex"].$canalplan_options["canalplan_rm_b_hex"];
@@ -954,6 +992,7 @@ function canal_bloggedroute($embed=0,$overnight="N"){
 	   	$maptype['R']="ROADMAP";
 	   	$maptype['T']="TERRAIN";
 	   	$maptype['H']="HYBRID";
+
 		$google_map_code.= 'var map_'.$overnight.'_'.$dogooglemap.'_opts = { zoom: '.$options['zoom'].',center: new google.maps.LatLng('.$centre_lat.','.$centre_long.'),';
 	    $google_map_code.='  scrollwheel: false, navigationControl: true, mapTypeControl: true, scaleControl: false, draggable: false,';
 	    $google_map_code.= ' mapTypeId: google.maps.MapTypeId.'.$maptype[$options['type']].' };';

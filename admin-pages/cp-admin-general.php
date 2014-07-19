@@ -90,12 +90,12 @@ if (isset($_POST["update_data"])){
 	$handle2=fopen("../wp-content/uploads/canalplan_data.sqlite","w");
 	//var_dump($response['response']);
 	if ($response['response']['code']==200) {
-	//	echo "Retrieving data using remote get";
+	echo "Retrieving data using remote get";
 		$data = $response['body'];
-		$handle2=fopen("../wp-content/uploads/canalplan_data.sqlite","w");
+	//	$handle2=fopen("../wp-content/uploads/canalplan_data.sqlite","w");
 		fwrite($handle2, $data);
 	} else {
-	//	echo "Retrieving data using fopen";
+		echo "Retrieving data using fopen";
 		$handle=fopen(CANALPLAN_BASE."/data/canalplan_wp.sqlite","rb");;
 		$contents = '';
 		while (!feof($handle)) {

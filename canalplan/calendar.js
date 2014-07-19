@@ -5,16 +5,16 @@
 
 // Customizable variables
 var DefaultDateFormat = 'DD/MM/YYYY'; // If no date format is supplied, this will be used instead
-var HideWait = 3; // Number of seconds before the calendar will disappear
+var HideWait = 10 // Number of seconds before the calendar will disappear
 var Y2kPivotPoint = 76; // 2-digit years before this point will be created in the 21st century
 var UnselectedMonthText = ''; // Text to display in the 1st month list item when the date isn't required
 var FontSize = 11; // In pixels
 var FontFamily = 'Tahoma';
 var CellWidth = 18;
 var CellHeight = 16;
-var ImageURL = 'calendar.jpg';
-var NextURL = 'next.gif';
-var PrevURL = 'prev.gif';
+var ImageURL = '/wp-content/plugins/canalplan-ac/canalplan/calendar.jpg';
+var NextURL = '/wp-content/plugins/canalplan-ac/canalplan/next.gif';
+var PrevURL = '/wp-content/plugins/canalplan-ac/canalplan/prev.gif';
 var CalBGColor = 'white';
 var TopRowBGColor = 'buttonface';
 var DayBGColor = 'lightgrey';

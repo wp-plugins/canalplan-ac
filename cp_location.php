@@ -42,7 +42,7 @@ header("Content-Type: text/xml, application/xml");
 </preference>
 <preference>
 <id>timezone</id>
-<value>true</value>
+<value>false</value>
 </preference>
 <preference>
 <id>server_key_longitude</id>
@@ -315,7 +315,6 @@ if ($username==$dbids[1] && $password==$dbids[0]) {
 	$accuracy=0;
 	$offset='+0:00';
 	$updated_ok='N';
-	//$x=print_r($_POST,true);
 	if (is_numeric($_POST['latitude'])) $latitude=$_POST['latitude'];
 	if (is_numeric($_POST['longitude'])) $longitude=$_POST['longitude'];
 	if (is_numeric($_POST['loc_timestamp'])) $loc_timestamp=$_POST['loc_timestamp'];
@@ -341,17 +340,8 @@ if ($username==$dbids[1] && $password==$dbids[0]) {
 	$data='Backitude|'.$latitude.'|'.$longitude.'|'.$loc_timestamp.'|'.$tzoff.'|'.$row['canalplan_id'].'|'.$row['place_name'].'|'.$values[7].'|'.$values[8];
 	$sql=$wpdb->prepare("insert into ".CANALPLAN_OPTIONS." set blog_id=%d ,pref_code='Location', pref_value=%s",$blog_id,$data);
 	$res = $wpdb->query($sql);
-	file_put_contents('/tmp/cplocsql.txt', $sql);
-//	file_put_contents('/tmp/arrsql.txt', print_r($values,true));
-	// This is for DEV only !!
-	//$sql='INSERT INTO canalplan.backitude_test (timestamp, Latitude, longitude,direction,speed,altitude)
-	//	  VALUES ('.$loc_timestamp.', '.$latitude.', '.$longitude.', '.$direction.', '.$speed.', '.$altitude.')';
-//	$res = $wpdb->query($sql);
 	if  ( $res ) $updated_ok='Y';
-	//file_put_contents('/tmp/post.txt', $x);
-	// Now lets update Canalplan
 	if ($values[7]=='on') {
-		// http://beta.canalplan.org.uk/boats/location.php?locat=3qy:d07ce0ed4a5cc62df81f|51.90309143066406|-2.0471630096435547|1396705284|3600
 		if ($plus_min=='-') $tzoff=0-$tz_offset;
 		if ($plus_min=='+') $tzoff=0+$tz_offset;
 		$domain=CANALPLAN_BASE ;
@@ -362,7 +352,7 @@ if ($username==$dbids[1] && $password==$dbids[0]) {
 		file_put_contents('/tmp/fcheck.txt', $fcheck);
 		$sql=$wpdb->prepare("Delete from ".CANALPLAN_OPTIONS." where blog_id=%d and pref_code='location_error'",$blog_id);
 		$res = $wpdb->query($sql);
-		$sql=$wpdb->prepare("insert into ".CANALPLAN_OPTIONS." set blog_id=%d ,pref_code='location_error', pref_value=%s",$blog_id,$fcheck.'|'.time());
+		$sql=$wpdb->prepare("insert into ".CANALPLAN_OPTIONS." set blog_id=%d ,pref_code='location_error', pref_value=%s",$blog_id,$fcheck.'|'.current_time( 'timestamp' ) );
 		$res = $wpdb->query($sql);
 		if  ( $res ) $updated_ok='Y';
 	}

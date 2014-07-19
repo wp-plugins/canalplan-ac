@@ -37,7 +37,7 @@ if(isset($_POST['_submit_check']))
 	$dataset="None";
 	}
 	$dataset.='|'.$_POST['Passthrough'].'|'.$_POST['CanalPlanuser'];
-	var_dump($dataset);
+//	var_dump($dataset);
 	parse_data($dataset,$blog_id);
 }
 	echo '<script type="text/javascript"> var linktype=1; cplogid='.$blog_id.'</script>';
@@ -124,8 +124,8 @@ function showValue(cptext,cpid)
 <br />
 Current location
 <?php echo " ( Set by ".$values[0]." at  ".date("l, j. M. Y, H:i:s", $values[3]+$values[4])." ) "; ?> is : <br /><br />
-<b>Latitude : </b> <?php echo $lat; ?> <br />
-<b>Longitude :</b> <?php echo $long; ?> <br />
+<b>Latitude : </b> <?php echo round($lat,6); ?> <br />
+<b>Longitude :</b> <?php echo round($long,6); ?> <br />
 <?php
 		$checked_flag=array('on'=>'checked','off'=>'');
 		$location_status=array('0'=>'Error','1'=>'Success ');
@@ -158,15 +158,12 @@ Lat : <input type="text" name="lati" id="lati" value="<?php echo $lat; ?>" maxle
 <INPUT TYPE="button" name="CPsub" VALUE="Set CanalPlan Location"  onclick="getCanalPlan2(CanalPlanID.value);showValue(CanalPlanText.value,code_id);"/><br />
 <input type="radio" name="location" value="None" <?php echo $radnon; ?> >Don't Set a Location<br />
 <input type="radio" name="location" value="Backitude" <?php echo $radback; ?> >Set Location from Backitude<br />
-<!--
 <input type="checkbox" name="Passthrough" <?php echo $checked_flag[$cp_pass]; ?> >Location Passthrough to Canalplan&nbsp;&nbsp;( Using Canalplan User Account Key : <input type="text" name="CanalPlanuser" ID="CanalPlanuser" align="LEFT" size="25" maxlength="90" value="<?php echo $cp_key;?>" /> &nbsp;)
--->
 <?php
 if ($values[4]) {
 	$sql=$wpdb->prepare("select pref_value from ".CANALPLAN_OPTIONS." where blog_id=%d and pref_code='location_error'",$blog_id);
 	$res = $wpdb->get_results($sql);
 	$update_result=explode('|',$res[0]->pref_value);
-//	var_dump($update_result);
 	echo "(<span style='color:".$status_colour[$update_result[0]]."';>".$location_status[$update_result[0]]." : ". $update_result[1].' -  '. date("l, j M Y, H:i:s", $update_result[2]).' </span>) ';
 }
 ?>
