@@ -4,7 +4,7 @@ Contributors: SteveAtty
 Tags: crosspost, Canalplan AC
 Requires at least: 3.0
 Tested up to: 3.9.1
-Stable tag: 3.13
+Stable tag: 3.14
 
 == Description ==
 
@@ -52,10 +52,17 @@ You also need to ensure that your PHP installation has the PDOs for SQLite V3 in
 
 == Changelog ==
 
+= Version 3.14 20/07/2014 =
+- Minor bug fixes to resolve some issues with the WPMUDEV global search plugin
+- Minor bug fixes to the location screen to get rid of rogue slash characters appearing when manually setting location
+- Remove diagnostic log writes from location code.
+
+
 = Version 3.13 19/07/2014 =
 - Location Updating now links through to Canalplan. So if you've liked and marked a boat for tracking on there then you can update your blog and canalplan at the same time
 - Added New Short Code to link to Trip blog posts
 - Other minor tweaks made.
+
 
 = Version 3.12 17/05/2014 =
 - Introduces Location updating using Backitude (an Android App) - allows you to automatically update your location using your mobile phone.

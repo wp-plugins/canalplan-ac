@@ -131,7 +131,7 @@ Current location
 		$location_status=array('0'=>'Error','1'=>'Success ');
 		$status_colour=array(0=>'red',1=>'green');
 if ($lat=='Not Set') {
-	print "<b>Canalplan location is set to :</b> <a href='".CANALPLAN_GAZ_URL.$values[1]."' target='_new' > ".$values[2]."</a> <br />";
+	print "<b>Canalplan location is set to :</b> <a href='".CANALPLAN_GAZ_URL.$values[1]."' target='_new' > ".stripslashes($values[2])."</a> <br />";
 } else {
 		$sql=$wpdb->prepare("SELECT place_name,canalplan_id,lat,`long`,GLength(LineString(lat_lng_point, GeomFromText('Point(".$lat." ".$long.")'))) AS distance FROM ".CANALPLAN_CODES." where attributes != %s ORDER BY distance ASC LIMIT 1", 'm' );
 		$res = $wpdb->get_results($sql,ARRAY_A);

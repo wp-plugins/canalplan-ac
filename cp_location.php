@@ -303,8 +303,8 @@ header("Content-Type: text/xml, application/xml");
 </preferences>
 ";
 }
-$x=print_r($_POST,true);
-file_put_contents('/tmp/2.txt', $x);
+//$x=print_r($_POST,true);
+//file_put_contents('/tmp/2.txt', $x);
 if ($username==$dbids[1] && $password==$dbids[0]) {
 	$latitude=0.0;
 	$longitude=0.0;
@@ -347,9 +347,9 @@ if ($username==$dbids[1] && $password==$dbids[0]) {
 		$domain=CANALPLAN_BASE ;
 		$domain='http://canalplan.org.uk';
 		$url=$domain."/boats/location.php?locat=$values[8]|$latitude|$longitude|$accuracy|$loc_timestamp|$tzoff";
-		file_put_contents('/tmp/url.txt', $url);
-		$fcheck=file_get_contents($url);
-		file_put_contents('/tmp/fcheck.txt', $fcheck);
+	//	file_put_contents('/tmp/url.txt', $url);
+	//	$fcheck=file_get_contents($url);
+	//	file_put_contents('/tmp/fcheck.txt', $fcheck);
 		$sql=$wpdb->prepare("Delete from ".CANALPLAN_OPTIONS." where blog_id=%d and pref_code='location_error'",$blog_id);
 		$res = $wpdb->query($sql);
 		$sql=$wpdb->prepare("insert into ".CANALPLAN_OPTIONS." set blog_id=%d ,pref_code='location_error', pref_value=%s",$blog_id,$fcheck.'|'.current_time( 'timestamp' ) );
