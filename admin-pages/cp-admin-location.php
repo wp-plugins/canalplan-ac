@@ -20,15 +20,17 @@ if(isset($_POST['_submit_check']))
 	$sql=$wpdb->prepare("SELECT place_name,canalplan_id,lat,`long`,GLength(LineString(lat_lng_point, GeomFromText('Point(".$_POST["lati"]." ".$_POST["longi"].")'))) AS distance FROM ".CANALPLAN_CODES." where attributes != %s ORDER BY distance ASC LIMIT 1", 'm' );
 	$res = $wpdb->get_results($sql,ARRAY_A);
 	$row=$res[0];
+	//var_dump($_POST);
 	switch($_POST['location']) {
 	case 'none':
         $dataset="None";
         break;
     case 'Browser':
-        $dataset='Browser|'.$_POST["lati"].'|'.$_POST["longi"].'|'.time().'|'.$_POST["tz"].'|'.$row['canalplan_id'].'|'.$row['place_name'];
+        $dataset='Browser|'.$_POST["lati"].'|'.$_POST["longi"].'|'.current_time('timestamp').'|0|'.$row['canalplan_id'].'|'.$row['place_name'];
         break;
     case 'Canalplan':
-        $dataset='Canalplan|'.$_POST['dataset'].'|'.time().'|0';
+		$dataset="None";
+       if (strlen($_POST['dataset']>4) )$dataset='Canalplan|'.$_POST['dataset'].'|'.current_time('timestamp').'|0';
         break;
    	case 'Backitude':
         $dataset="Backitude|".$_POST["lati2"].'|'.$_POST["longi2"].'|'.$_POST["time"] .'|'.$_POST["tz"].'|'.$row['canalplan_id'].'|'.$row['place_name'];
@@ -37,7 +39,6 @@ if(isset($_POST['_submit_check']))
 	$dataset="None";
 	}
 	$dataset.='|'.$_POST['Passthrough'].'|'.$_POST['CanalPlanuser'];
-//	var_dump($dataset);
 	parse_data($dataset,$blog_id);
 }
 	echo '<script type="text/javascript"> var linktype=1; cplogid='.$blog_id.'</script>';
@@ -100,36 +101,44 @@ function getCanalPlan2(tag)
 }
 
 function GetLocation() {
+	var options = {
+  enableHighAccuracy: false,
+  timeout: 2500,
+  maximumAge: 10000
+};
 if("geolocation" in navigator) {
+	document.getElementById("lati").value='';
+	document.getElementById("longi").value='';
 	navigator.geolocation.getCurrentPosition(function(position) {
 		document.getElementById("lati").value=position.coords.latitude;
 		document.getElementById("longi").value=position.coords.longitude;
-	});
-}
+		});
+	}
  else {
- document.getElementById("geobut").disabled = true;
- document.getElementById("geobut").value="Get from Browser - Disabled";
+	document.getElementById("geobut").disabled = true;
+	document.getElementById("geobut").value="Get from Browser - Disabled";
  }
 }
 function showValue(cptext,cpid)
 {
   document.getElementById("dataset").value=cpid+"|"+cptext;
- }
-
-	//-->
+}
 </script>
 <div class="wrap">
 
 <h2><?php _e('Set Location') ?> </h2>
 <br />
 Current location
-<?php echo " ( Set by ".$values[0]." at  ".date("l, j. M. Y, H:i:s", $values[3]+$values[4])." ) "; ?> is : <br /><br />
+<?php
+// Put in to fix some problems in multisite when some blogs got a different TZ even though they were all set the same
+date_default_timezone_set('UTC');
+echo " ( Set by ".$values[0]." at  ".date("l, j. M. Y, H:i:s", $values[3]+$values[4])." ) "; ?> is : <br /><br />
 <b>Latitude : </b> <?php echo round($lat,6); ?> <br />
 <b>Longitude :</b> <?php echo round($long,6); ?> <br />
 <?php
-		$checked_flag=array('on'=>'checked','off'=>'');
-		$location_status=array('0'=>'Error','1'=>'Success ');
-		$status_colour=array(0=>'red',1=>'green');
+$checked_flag=array('on'=>'checked','off'=>'');
+$location_status=array('0'=>'Error','1'=>'Success ');
+$status_colour=array(0=>'red',1=>'green');
 if ($lat=='Not Set') {
 	print "<b>Canalplan location is set to :</b> <a href='".CANALPLAN_GAZ_URL.$values[1]."' target='_new' > ".stripslashes($values[2])."</a> <br />";
 } else {
@@ -160,7 +169,7 @@ Lat : <input type="text" name="lati" id="lati" value="<?php echo $lat; ?>" maxle
 <input type="radio" name="location" value="Backitude" <?php echo $radback; ?> >Set Location from Backitude<br />
 <input type="checkbox" name="Passthrough" <?php echo $checked_flag[$cp_pass]; ?> >Location Passthrough to Canalplan&nbsp;&nbsp;( Using Canalplan User Account Key : <input type="text" name="CanalPlanuser" ID="CanalPlanuser" align="LEFT" size="25" maxlength="90" value="<?php echo $cp_key;?>" /> &nbsp;)
 <?php
-if ($values[4]) {
+if ($cp_pass=='on') {
 	$sql=$wpdb->prepare("select pref_value from ".CANALPLAN_OPTIONS." where blog_id=%d and pref_code='location_error'",$blog_id);
 	$res = $wpdb->get_results($sql);
 	$update_result=explode('|',$res[0]->pref_value);

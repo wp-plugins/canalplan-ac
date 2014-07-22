@@ -65,7 +65,7 @@ class CanalPLanWidget extends WP_Widget {
 		unset($values);
 	}
 		echo "<div align='center'>";
-		if (!isset($values)) {
+		if (is_null($cp_lat) || is_null($cp_long) ||is_null($cp_name) || !isset($values) || strlen($cp_lat) < 3    || strlen($cp_long) < 3  || strlen($cp_name) < 3     ) {
 			echo "<br /> No Location Set <br />";
 		} else {
 		$maptype['S']="SATELLITE";

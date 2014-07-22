@@ -4,7 +4,7 @@ Contributors: SteveAtty
 Tags: crosspost, Canalplan AC
 Requires at least: 3.0
 Tested up to: 3.9.1
-Stable tag: 3.14
+Stable tag: 3.15
 
 == Description ==
 
@@ -51,6 +51,13 @@ You also need to ensure that your PHP installation has the PDOs for SQLite V3 in
 
 
 == Changelog ==
+
+= Version 3.15 21/07/2014 =
+- Changes to Location Widget to stop missing values from blowing up all the googlemaps on the page
+- Fixes to the location setting page to handle odd time differences appearing in Multisite installs
+- Fixes to the location settings page to try to stop odd results when selecting one update option but using another.
+
+
 
 = Version 3.14 20/07/2014 =
 - Minor bug fixes to resolve some issues with the WPMUDEV global search plugin

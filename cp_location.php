@@ -9,8 +9,8 @@ $dbids=explode('|',$r[0]->pref_value);
 $username=$_POST['username'];
 $password=$_POST['password'];
 if ($pref_id==$pref_db) {
-header("Content-disposition: attachment; filename=backitude.prefs");
-header("Content-Type: text/xml, application/xml");
+	header("Content-disposition: attachment; filename=backitude.prefs");
+	header("Content-Type: text/xml, application/xml");
 	$url = get_bloginfo('url');
 	$url.='/wp-content/plugins/canalplan-ac/cp_location.php';
 	$config_url=$url;
