@@ -188,7 +188,7 @@ if(isset($_POST['_submit_check'])) {
 			echo "Deleting Post : ".$row[0]."<br />";
 			wp_delete_post($row[0]);
 		}
-		echo "<b>NOTE : </b> If you created a route summary post for this trip you will need to manually delete it ";
+		//echo "<b>NOTE : </b> If you created a route summary post for this trip you will need to manually delete it ";
 		$sql=$wpdb->prepare("delete from ".CANALPLAN_ROUTES." where blog_id=%d and route_id=%d",$blog_id,$_POST["route_list"]);
 		$r=$wpdb->query($sql);
 		$sql=$wpdb->prepare("delete from ".CANALPLAN_ROUTE_DAY."  where blog_id=%d and route_id=%d",$blog_id,$_POST["route_list"]);
@@ -197,6 +197,7 @@ if(isset($_POST['_submit_check'])) {
 		unset($_POST["_submit_check"]);
 	}
 	if ($_POST['_submit_check']==2) {
+		//var_dump($_POST);
 		$sql=$wpdb->prepare("Update ".CANALPLAN_ROUTES." set title=%s, description=%s, uom=%s, status=%s where blog_id=%d and route_id=%d",stripslashes($_POST['rtitle']),stripslashes($_POST['rdesc']),$_POST['dfsel'],$_POST['routestatus'],$blog_id,$_POST["route_list"]);
 		$dformat=$_POST['dfsel'];
 		$res2 = $wpdb->query($sql);
@@ -206,8 +207,6 @@ if(isset($_POST['_submit_check'])) {
 			$elock='endlock'.$elockno;
 			$elockno2=$eplacecount;
 			$elock2='endlock'.$elockno2;
-			if(!isset($_POST[$elock])){$_POST[$elock]=0;}
-			if(!isset($_POST[$elock2])){$_POST[$elock2]=0;}
 			if ($eplacecount<$eplacelength) {
 				$sql=$wpdb->prepare("Update ".CANALPLAN_ROUTE_DAY." set end_id=%d where blog_id=%d and route_id=%d and day_id=%d",$_POST[$eplacecount],$blog_id,$_POST["route_list"],$eplacecount);
 				$res2 = $wpdb->query($sql);
@@ -216,57 +215,18 @@ if(isset($_POST['_submit_check'])) {
 				$sql=$wpdb->prepare("Update ".CANALPLAN_ROUTE_DAY." set start_id=%d where blog_id=%d and route_id=%d and day_id=%d",$_POST[$eplacecount-1],$blog_id,$_POST["route_list"],$eplacecount);
 				$res2 = $wpdb->query($sql);
 			}
-			if ($_POST[$elock2]=='on') {
-				$sql=$wpdb->prepare("update ".CANALPLAN_ROUTE_DAY." set flags='L' where blog_id=%d and route_id=%d and day_id=%d",$blog_id,$_POST["route_list"],$eplacecount);
+			if (!isset($_POST[$elock2])) {
+				$sql=$wpdb->prepare("update ".CANALPLAN_ROUTE_DAY." set flags='' where blog_id=%d and route_id=%d and day_id=%d",$blog_id,$_POST["route_list"],$eplacecount);
 				$res2 = $wpdb->query($sql);
 			}
 			else
 			{
-				$sql=$wpdb->prepare("update ".CANALPLAN_ROUTE_DAY." set flags='' where blog_id=%d and route_id=%d and day_id=%d",$blog_id,$_POST["route_list"],$eplacecount);
+				$sql=$wpdb->prepare("update ".CANALPLAN_ROUTE_DAY." set flags='L' where blog_id=%d and route_id=%d and day_id=%d",$blog_id,$_POST["route_list"],$eplacecount);
 				$res2 = $wpdb->query($sql);
 			}
-			$sql=$wpdb->prepare("Select totalroute from ".CANALPLAN_ROUTES." where blog_id=%d and route_id=%d",$blog_id,$_POST["route_list"]);
-			$r=$wpdb->get_results($sql,ARRAY_A);
-			$totalroute=$r[0]["totalroute"];
-			$sql=$wpdb->prepare("Select start_id,end_id from ".CANALPLAN_ROUTE_DAY." where blog_id=%d and route_id=%d and day_id=%d",$blog_id,$_POST["route_list"],$eplacecount);
-			$r=$wpdb->get_results($sql,ARRAY_A);
-			$rw=$r[0];
-			$route=explode(",",$totalroute);
-			$dayroute=array_slice($route,$rw['start_id'],( $rw['end_id']-$rw['start_id'])+1);
-			$newlocks=0;
-			$newdistance=0;
-			for ($placeindex=1;$placeindex<count($dayroute);$placeindex+=1){
-				$p1=$dayroute[$placeindex];
-				$p2=$dayroute[$placeindex-1];
-				 $sql=$wpdb->prepare("select metres,locks from ".CANALPLAN_LINK." where (place1=%s and place2=%s) or  (place1=%s and place2=%s )",$p1,$p2,$p2,$p1);
-				$r=$wpdb->get_results($sql,ARRAY_A);
-				if(count($r)>0) $rw=$r[0];
-				//echo $p1.' to '.$p2." : ".$rw['metres'].' - '.$rw['locks'],"<br />";
-				$newlocks=$newlocks+$rw['locks'];
-				$newdistance=$newdistance+$rw['metres'];
-			}
-			for ($placeindex=0;$placeindex<count($dayroute);$placeindex+=1){
-				$x=$dayroute["$placeindex"];
-				$sql=$wpdb->prepare("select attributes from ".CANALPLAN_CODES." where canalplan_id=%s",$x);
-				$r=$wpdb->get_results($sql,ARRAY_A);
-				$rw=$r[0];
-						if(!isset($_POST[$elock])){$_POST[$elock]=0;}
-		if(!isset($_POST[$elock2])){$_POST[$elock2]=0;}
-				if (strpos($rw['attributes'],'L') !== false) {
-					#echo "we have a lock at ".$x." - ".$rw['attributes']."<br>";
-					if ($_POST[$elock]=='on' and $placeindex==0) {
-						$newlocks=$newlocks;} elseif ($_POST[$elock2]!='on' and $placeindex==count($dayroute)-1) {$newlocks=$newlocks;}  else {$newlocks=$newlocks+1;}
-				}
-				if (strpos($rw['attributes'],'2') !== false) {
-					#echo "we have 2 locks at ".$x." - ".$rw['attributes']."<br>";
-					if ($_POST[$elock]=='on' and $placeindex==0) {$newlocks=$newlocks;} elseif ($_POST[$elock2]!='on' and $placeindex==count($dayroute)-1) {$newlocks=$newlocks;}  else {$newlocks=$newlocks+2;}
-				}
-				if(!isset($rw['locks'])){$rw['locks']=0;}
-				$newlocks=$newlocks+$rw['locks'];
-			}
-			$sql=$wpdb->prepare("update ".CANALPLAN_ROUTE_DAY." set distance=%d , locks=%d where blog_id=%d and route_id=%d and day_id=%d",$newdistance,$newlocks,$blog_id,$_POST["route_list"],$eplacecount);
-			$r=$wpdb->query($sql);
+		recalculate_route_day ($blog_id,$_POST["route_list"],$eplacecount);
 		}
+		//recalculate_route($blog_id,$_POST["route_list"]);
 	}
 if (!isset($_POST["route_list"] )) $_POST["route_list"] =-1;
 if ($_POST["route_list"] >=1  && !isset($_POST['delete'])) {
@@ -298,7 +258,7 @@ if ($reimported >=1) {
 	echo "<td><b>&nbsp;&nbsp;&nbsp;Pre-Reload Stop location</b></td>"; }
 echo"</tr>";
 $total_route=explode(",",$rw['totalroute']);
-$r = $wpdb->prepare("SELECT distinct day_id,route_date,start_id,end_id,distance,locks,flags FROM ".CANALPLAN_ROUTE_DAY." where blog_id=%d and route_id=%d ORDER BY `route_date` ASC",$blog_id,$_POST["route_list"]);
+$r = $wpdb->prepare("SELECT distinct day_id,route_date,start_id,end_id,distance,locks,flags FROM ".CANALPLAN_ROUTE_DAY." where blog_id=%d and route_id=%d and day_id > 0 ORDER BY `route_date` ASC",$blog_id,$_POST["route_list"]);
 $r = $wpdb->get_results($r,ARRAY_A);
 $stopplaces="";
 foreach($r as $rw) {
@@ -311,11 +271,14 @@ foreach($r as $rw) {
 		for ($eplacecount=-50;$eplacecount<=50;$eplacecount+=1){
 			$eplace=$wpdb->prepare("SELECT place_name,attributes from ".CANALPLAN_CODES." where canalplan_id=%s",$total_route[$rw['end_id']+$eplacecount]);
 			$eplace=$wpdb->get_row($eplace,ARRAY_N);
-			if (isset($eplace[0])) {
+			if (isset($eplace[0]) ) {
+				if (substr($eplace[0],0,1)!='!'|| $eplacecount==0 ) {
+				if (substr($eplace[0],0,1)=='!') $eplace[0]=$eplace[0].' (Marker Place)';
 				echo "<option value=";
 				echo $rw['end_id']+$eplacecount;
 				if ($eplacecount==0){echo ' selected="yes"';}
 				echo ">".$eplace[0]."</option>";
+			}
 			}
 		}
 	}
@@ -325,22 +288,27 @@ foreach($r as $rw) {
 		echo $eplace[0];
 	}
 	echo "&nbsp;&nbsp</td><td>".format_distance($rw['distance'],$rw['locks'],$dformat,1);
-	$endlock="";
+	$endlock=0;
+	$endlockcheck="";
 	$eplace=$wpdb->prepare("SELECT place_name,attributes from ".CANALPLAN_CODES." where canalplan_id=%s",$total_route[$rw['end_id']]);
 	$eplace=$wpdb->get_row($eplace,ARRAY_N);
-
 	if (strpos($eplace[1],'L') !== false) {
 		$endlock=1;
 	}
-	if (strpos($eplace[1],'1') !== false) {
-		$endlock=1;
+	preg_match_all('!\d+!', $eplace[1], $matches);
+	$lock_count=$matches[0][0];
+	if ($lock_count>0) {
+		$endlock=$endlock+$lock_count;
 	}
+	//var_dump($_POST['endlock'.$rw['day_id']]);
 	if (strpos($rw['flags'],'L') !== false) {
 		$endlockcheck="checked";
 	}
-	if ($endlock==1) {
-		echo "&nbsp;&nbsp<input type=checkbox name='endlock".$rw['day_id']."' ".$endlockcheck." > Stop after passing through lock </td>";
-		$endlock="";
+	if ($endlock>=1) {
+		$lock_text='the lock';
+		if ($endlock>1) $lock_text.='s';
+		echo "&nbsp;&nbsp<input type=checkbox name='endlock".$rw['day_id']."' ".$endlockcheck." > Stop after passing through $lock_text </td>";
+		$endlock=0;
 		}
 	else {echo "</td>";}
 	if ($reimported >=1) {

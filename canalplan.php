@@ -3,7 +3,7 @@
 Plugin Name: CanalPlan Integration
 Plugin URI: http://blogs.canalplan.org.uk/canalplanac/canalplan-plug-in/
 Description: Provides features to integrate your blog with <a href="http://www.canalplan.eu">Canalplan AC</a> - the Canal Route Planner.
-Version: 3.15
+Version: 3.16
 Author: Steve Atty
 Author URI: http://blogs.canalplan.org.uk/steve/
  *
@@ -33,7 +33,7 @@ define ('CANALPLAN_GAZ_URL',CANALPLAN_BASE.'/gazetteer/');
 define ('CANALPLAN_WAT_URL',CANALPLAN_BASE.'/waterway/');
 define ('CANALPLAN_FEA_URL',CANALPLAN_BASE.'/feature/');
 define ('CANALPLAN_MAX_POST_PROCESS',100);
-define('CANALPLAN_CODE_RELEASE','3.15 r00');
+define('CANALPLAN_CODE_RELEASE','3.16 r00');
 //error_reporting (E_ALL | E_NOTICE | E_STRICT | E_DEPRECATED);
 
 global $table_prefix, $wp_version,$wpdb,$db_prefix,$canalplan_run_canal_link_maps,$canalplan_run_canal_route_maps,$canalplan_run_canal_place_maps;
@@ -136,6 +136,108 @@ function format_distance($distance,$locks,$format,$short){
 	return $dist_text;
 }
 
+
+function recalculate_route_day ($blog_id,$route_id,$day_id) {
+	global $wpdb;
+	//echo "<br /> Doing $day_id <br />";
+	$sql=$wpdb->prepare("Select totalroute from ".CANALPLAN_ROUTES." where blog_id=%d and route_id=%d",$blog_id,$route_id);
+	$r=$wpdb->get_results($sql,ARRAY_A);
+	$totalroute=$r[0]["totalroute"];
+	$sql=$wpdb->prepare("Select start_id,end_id,flags from ".CANALPLAN_ROUTE_DAY." where blog_id=%d and route_id=%d and day_id=%d",$blog_id,$route_id,$day_id);
+	$r=$wpdb->get_results($sql,ARRAY_A);
+	$rw=$r[0];
+	$route=explode(",",$totalroute);
+	$dayroute=array_slice($route,$rw['start_id'],( $rw['end_id']-$rw['start_id'])+1);
+	$stopafterlocktoday=$rw['flags'];
+	$stopafterlockyesterday='X';
+	$newlocks=0;
+	$newdistance=0;
+	if ($day_id >1)
+	{
+		$sql=$wpdb->prepare("Select start_id,end_id,flags from ".CANALPLAN_ROUTE_DAY." where blog_id=%d and route_id=%d and day_id=%d",$blog_id,$route_id,$day_id-1);
+	$r=$wpdb->get_results($sql,ARRAY_A);
+	$rw=$r[0];
+	$stopafterlockyesterday=$rw['flags'];
+	}
+	// var_dump($stopafterlocktoday);
+	// var_dump($stopafterlockyesterday);
+	if(strlen($stopafterlocktoday)==0) $stopafterlocktoday='X';
+	if(strlen($stopafterlockyesterday)==0) $stopafterlockyesterday='X';
+	// var_dump($stopafterlocktoday);
+	// var_dump($stopafterlockyesterday);
+	for ($placeindex=1;$placeindex<count($dayroute);$placeindex+=1){
+		$p1=$dayroute[$placeindex];
+		$p2=$dayroute[$placeindex-1];
+		 $sql=$wpdb->prepare("select distinct metres,locks from ".CANALPLAN_LINK." where (place1=%s and place2=%s) or  (place1=%s and place2=%s )",$p1,$p2,$p2,$p1);
+		$r=$wpdb->get_results($sql,ARRAY_A);
+		if(count($r)>0) $rw=$r[0];
+		if (is_null($rw['locks'])) $rw['locks']=0;
+		if (is_null($rw['metres'])) $rw['metres']=10;
+		$newlocks=$newlocks+$rw['locks'];
+		$newdistance=$newdistance+$rw['metres'];
+	}
+	for ($placeindex=0;$placeindex<count($dayroute);$placeindex+=1){
+		$x=$dayroute["$placeindex"];
+		$sql=$wpdb->prepare("select attributes from ".CANALPLAN_CODES." where canalplan_id=%s",$x);
+		$r=$wpdb->get_results($sql,ARRAY_A);
+		$rw=$r[0];
+	//	if(!isset($_POST[$elock])){$_POST[$elock]=0;}
+	//	if(!isset($_POST[$elock2])){$_POST[$elock2]=0;}
+		if (strpos($rw['attributes'],'L') !== false) {
+		//	echo "we have a lock at ".$x." - ".$rw['attributes']."<br>";
+		//	if ($stopafterlockyesterday =='L' and $placeindex==0) echo "Did this lock last thing yesterday";
+			if ($stopafterlockyesterday =='L' and $placeindex==0) $newlocks=$newlocks;
+		//	if ($stopafterlockyesterday =='X' and $placeindex==0) echo "Doing this lock first thing today";
+			if ($stopafterlockyesterday =='X' and $placeindex==0) $newlocks=$newlocks+1;
+		//	if ($stopafterlocktoday=='X' and $placeindex==count($dayroute)-1) echo "Doing this lock first thing tomorrow";
+			if ($stopafterlocktoday=='X' and $placeindex==count($dayroute)-1) $newlocks=$newlocks;
+		//	if ($stopafterlocktoday=='L' and $placeindex==count($dayroute)-1) echo "Doing this lock last thing today";
+			if ($stopafterlocktoday=='L' and $placeindex==count($dayroute)-1) $newlocks=$newlocks+1;
+			if ($placeindex > 0 and $placeindex<count($dayroute)-1 )  $newlocks=$newlocks+1;
+		}
+		preg_match_all('!\d+!', $rw['attributes'], $matches);
+		$lock_count=$matches[0][0];
+
+		if (!is_null($lock_count)) {
+		//	echo "we have an extra $lock_count locks at ".$x." - ".$rw['attributes']."<br>";
+		//	if ($stopafterlockyesterday =='L' and $placeindex==0) echo "Did this lock last thing yesterday";
+			if ($stopafterlockyesterday =='L' and $placeindex==0) $newlocks=$newlocks;
+		//	if ($stopafterlockyesterday =='X' and $placeindex==0) echo "Doing this lock first thing today";
+			if ($stopafterlockyesterday =='X' and $placeindex==0) $newlocks=$newlocks+$lock_count;
+		//	if ($stopafterlocktoday=='X' and $placeindex==count($dayroute)-1) echo "Doing this lock first thing tomorrow";
+			if ($stopafterlocktoday=='X' and $placeindex==count($dayroute)-1) $newlocks=$newlocks;
+		//	if ($stopafterlocktoday=='L' and $placeindex==count($dayroute)-1) echo "Doing this lock last thing today";
+			if ($stopafterlocktoday=='L' and $placeindex==count($dayroute)-1) $newlocks=$newlocks+$lock_count;
+			if ($placeindex > 0 and $placeindex<count($dayroute)-1 )  $newlocks=$newlocks+$lock_count;
+		}
+	/*
+		if (strpos($rw['attributes'],'3') !== false) {
+		#echo "we have 2 locks at ".$x." - ".$rw['attributes']."<br>";
+		if ($_POST[$elock]=='on' and $placeindex==0) {$newlocks=$newlocks;} elseif ($_POST[$elock2]!='on' and $placeindex==count($dayroute)-1) {$newlocks=$newlocks;}  else {$newlocks=$newlocks+3;}
+	}
+		if (strpos($rw['attributes'],'4') !== false) {
+		#echo "we have 2 locks at ".$x." - ".$rw['attributes']."<br>";
+		if ($_POST[$elock]=='on' and $placeindex==0) {$newlocks=$newlocks;} elseif ($_POST[$elock2]!='on' and $placeindex==count($dayroute)-1) {$newlocks=$newlocks;}  else {$newlocks=$newlocks+4;}
+	}
+	*/
+
+		if(!isset($rw['locks'])){$rw['locks']=0;}
+		$newlocks=$newlocks+$rw['locks'];
+	}
+	$sql=$wpdb->prepare("update ".CANALPLAN_ROUTE_DAY." set distance=%d , locks=%d where blog_id=%d and route_id=%d and day_id=%d",$newdistance,$newlocks,$blog_id,$route_id,$day_id);
+	echo "Updating ...";
+	$r=$wpdb->query($sql);
+}
+
+function recalculate_route($blog_id,$route_id){
+	global $wpdb;
+	$sql=$wpdb->prepare("select duration from ".CANALPLAN_ROUTES." where blog_id=%d and route_id=%d ",$blog_id,$route_id);
+	$duration=$wpdb->get_row($sql,ARRAY_N);
+  //  var_dump($duration);
+	for ($daycount=1;$daycount<=$duration;$daycount+=1){
+  //  recalculate_route_day ($blog_id,$route_id,$daycount);
+	}
+}
 function canalplan_add_custom_box() {
     add_meta_box( 'canalplan_sectionid', __( 'CanalPlan Tags', 'canalplan_textdomain' ),
                 'canalplan_inner_custom_box', 'post', 'advanced' );
@@ -252,6 +354,7 @@ function canal_trip_maps($content,$mapblog_id=NULL,$post_id=NULL,$search='N') {
     global $wpdb,$post,$blog_id,$google_map_code,$dogooglemap,$canalplan_run_canal_route_maps;
     $tripdetail='N';
     $tripsumm='N';
+    $pid=$post->ID;
     if (preg_match_all('/' . preg_quote('[[CPTM:') . '(.*?)' . preg_quote(']]') .'/',$content,$matches)) { $places_array=$matches[1]; $tripsumm='Y' ;}
     if (preg_match_all('/' . preg_quote('[[CPTO:') . '(.*?)' . preg_quote(']]') .'/',$content,$matches2)) { $places_array2=$matches2[1]; $tripdetail='Y'; }
     if (preg_match_all('/' . preg_quote('[[CPTL:') . '(.*?)' . preg_quote(']]') .'/',$content,$matches2)) { $places_array3=$matches2[1]; $triplink='Y'; }
@@ -283,7 +386,7 @@ function canal_trip_maps($content,$mapblog_id=NULL,$post_id=NULL,$search='N') {
 		$format=strtoupper($x[1]);
 		if (!in_array($format,array("B", "N"))) $format='N';
 		$list_type=$format_type[$format];
-		$sql="select id, post_title from ".$wpdb->posts." where id in (select post_id from ".CANALPLAN_ROUTE_DAY." where blog_id=".$wpdb->blogid." and  route_id=".$routeid." ) and post_status='publish' order by post_date";
+		$sql="select id, post_title from ".$wpdb->posts." where id in (select post_id from ".CANALPLAN_ROUTE_DAY." where blog_id=".$wpdb->blogid." and  route_id=".$routeid." and post_id <> $pid order by day_id asc ) and post_status='publish' order by id asc";
 		$res = $wpdb->get_results($sql,ARRAY_A);
 		$blroute ="<$list_type>";
 		foreach ($res as $row) {
@@ -397,7 +500,8 @@ function canal_route_maps($content,$mapblog_id=NULL,$post_id=NULL,$search='N') {
 	return str_replace($names,$links , $content);
 	}
 	$google_map_code2='';
-	$mapstuff="<br />";
+	//$mapstuff="<br />";
+	$mapstuff="";
 	if($canalplan_run_canal_route_maps[$post->ID]==1) {$dogooglemap=$dogooglemap+1;}
 	$dogooglemap='CPRM'.$mapblog_id.'_'.$post->ID;
 	$canalplan_options = get_option('canalplan_options');
@@ -1036,8 +1140,10 @@ function canal_bloggedroute($embed=0,$overnight="N"){
 }
 	if($embed==0 && $routeid>0) {
 		$blroute .= "<p><h2>Blog Entries for this trip</h2>";
-		$sql="select id, post_title from ".$wpdb->posts." where id in (select post_id from ".CANALPLAN_ROUTE_DAY." where blog_id=".$wpdb->blogid." and  route_id=".$routeid." ) order by post_date";
+		$sql="select id, post_title from ".$wpdb->posts." where id in (select post_id from ".CANALPLAN_ROUTE_DAY." where blog_id=".$wpdb->blogid." and  route_id=".$routeid."  order by day_id asc ) and post_status='publish' order by id asc";
+   //var_dump($sql);
 		$res = $wpdb->get_results($sql,ARRAY_A);
+		//var_dump($res);
 		$blroute .="<ol>";
 		foreach ($res as $row) {
 			$link = get_blog_permalink( $blog_id, $row['id'] ) ;

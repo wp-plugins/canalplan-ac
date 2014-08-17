@@ -78,24 +78,22 @@ if (isset($_POST["routeslug"])){
 }
 
 if (isset($_POST["update_data"])){
-		$params = array(
-			'redirection' => 0,
-			'httpversion' => '1.1',
-			'timeout' => 60,
-			'user-agent' => apply_filters( 'http_headers_useragent', 'WordPress/' . $wp_version . '; ' . get_bloginfo( 'url' ) . ';canalplan-' . CANALPLAN_CODE_RELEASE ),
-			'headers' => array( 'Expect:' ),
-			'sslverify' => false
+	$params = array(
+		'redirection' => 0,
+		'httpversion' => '1.1',
+		'timeout' => 60,
+		'user-agent' => apply_filters( 'http_headers_useragent', 'WordPress/' . $wp_version . '; ' . get_bloginfo( 'url' ) . ';canalplan-' . CANALPLAN_CODE_RELEASE ),
+		'headers' => array( 'Expect:' ),
+		'sslverify' => false
 	);
 	$response = wp_remote_get(CANALPLAN_BASE."/data/canalplan_wp.sqlite" ,$params);
 	$handle2=fopen("../wp-content/uploads/canalplan_data.sqlite","w");
-	//var_dump($response['response']);
 	if ($response['response']['code']==200) {
-	echo "Retrieving data using remote get";
+	echo "Retrieving data using remote get<br >";
 		$data = $response['body'];
-	//	$handle2=fopen("../wp-content/uploads/canalplan_data.sqlite","w");
 		fwrite($handle2, $data);
 	} else {
-		echo "Retrieving data using fopen";
+		echo "Retrieving data using fopen<br >";
 		$handle=fopen(CANALPLAN_BASE."/data/canalplan_wp.sqlite","rb");;
 		$contents = '';
 		while (!feof($handle)) {

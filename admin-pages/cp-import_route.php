@@ -105,6 +105,9 @@ $jdata=json_decode($data, true);
 
 }
 fclose($handle);
+// echo "data from ".$cptable."<br />";
+// var_dump($jdata);
+echo "<br />";
 foreach ($jdata as $jsondata){
 $durations[$jsondata['name']]=$jsondata['value'];
 }
@@ -132,6 +135,9 @@ $jdata=json_decode($data, true);
 
 }
 fclose($handle);
+//echo "data from ".$cptable."<br />";
+//var_dump($jdata);
+echo "<br />";
 foreach ($jdata as $jsondata){
 $places[$jsondata['name']]=$jsondata['value'];
 }
@@ -147,6 +153,9 @@ $jdata=json_decode($data, true);
 
 }
 fclose($handle);
+// echo "data from ".$cptable."<br />";
+//var_dump($jdata);
+echo "<br />";
 foreach ($jdata as $jsondata){
 if(!isset($route)) {$route[]=$jsondata['place1'];}
 $route[]=$jsondata['place1'];
@@ -155,6 +164,7 @@ $lastplace=$jsondata['place2'];
 $route[]=$lastplace;
 
 $routestring=implode(",", $route);
+//xx`var_dump($routestring);
 
 # Get the start date from the places array
 $sd=$places['start_date'];
@@ -202,6 +212,8 @@ $date=date('Y-m-d H:i:s',strtotime("+ 0 days",strtotime($sd)));
 
 // Insert the post into the database
 $newpostid=wp_insert_post( $my_post );
+$sql=$wpdb->prepare("insert into ".CANALPLAN_ROUTE_DAY." set route_id=%d, day_id=%d, blog_id=%d, post_id=%d, route_date=%s,start_id=%d, end_id=%d, distance=%d, `locks`=%d",$route_id,0,$blog_id,$newpostid,date('Y-m-d',strtotime($date)),0,0,0,0);
+$r = $wpdb->query($sql);
 }
 $offset=0;
 $category[]=$_POST['category_select'];
