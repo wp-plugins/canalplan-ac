@@ -86,14 +86,15 @@ if (isset($_POST["update_data"])){
 		'headers' => array( 'Expect:' ),
 		'sslverify' => false
 	);
+        echo "<br />";
 	$response = wp_remote_get(CANALPLAN_BASE."/data/canalplan_wp.sqlite" ,$params);
 	$handle2=fopen("../wp-content/uploads/canalplan_data.sqlite","w");
 	if ($response['response']['code']==200) {
-	echo "Retrieving data using remote get<br >";
+	echo "Retrieving data using remote get<br /><br />";
 		$data = $response['body'];
 		fwrite($handle2, $data);
 	} else {
-		echo "Retrieving data using fopen<br >";
+		echo "Retrieving data using fopen<br /><br />";
 		$handle=fopen(CANALPLAN_BASE."/data/canalplan_wp.sqlite","rb");;
 		$contents = '';
 		while (!feof($handle)) {

@@ -3,8 +3,8 @@
 Contributors: SteveAtty
 Tags: crosspost, Canalplan AC
 Requires at least: 3.0
-Tested up to: 3.9.2
-Stable tag: 3.16
+Tested up to: 4.0.1
+Stable tag: 3.17
 
 == Description ==
 
@@ -51,6 +51,12 @@ You also need to ensure that your PHP installation has the PDOs for SQLite V3 in
 
 
 == Changelog ==
+
+= Version 3.17 22/11/2014 =
+- Confirmed 4.0.1 compatible
+- Fixed a bug where Posts in the WPMU site-search results picked up the containing page url rather than the actual post url
+- Changes to short codes to include summary post in list of available posts
+
 
 = Version 3.16 17/08/2014 =
 - Changes to route import to include the summary post (if created) in the posts for that trip

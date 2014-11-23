@@ -72,6 +72,7 @@ class CanalPLanWidget extends WP_Widget {
 	   	$maptype['R']="ROADMAP";
 	   	$maptype['T']="TERRAIN";
 	   	$maptype['H']="HYBRID";
+	   	//var_dump($instance);
 		echo '<div id="map_canvas_widget_'.$blog_id.'"  style="width: '.$instance['width'].'px; height: '.$instance['height'].'px"></div>';
 		$google_map_code.= 'var map_widget_'.$blog_id.'_opts = { zoom: '.$instance['zl'].',center: new google.maps.LatLng('.$cp_lat.','.$cp_long.'),';
 		$google_map_code.=' scrollwheel: false, navigationControl: true, mapTypeControl: true, scaleControl: false, draggable: false,';

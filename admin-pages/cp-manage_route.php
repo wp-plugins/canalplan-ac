@@ -99,7 +99,7 @@ if ($cpsession!="0"){
 	#Get the number of days from the stops array, removing 1 because we've forced a fake value into the start of it
 	$duration=count($stops)-1;
 
-	$sql=$wpdb->prepare("select count(*) as duration from ".CANALPLAN_ROUTE_DAY." where route_id=%d and blog_id=%d",$reimported,$blog_id);
+	$sql=$wpdb->prepare("select count(*) as duration from ".CANALPLAN_ROUTE_DAY." where route_id=%d and blog_id=%d and day_id > 0",$reimported,$blog_id);
 	$r=$wpdb->get_results($sql,ARRAY_A);
 
 

@@ -20,7 +20,6 @@ if(isset($_POST['_submit_check']))
 	$sql=$wpdb->prepare("SELECT place_name,canalplan_id,lat,`long`,GLength(LineString(lat_lng_point, GeomFromText('Point(".$_POST["lati"]." ".$_POST["longi"].")'))) AS distance FROM ".CANALPLAN_CODES." where attributes != %s ORDER BY distance ASC LIMIT 1", 'm' );
 	$res = $wpdb->get_results($sql,ARRAY_A);
 	$row=$res[0];
-	//var_dump($_POST);
 	switch($_POST['location']) {
 	case 'none':
         $dataset="None";
@@ -30,7 +29,7 @@ if(isset($_POST['_submit_check']))
         break;
     case 'Canalplan':
 		$dataset="None";
-       if (strlen($_POST['dataset']>4) )$dataset='Canalplan|'.$_POST['dataset'].'|'.current_time('timestamp').'|0';
+       if (strlen($_POST['dataset'])>4 )$dataset='Canalplan|'.$_POST['dataset'].'|'.current_time('timestamp').'|0';
         break;
    	case 'Backitude':
         $dataset="Backitude|".$_POST["lati2"].'|'.$_POST["longi2"].'|'.$_POST["time"] .'|'.$_POST["tz"].'|'.$row['canalplan_id'].'|'.$row['place_name'];
@@ -51,7 +50,6 @@ $radnon=" ";
 $sql=$wpdb->prepare("select * from ".CANALPLAN_OPTIONS." where blog_id=%d and pref_code='Location'",$blog_id);
 $res = $wpdb->get_results($sql,ARRAY_A);
 $values=explode('|',$res[0]['pref_value']);
-//var_dump($values);
 if (strlen($values[4])==0) $values[4]=0;
 	switch($values[0]) {
 	case 'none':
