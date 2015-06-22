@@ -17,9 +17,11 @@ echo '<script type="text/javascript"> var linktype=1; cplogid='.$blog_id.'</scri
 
 if(isset($_POST['_submit_check']))
 {
+//	 var_dump($_POST['dataset']);
 	$sql=$wpdb->prepare("SELECT place_name,canalplan_id,lat,`long`,GLength(LineString(lat_lng_point, GeomFromText('Point(".$_POST["lati"]." ".$_POST["longi"].")'))) AS distance FROM ".CANALPLAN_CODES." where attributes != %s ORDER BY distance ASC LIMIT 1", 'm' );
 	$res = $wpdb->get_results($sql,ARRAY_A);
 	$row=$res[0];
+	//var_dump($row);
 	switch($_POST['location']) {
 	case 'none':
         $dataset="None";
@@ -29,7 +31,28 @@ if(isset($_POST['_submit_check']))
         break;
     case 'Canalplan':
 		$dataset="None";
-       if (strlen($_POST['dataset'])>4 )$dataset='Canalplan|'.$_POST['dataset'].'|'.current_time('timestamp').'|0';
+       if (strlen($_POST['dataset'])>4 )
+       {
+		$dataset='Canalplan|'.$_POST['dataset'].'|'.current_time('timestamp').'|0';
+		$values=explode('|',$_POST['dataset']);
+        $sql=$wpdb->prepare("select lat,`long` from ".CANALPLAN_CODES." where canalplan_id=%s",$values[0]);
+		$res = $wpdb->get_results($sql,ARRAY_A);
+	    $row = $res[0];
+	    $cp_lat=$row['lat'];
+		$cp_long=$row['long'];
+        $cp_user=$_POST['CanalPlanuser'];
+		$domain=CANALPLAN_BASE ;
+	//	$domain='http://canalplan.org.uk';
+		$url=$domain."/boats/location.php?locat=$cp_user|$cp_lat|$cp_long|0|".current_time('timestamp').'|0';
+	//	var_dump($url);
+	//	file_put_contents('/tmp/burl.txt', $url);
+		$fcheck=file_get_contents($url);
+	//	file_put_contents('/tmp/bfcheck.txt', $fcheck);
+	    $sql=$wpdb->prepare("Delete from ".CANALPLAN_OPTIONS." where blog_id=%d and pref_code='location_error'",$blog_id);
+		$res = $wpdb->query($sql);
+		$sql=$wpdb->prepare("insert into ".CANALPLAN_OPTIONS." set blog_id=%d ,pref_code='location_error', pref_value=%s",$blog_id,$fcheck.'|'.current_time( 'timestamp' ) );
+		$res = $wpdb->query($sql);
+	   }
         break;
    	case 'Backitude':
         $dataset="Backitude|".$_POST["lati2"].'|'.$_POST["longi2"].'|'.$_POST["time"] .'|'.$_POST["tz"].'|'.$row['canalplan_id'].'|'.$row['place_name'];
@@ -50,6 +73,7 @@ $radnon=" ";
 $sql=$wpdb->prepare("select * from ".CANALPLAN_OPTIONS." where blog_id=%d and pref_code='Location'",$blog_id);
 $res = $wpdb->get_results($sql,ARRAY_A);
 $values=explode('|',$res[0]['pref_value']);
+//var_dump($values);
 if (strlen($values[4])==0) $values[4]=0;
 	switch($values[0]) {
 	case 'none':
@@ -154,6 +178,7 @@ if ($lat=='Not Set') {
 		$img_url=$url.'/wp-content/plugins/canalplan-ac/canalplan/';
 		$url.='/wp-content/plugins/canalplan-ac/cp_location.php?config='.$r[0]->pref_value;
 		$config_url=$url;
+	//	var_dump($config_url);
 ?>
 <br />
 <form action="" name="flid" id="fav_list" method="post">
@@ -221,5 +246,7 @@ function parse_data($data,$blid) {
 	 $res = $wpdb->query($sql);
      $sql=$wpdb->prepare("insert into ".CANALPLAN_OPTIONS." set blog_id=%d ,pref_code='Location', pref_value=%s",$blid,$data);
       $res = $wpdb->query($sql);
+   // flush the cache if needed.
+   if (function_exists('wp_cache_clear_cache') )    wp_cache_clear_cache();
 }
 ?>

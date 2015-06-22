@@ -3,12 +3,12 @@
 Plugin Name: CanalPlan Integration
 Plugin URI: http://blogs.canalplan.org.uk/canalplanac/canalplan-plug-in/
 Description: Provides features to integrate your blog with <a href="http://www.canalplan.eu">Canalplan AC</a> - the Canal Route Planner.
-Version: 3.17
+Version: 3.18
 Author: Steve Atty
 Author URI: http://blogs.canalplan.org.uk/steve/
  *
  *
- * Copyright 2011 - 2014 Steve Atty (email : posty@tty.org.uk)
+ * Copyright 2011 - 2015 Steve Atty (email : posty@tty.org.uk)
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -24,6 +24,7 @@ Author URI: http://blogs.canalplan.org.uk/steve/
  * this program; if not, write to the Free Software Foundation, Inc., 51
  * Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
+
 if (file_exists(WP_CONTENT_DIR."/uploads/canalplan_multisite.php")){
 	@include(WP_CONTENT_DIR."/uploads/canalplan_multisite.php");
 }
@@ -33,7 +34,7 @@ define ('CANALPLAN_GAZ_URL',CANALPLAN_BASE.'/gazetteer/');
 define ('CANALPLAN_WAT_URL',CANALPLAN_BASE.'/waterway/');
 define ('CANALPLAN_FEA_URL',CANALPLAN_BASE.'/feature/');
 define ('CANALPLAN_MAX_POST_PROCESS',100);
-define('CANALPLAN_CODE_RELEASE','3.17 r00');
+define('CANALPLAN_CODE_RELEASE','3.18 r00');
 //error_reporting (E_ALL | E_NOTICE | E_STRICT | E_DEPRECATED);
 
 global $table_prefix, $wp_version,$wpdb,$db_prefix,$canalplan_run_canal_link_maps,$canalplan_run_canal_route_maps,$canalplan_run_canal_place_maps;
@@ -71,6 +72,17 @@ function ascii_encode_helper($numb) {
         }
         $string .= pack("C", $numb+63);
         return str_replace("\\","\\\\",$string);
+}
+
+function canalplan_mobile() {
+ if (function_exists('jetpack_is_mobile') )   return jetpack_is_mobile();
+return wp_is-mobile();
+}
+
+function isMobileBrowser() {
+   $useragent=$_SERVER['HTTP_USER_AGENT'];
+   if(preg_match('/(android|bbd+|meego).+mobile|avantgo|bada/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)/|plucker|pocket|psp|series(4|6)0|symbian|treo|up.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i',$useragent)||preg_match('/1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw-(n|u)|c55/|capi|ccwa|cdm-|cell|chtm|cldc|cmd-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc-s|devi|dica|dmob|do(c|p)o|ds(12|-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(-|_)|g1 u|g560|gene|gf-5|g-mo|go(.w|od)|gr(ad|un)|haie|hcit|hd-(m|p|t)|hei-|hi(pt|ta)|hp( i|ip)|hs-c|ht(c(-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i-(20|go|ma)|i230|iac( |-|/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |/)|klon|kpt |kwc-|kyo(c|k)|le(no|xi)|lg( g|/(k|l|u)|50|54|-[a-w])|libw|lynx|m1-w|m3ga|m50/|ma(te|ui|xo)|mc(01|21|ca)|m-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|-([1-8]|c))|phil|pire|pl(ay|uc)|pn-2|po(ck|rt|se)|prox|psio|pt-g|qa-a|qc(07|12|21|32|60|-[2-7]|i-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55/|sa(ge|ma|mm|ms|ny|va)|sc(01|h-|oo|p-)|sdk/|se(c(-|0|1)|47|mc|nd|ri)|sgh-|shar|sie(-|m)|sk-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h-|v-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl-|tdg-|tel(i|m)|tim-|t-mo|to(pl|sh)|ts(70|m-|m3|m5)|tx-9|up(.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas-|your|zeto|zte-/i',substr($useragent,0,4)))
+   return true; 
 }
 
 function format_distance($distance,$locks,$format,$short){
@@ -295,6 +307,8 @@ function canal_init() {
 	add_filter('the_content',  'canal_link_maps');
 	add_filter('the_content',  'canal_linkify');
 	add_filter('the_content',  'canal_blogroute_insert');
+	add_filter('the_excerpt', 'canal_stats');
+	add_filter('the_excerpt', 'canal_trip_stats');
 	add_filter('network_the_content',  'canal_stats');
 	add_filter('network_the_content',  'canal_trip_maps');
 	add_filter('network_the_content',  'canal_trip_stats');
@@ -346,6 +360,16 @@ function canal_init() {
 
 	add_action('wp_head', 'canalplan_header');
 	add_action('wp_footer', 'canalplan_footer');
+	
+	// Makes sure Jetpack OG description tag has place names in it rather than tags
+	add_filter( 'jetpack_open_graph_tags', function( $tags ){
+		$tags['og:description'] =  canal_trip_stats($tags['og:description'],$blog_id,null,'N',1) ;
+		$tags['og:description'] =  canal_trip_maps($tags['og:description'],$blog_id,null,'Y') ;
+		$tags['og:description'] = canal_stats($tags['og:description'],$blog_id,null,1) ;
+	    $tags['og:description'] = canal_route_maps($tags['og:description'],$blog_id,null,'Y') ;
+	return $tags;}
+);
+
    	global $dogooglemap;
    	$dogooglemap=0;
 }
@@ -354,11 +378,38 @@ function canal_trip_maps($content,$mapblog_id=NULL,$post_id=NULL,$search='N') {
     global $wpdb,$post,$blog_id,$google_map_code,$dogooglemap,$canalplan_run_canal_route_maps;
     $tripdetail='N';
     $tripsumm='N';
+    $triplink='N';
     $pid=$post->ID;
     if (is_null($pid)) return $content;
     if (preg_match_all('/' . preg_quote('[[CPTM:') . '(.*?)' . preg_quote(']]') .'/',$content,$matches)) { $places_array=$matches[1]; $tripsumm='Y' ;}
     if (preg_match_all('/' . preg_quote('[[CPTO:') . '(.*?)' . preg_quote(']]') .'/',$content,$matches2)) { $places_array2=$matches2[1]; $tripdetail='Y'; }
     if (preg_match_all('/' . preg_quote('[[CPTL:') . '(.*?)' . preg_quote(']]') .'/',$content,$matches2)) { $places_array3=$matches2[1]; $triplink='Y'; }
+	if ( get_query_var('feed') || $search=='Y' || is_feed() )  {
+		$names = array();
+		$links = array();
+		if (is_array($places_array)) {
+			foreach ($places_array as $place_code) {
+				$words=explode(":",$place_code);
+				$names[] = "[[CPTM:" .$place_code . "]]";
+				$links[] ="<b>[ Google Route Map embedded here ]</b>" ;
+			}
+		}
+		if (is_array($places_array2)) {
+			foreach ($places_array2 as $place_code) {
+				$words=explode(":",$place_code);
+				$names[] = "[[CPTO:" .$place_code . "]]";
+				$links[] ="<b>[ Google Route Map embedded here ]</b>" ;
+			}
+		}
+		if (is_array($places_array3)) {
+			foreach ($places_array3 as $place_code) {
+				$words=explode(":",$place_code);
+				$names[] = "[[CPTL:" .$place_code . "]]";
+				$links[] ="<b>[ Google Route Map embedded here ]</b>" ;
+			}
+		}
+		return str_replace($names,$links , $content);
+	}
 	if($tripsumm=='Y'){
 		$names = array();
 		$links = array();
@@ -403,7 +454,7 @@ function canal_trip_maps($content,$mapblog_id=NULL,$post_id=NULL,$search='N') {
 	return $content;
 }
 
-function canal_trip_stats($content,$mapblog_id=NULL,$post_id=NULL,$search='N') {
+function canal_trip_stats($content,$mapblog_id=NULL,$post_id=NULL,$search='N',$names_only=0) {
     global $wpdb,$post,$blog_id,$google_map_code,$dogooglemap,$canalplan_run_canal_route_maps,$network_post;
     if (isset($network_post)) {
 		$post_id=$network_post->ID;
@@ -434,7 +485,11 @@ function canal_trip_stats($content,$mapblog_id=NULL,$post_id=NULL,$search='N') {
 			$res3 = $wpdb->get_results($sql,ARRAY_A);
 			$row3 = $res3[0];
 			$names[] = "[[CPTS:" .$place_code . "]]";
+			if ($names_only==1) {
+				$links[] = "From ".$row2['place_name']." to ".$row3['place_name'].", ".format_distance($row['total_distance'],$row['total_locks'],$dformat,2).".";
+			} else {
 			$links[] = "From [[CP:".$row2['place_name']."|".$startp."]] to [[CP:".$row3['place_name']."|".$endp."]], ".format_distance($row1['total_distance'],$row1['total_locks'],$dformat,3).".";
+		}
 		}
 		$content = str_ireplace($names,$links , $content);
 	}
@@ -462,13 +517,23 @@ function canal_trip_stats($content,$mapblog_id=NULL,$post_id=NULL,$search='N') {
 		$endplace=array_pop($endplaces);
 		$penultimateplace=array_pop($endplaces);
 		$names[] = "[[CPTS:" .$place_code . "]]";
+		if ($names_only==1) {
+			$stat_text = "Starting at ".$startplaces[0]['place_name']." and finishing at ".$endplace['place_name']." with overnight stops at :";
+			} else {
 		$stat_text = "Starting at [[CP:".$startplaces[0]['place_name']."|".$startplaces[0]['canalplan_id']."]] and finishing at [[CP:".$endplace['place_name']."|".$endplace['canalplan_id']." ]] with overnight stops at :";
-	//	var_dump($endplaces);
+		}
 		foreach ($endplaces as $nightplace) {
-			$stat_text.=" [[CP:".$nightplace['place_name']."|".$nightplace['canalplan_id']."]],";
+				if ($names_only==1) {
+			$stat_text.=" ".$nightplace['place_name'].",";
+		} else {
+		$stat_text.=" [[CP:".$nightplace['place_name']."|".$nightplace['canalplan_id']."]],";}
 		}
 		rtrim($stat_text, ",");
-		$stat_text.=" and [[CP:".$penultimateplace['place_name']."|".$penultimateplace['canalplan_id']."]].";
+			if ($names_only==1) {
+		$stat_text.=" and ".$penultimateplace['place_name'].".";
+	}
+	else {$stat_text.=" and [[CP:".$penultimateplace['place_name']."|".$penultimateplace['canalplan_id']."]].";}
+	
 		$stat_text.= " ".format_distance($row1['total_distance'],$row1['total_locks'],$dformat,3).".";
 		$names2[] = "[[CPTD:" .$place_code . "]]";
 		$links2[]= $stat_text;
@@ -485,22 +550,23 @@ function canal_route_maps($content,$mapblog_id=NULL,$post_id=NULL,$search='N') {
 	// If the array is empty then we've no maps so don't do anything!
 	if (!isset($places_array)) {return $content;}
 	if (count($places_array)==0) {return $content;}
+		if ( get_query_var('feed') || $search=='Y' || is_feed() )  {
+		$names = array();
+		$links = array();
+		foreach ($places_array as $place_code) {
+			$words=explode(":",$place_code);
+			$names[] = $place_code;
+			$links[] ="[ Google Route Map embedded here ]" ;
+		}
+	return str_replace($names,$links , $content);
+	}
 	if(!isset($canalplan_run_canal_route_maps[$post->ID])) {$canalplan_run_canal_route_maps[$post->ID]=1;} else {
 		$canalplan_run_canal_route_maps[$post->ID]=$canalplan_run_canal_route_maps[$post->ID]+1;
 	}
     if (isset($mapblog_id)) {} else { $mapblog_id=$blog_id;}
     if (isset($post_id)) {} else {$post_id=$post->ID;
     if (isset($post->blog_id)) {$mapblog_id=$post->blog_id;}}
-	if ( get_query_var('feed') || $search=='Y' || is_feed() )  {
-		$names = array();
-		$links = array();
-		foreach ($places_array as $place_code) {
-			$words=explode(":",$place_code);
-			$names[] = $place_code;
-			$links[] ="<b>[ Google Route Map embedded here ]</b>" ;
-		}
-	return str_replace($names,$links , $content);
-	}
+
 	$google_map_code2='';
 	//$mapstuff="<br />";
 	$mapstuff="";
@@ -550,7 +616,11 @@ function canal_route_maps($content,$mapblog_id=NULL,$post_id=NULL,$search='N') {
 		 $opcode=explode("=",$opt);
 		 if (count($opcode)>1) {$options[$opcode[0]]=strtoupper($opcode[1]);}
 	}
+	if (canalplan_mobile()) {  
+	 $mapstuff.= '<div id="map_canvas_'.$dogooglemap.'" style="width:100%; height: '.$options['height'].'px"></div>';}
+	  else
 	$mapstuff.= '<div id="map_canvas_'.$dogooglemap.'" style="width: '.$options['width'].'px; height: '.$options['height'].'px"></div>';
+	
 	foreach ($dayroute as $place) {
 		$sql=$wpdb->prepare("select `lat`,`long`,`place_name` from ".CANALPLAN_CODES." where canalplan_id=%s",$place);
 		$res =  $wpdb->get_results($sql,ARRAY_A);
@@ -586,7 +656,7 @@ function canal_route_maps($content,$mapblog_id=NULL,$post_id=NULL,$search='N') {
 	        $cpoint=$row['place_name'].",".$row['lat'].",".$row['long'];
 	        if ($cpoint==$lpointb1) {
 			$lpoints=explode(",",$lpoint);
-			$turnaround.='var marker_turn'.$dogooglemap.'_'.$x.' = new google.maps.Marker({ position: new google.maps.LatLng('.$lpoints[1].','.$lpoints[2].'), map: map'.$dogooglemap.',   title: "Turn Round here  : '.$lpoints[0].'" });';
+			$turnaround.='var marker_turn'.$dogooglemap.'_'.$x.' = new google.maps.Marker({ position: new google.maps.LatLng('.$lpoints[1].','.$lpoints[2].'), map: map_'.$dogooglemap.',   title: "Turn Round here  : '.$lpoints[0].'" });';
 			$turnaround.='iconFile = "http://maps.google.com/mapfiles/ms/icons/blue-dot.png"; marker_turn'.$dogooglemap.'_'.$x.'.setIcon(iconFile) ; ';
 		 	$x=$x+1;
 		}
@@ -597,29 +667,29 @@ function canal_route_maps($content,$mapblog_id=NULL,$post_id=NULL,$search='N') {
 	}
 
 	if ($firstid==$lastid) {
-		$markertext='var marker_start'.$dogooglemap.' = new google.maps.Marker({ position: new google.maps.LatLng('.$first_lat.','.$first_long.'), map: map'.$dogooglemap.',   title: "Start / Finish : '.$firstname.'"});';
+		$markertext='var marker_start'.$dogooglemap.' = new google.maps.Marker({ position: new google.maps.LatLng('.$first_lat.','.$first_long.'), map: map_'.$dogooglemap.',   title: "Start / Finish : '.$firstname.'"});';
 		$markertext.='iconFile = "http://maps.google.com/mapfiles/ms/icons/yellow-dot.png"; marker_start'.$dogooglemap.'.setIcon(iconFile) ; ';
 	}
 	else
 	{
-		$markertext='var marker_start'.$dogooglemap.' = new google.maps.Marker({ position: new google.maps.LatLng('.$first_lat.','.$first_long.'), map: map'.$dogooglemap.',   title: "Start : '.$firstname.'" });';
-		$markertext.='var marker_stop'.$dogooglemap.' = new google.maps.Marker({ position: new google.maps.LatLng('.$last_lat.','.$last_long.'), map: map'.$dogooglemap.',  title: "Stop : '.$lastname.'" });';
+		$markertext='var marker_start'.$dogooglemap.' = new google.maps.Marker({ position: new google.maps.LatLng('.$first_lat.','.$first_long.'), map: map_'.$dogooglemap.',   title: "Start : '.$firstname.'" });';
+		$markertext.='var marker_stop'.$dogooglemap.' = new google.maps.Marker({ position: new google.maps.LatLng('.$last_lat.','.$last_long.'), map: map_'.$dogooglemap.',  title: "Stop : '.$lastname.'" });';
 		$markertext.='iconFile = "http://maps.google.com/mapfiles/ms/icons/green-dot.png"; marker_start'.$dogooglemap.'.setIcon(iconFile) ; ';
 		$markertext.='iconFile = "http://maps.google.com/mapfiles/ms/icons/red-dot.png"; marker_stop'.$dogooglemap.'.setIcon(iconFile) ; ';
 	}
 	$google_map_code2.= 'var map_'.$dogooglemap.'_opts = { zoom: '.$options['zoom'].',center: new google.maps.LatLng('.$centre_lat.','.$centre_long.'),';
-	$google_map_code2.='  scrollwheel: false, navigationControl: true, mapTypeControl: true, scaleControl: false, draggable: true,';
+	$google_map_code2.='  scrollwheel: false, navigationControl: true, mapTypeControl: true, scaleControl: false, draggable: false,';
 	$google_map_code2.= ' mapTypeId: google.maps.MapTypeId.'.$maptype[$options['type']].' };';
-	$google_map_code2.= 'var map'.$dogooglemap.' = new google.maps.Map(document.getElementById("map_canvas_'.$dogooglemap.'"),map_'.$dogooglemap.'_opts);';
+	$google_map_code2.= 'var map_'.$dogooglemap.' = new google.maps.Map(document.getElementById("map_canvas_'.$dogooglemap.'"),map_'.$dogooglemap.'_opts);';
 	$google_map_code2.='  var polyOptions'.$dogooglemap.' = {strokeColor: "#'.$options['rgb'].'", strokeOpacity: 1.0,strokeWeight: '.$options['brush'].' }; ';
 	$i=1;
 	$google_map_code2.=' var line'.$dogooglemap.'_'.$i.' = new google.maps.Polyline(polyOptions'.$dogooglemap.');';
  	$google_map_code2.=' line'.$dogooglemap.'_'.$i.'.setPath(google.maps.geometry.encoding.decodePath("'.$pointstring.'"));';
- 	$google_map_code2.=' line'.$dogooglemap.'_'.$i.'.setMap(map'.$dogooglemap.');';
+ 	$google_map_code2.=' line'.$dogooglemap.'_'.$i.'.setMap(map_'.$dogooglemap.');';
 	$google_map_code2.='var bounds'.$dogooglemap.' = new google.maps.LatLngBounds();';
 	$google_map_code2.='line'.$dogooglemap.'_'.$i.'.getPath().forEach(function(latLng) {bounds'.$dogooglemap.'.extend(latLng);});';
-	$google_map_code2.='map'.$dogooglemap.'.fitBounds(bounds'.$dogooglemap.');';
-	$google_map_code2.='var resizer'.$dogooglemap.' = new CPResizeControl(map'.$dogooglemap.'); ';
+	$google_map_code2.='map_'.$dogooglemap.'.fitBounds(bounds'.$dogooglemap.');';
+	$google_map_code2.='var resizer'.$dogooglemap.' = new CPResizeControl(map_'.$dogooglemap.'); ';
 	$google_map_code2.=$turnaround.$markertext;
 	$names = array();
 	$links = array();
@@ -679,7 +749,10 @@ function canal_link_maps($content) {
 		}
 		if($canalplan_run_canal_link_maps[$post->ID]==1) {$dogooglemap=$dogooglemap+1;}
 		$dogooglemap='CPGMW'.$words[1].'_'.$post->ID.'_'.$mapc;
-		$mapstuff.= '<div id="map_canvas_'.$dogooglemap.'"  style="width: '.$options['width'].'px; height: '.$options['height'].'px"></div>';
+			if (!canalplan_mobile()) { 
+	$mapstuff.= '<div id="map_canvas_'.$dogooglemap.'"  style="width: '.$options['width'].'px; height: '.$options['height'].'px"></div>'; }
+		else
+		$mapstuff.= '<div id="map_canvas_'.$dogooglemap.'"  style="width:100%; height: '.$options['height'].'px"></div>';
 		$post_id=$post->ID;
 		unset($missingpoly);
 		unset($plines);
@@ -708,9 +781,9 @@ function canal_link_maps($content) {
 		$markertext="";
 		$i=1;
 		$google_map_code2.= 'var map_'.$dogooglemap.'_opts = { zoom: '.$options['zoom'].',center: new google.maps.LatLng('.$centre_lat.','.$centre_long.'),';
-		$google_map_code2.='  scrollwheel: false, navigationControl: true, mapTypeControl: true, scaleControl: false, draggable: true,';
+		$google_map_code2.='  scrollwheel: false, navigationControl: true, mapTypeControl: true, scaleControl: false, draggable: false,';
 		$google_map_code2.= ' mapTypeId: google.maps.MapTypeId.'.$maptype[$options['type']].' };';
-		$google_map_code2.= 'var map'.$dogooglemap.' = new google.maps.Map(document.getElementById("map_canvas_'.$dogooglemap.'"),map_'.$dogooglemap.'_opts);';
+		$google_map_code2.= 'var map_'.$dogooglemap.' = new google.maps.Map(document.getElementById("map_canvas_'.$dogooglemap.'"),map_'.$dogooglemap.'_opts);';
 		$google_map_code2.='  var polyOptions'.$dogooglemap.' = {strokeColor: "#'.$options['rgb'].'", strokeOpacity: 1.0, strokeWeight: '.$options['brush'].' }; ';
 		$i=1;
 		$google_map_code2.='var bounds'.$dogooglemap.' = new google.maps.LatLngBounds();';
@@ -720,9 +793,9 @@ function canal_link_maps($content) {
 			$rw = $res[0];
 		    $google_map_code2.=' var line'.$dogooglemap.'_'.$i.' = new google.maps.Polyline(polyOptions'.$dogooglemap.');';
 		 	$google_map_code2.=' line'.$dogooglemap.'_'.$i.'.setPath(google.maps.geometry.encoding.decodePath("'.$rw[0].'"));';
-		 	$google_map_code2.=' line'.$dogooglemap.'_'.$i.'.setMap(map'.$dogooglemap.');';
+		 	$google_map_code2.=' line'.$dogooglemap.'_'.$i.'.setMap(map_'.$dogooglemap.');';
 	   		$google_map_code2.='line'.$dogooglemap.'_'.$i.'.getPath().forEach(function(latLng) {bounds'.$dogooglemap.'.extend(latLng);});';
-			$google_map_code2.='map'.$dogooglemap.'.fitBounds(bounds'.$dogooglemap.');';
+			$google_map_code2.='map_'.$dogooglemap.'.fitBounds(bounds'.$dogooglemap.');';
 			$i=$i+1;
 		}
       		$names[] = "[[CPGMW:" .$place_code . "]]";
@@ -793,20 +866,24 @@ function canal_place_maps($content,$mapblog_id=NULL,$post_id=NULL) {
 		$mapstuff="<br />";
 		if($canalplan_run_canal_place_maps[$post->ID]==1) {$dogooglemap=$dogooglemap+1;}
 		$dogooglemap='CPGM'.$words[1].'_'.$post->ID.'_'.$mapc;
-		$mapstuff= '<div id="map_canvas_'.$dogooglemap.'" style="width: '.$options['width'].'px; height: '.$options['height'].'px"></div> ';
+	if (!canalplan_mobile()) { 
+		$mapstuff= '<div id="map_canvas_'.$dogooglemap.'" style="width: '.$options['width'].'px; height: '.$options['height'].'px"></div> '; }
+		else
+		$mapstuff= '<div id="map_canvas_'.$dogooglemap.'"  style="width:100%; height: '.$options['height'].'px"></div>';
+		
 		$names[] = "[[CPGM:" .$place_code . "]]";
 		$links[] = $mapstuff;
 		$google_map_code2.= 'var map_'.$dogooglemap.'_opts = { zoom: '.$options['zoom'].',center: new google.maps.LatLng('.$options['lat'].','.$options['long'].'),';
 		$google_map_code2.='  scrollwheel: false, navigationControl: true, mapTypeControl: true, scaleControl: false, draggable: false,';
 		$google_map_code2.= ' mapTypeId: google.maps.MapTypeId.'.$maptype[$options['type']].' };';
-		$google_map_code2.= 'var map'.$dogooglemap.' = new google.maps.Map(document.getElementById("map_canvas_'.$dogooglemap.'"),map_'.$dogooglemap.'_opts);';
-		$google_map_code2.= 'var marker'.$dogooglemap.' = new google.maps.Marker({ position: new google.maps.LatLng('.$options['lat'].','.$options['long'].'), map: map'.$dogooglemap.', title: "'.$words[0].'"  });  ';
+		$google_map_code2.= 'var map_'.$dogooglemap.' = new google.maps.Map(document.getElementById("map_canvas_'.$dogooglemap.'"),map_'.$dogooglemap.'_opts);';
+		$google_map_code2.= 'var marker'.$dogooglemap.' = new google.maps.Marker({ position: new google.maps.LatLng('.$options['lat'].','.$options['long'].'), map: map_'.$dogooglemap.', title: "'.$words[0].'"  });  ';
      }
     if($canalplan_run_canal_place_maps[$post->ID]==1) {$google_map_code.=$google_map_code2;}
 	return str_ireplace($matches[0], $links, $content);
 }
 
-function canal_stats($content,$mapblog_id=NULL,$post_id=NULL) {
+function canal_stats($content,$mapblog_id=NULL,$post_id=NULL,$names_only=0) {
 	global $blog_id,$wpdb,$post,$network_post;
 //	var_dump($network_post);
 	if (preg_match_all('/' . preg_quote('[[CPRS') . '(.*?)' . preg_quote(']]') .'/',$content,$matches)) { $places_array=$matches[0]; }
@@ -846,8 +923,11 @@ function canal_stats($content,$mapblog_id=NULL,$post_id=NULL) {
 	foreach ($places_array as $place_code) {
 		$words=explode(":",$place_code);
 		$names[] = $place_code;
+		if ($names_only==1) {
+				$links[] = "From ".$start_name." to ".$end_name.", ".format_distance($row['distance'],$row['locks'],$dformat,2).".";
+			} else {
 		$links[] = "From [[CP:".$start_name."|".$places[$row['start_id']]."]] to [[CP:".$end_name."|".$places[$row['end_id']]."]], ".format_distance($row['distance'],$row['locks'],$dformat,2).".";
-	}
+}	}
 	return str_ireplace($names, $links, $content);
 }
 
@@ -906,11 +986,11 @@ function canal_linkify($content) {
 			$words=explode("|",$place_code);
 			$names[] = "[[CP:" .$place_code . "]]";
 			if ($api[0]=="") {
-				$links[] = "<a href='".CANALPLAN_GAZ_URL.$words[1]."' target='gazetteer'  title=\"Link to ".trim($words[0])." on Canalplan \">".htmlspecialchars(trim($words[0]))."</a>";
+				$links[] = "<a href='".CANALPLAN_GAZ_URL.$words[1]."' target='gazetteer'  title=\"Link to ".trim($words[0])." on Canalplan \">".trim($words[0])."</a>";
 			}
 			 else
 			{
-				$links[] ="<a href='". CANALPLAN_GAZ_URL .$words[1]. "?blogkey=".$api[0]."&title=".$title."&blogid=".$api[1]."&date=".$date."&url=".$link."' target='gazetteer' title=\"Link to ".trim($words[0])." on Canalplan\">".htmlspecialchars(trim($words[0]))."</a>";
+				$links[] ="<a href='". CANALPLAN_GAZ_URL .$words[1]. "?blogkey=".$api[0]."&title=".$title."&blogid=".$api[1]."&date=".$date."&url=".$link."' target='gazetteer' title=\"Link to ".trim($words[0])." on Canalplan\">".trim($words[0])."</a>";
 			}
 		}
 	}
@@ -1030,12 +1110,15 @@ function canal_bloggedroute($embed=0,$overnight="N"){
 	{
 		$sql=$wpdb->prepare("select description, totalroute from ".CANALPLAN_ROUTES." where route_id=%d and blog_id=%d",$routeid,$wpdb->blogid);
 		$res = $wpdb->get_results($sql,ARRAY_A);
-//		$mid_point=round($wpdb->num_rows/2,0,PHP_ROUND_HALF_UP);
 		$mid_point=round(count($row['totalroute'])/2,0,PHP_ROUND_HALF_UP);
 		$place_count=0;
 		$row = $res[0];
 		if($embed==0) { $blroute .="<h2>".$row['description']."</h2><br/>"; }
-		$blroute.='<div id="map_canvas_'.$overnight.'_'.$dogooglemap.'"  style="width: '.$canalplan_options["canalplan_rm_width"].'px; height: '.$canalplan_options["canalplan_rm_height"].'px"></div>';
+	if (!canalplan_mobile()) { 
+		$blroute.='<div id="map_canvas_'.$overnight.'_'.$dogooglemap.'"  style="width: '.$canalplan_options["canalplan_rm_width"].'px; height: '.$canalplan_options["canalplan_rm_height"].'px"></div>'; }
+    else
+		$blroute.='<div id="map_canvas_'.$overnight.'_'.$dogooglemap.'"  style="width:100%; height: '.$canalplan_options["canalplan_rm_height"].'px"></div>';
+	
 		$pointstring = "";
 		$zoomstring = "";
 		$lat = 0;
@@ -1051,7 +1134,11 @@ function canal_bloggedroute($embed=0,$overnight="N"){
 		$firstname="";
 		$first_lat="";
 		$first_long="";
-  		$mapstuff='<div id="map_canvas_'.$overnight.'_'.$dogooglemap.'"  style="width: '.$canalplan_options["canalplan_rm_width"].'px; height: '.$canalplan_options["canalplan_rm_height"].'px"></div>';
+	if (!canalplan_mobile()) { 
+  		$mapstuff='<div id="map_canvas_'.$overnight.'_'.$dogooglemap.'"  style="width: '.$canalplan_options["canalplan_rm_width"].'px; height: '.$canalplan_options["canalplan_rm_height"].'px"></div>'; }
+  		else
+		$mapstuff='<div id="map_canvas_'.$overnight.'_'.$dogooglemap.'"  style="width:100%; height: '.$canalplan_options["canalplan_rm_height"].'px"></div>';
+	
 		foreach ($places as $place) {
 			$sql=$wpdb->prepare("select `lat`,`long`,`place_name` from ".CANALPLAN_CODES." where canalplan_id=%s",$place);
 			$res =  $wpdb->get_results($sql,ARRAY_A);
@@ -1100,8 +1187,8 @@ function canal_bloggedroute($embed=0,$overnight="N"){
 		}
 		else
 		{
-			$markertext='var marker_start_'.$overnight.'_'.$dogooglemap.' = new google.maps.Marker({ position: new google.maps.LatLng('.$first_lat.','.$first_long.'), map: map'.$overnight.'_'.$dogooglemap.',   title: "Start : '.$firstname.'" });';
-			$markertext.='var marker_stop_'.$overnight.'_'.$dogooglemap.' = new google.maps.Marker({ position: new google.maps.LatLng('.$last_lat.','.$last_long.'), map: map'.$overnight.'_'.$dogooglemap.',  title: "Stop : '.$lastname.'" });';
+			$markertext='var marker_start_'.$overnight.'_'.$dogooglemap.' = new google.maps.Marker({ position: new google.maps.LatLng('.$first_lat.','.$first_long.'), map: map_'.$overnight.'_'.$dogooglemap.',   title: "Start : '.$firstname.'" });';
+			$markertext.='var marker_stop_'.$overnight.'_'.$dogooglemap.' = new google.maps.Marker({ position: new google.maps.LatLng('.$last_lat.','.$last_long.'), map: map_'.$overnight.'_'.$dogooglemap.',  title: "Stop : '.$lastname.'" });';
 			$markertext.='iconFile = "http://maps.google.com/mapfiles/ms/icons/green-dot.png"; marker_start_'.$overnight.'_'.$dogooglemap.'.setIcon(iconFile) ; ';
 			$markertext.='iconFile = "http://maps.google.com/mapfiles/ms/icons/red-dot.png"; marker_stop_'.$overnight.'_'.$dogooglemap.'.setIcon(iconFile) ; ';
 		}}
@@ -1120,7 +1207,7 @@ function canal_bloggedroute($embed=0,$overnight="N"){
 	   	$maptype['H']="HYBRID";
 
 		$google_map_code.= 'var map_'.$overnight.'_'.$dogooglemap.'_opts = { zoom: '.$options['zoom'].',center: new google.maps.LatLng('.$centre_lat.','.$centre_long.'),';
-	    $google_map_code.='  scrollwheel: false, navigationControl: true, mapTypeControl: true, scaleControl: false, draggable: true,';
+	    $google_map_code.='  scrollwheel: false, navigationControl: true, mapTypeControl: true, scaleControl: false, draggable: false,';
 	    $google_map_code.= ' mapTypeId: google.maps.MapTypeId.'.$maptype[$options['type']].' };';
 	    $google_map_code.= 'var map_'.$overnight.'_'.$dogooglemap.' = new google.maps.Map(document.getElementById("map_canvas_'.$overnight.'_'.$dogooglemap.'"),map_'.$overnight.'_'.$dogooglemap.'_opts);';
 	    $google_map_code.='  var polyOptions_'.$overnight.'_'.$dogooglemap.' = {strokeColor: "#'.$options['rgb'].'", strokeOpacity: 1.0,strokeWeight: '.$canalplan_options["canalplan_rm_weight"].' }; ';
@@ -1134,7 +1221,7 @@ function canal_bloggedroute($embed=0,$overnight="N"){
 		$google_map_code.=$turnaround.$markertext;
 	}
 	if ($overnight=='Y'){
-		$sql=$wpdb->prepare("select day_id,end_id from ".CANALPLAN_ROUTE_DAY." where blog_id=%d and  route_id=%d",$blog_id,$routeid);
+		$sql=$wpdb->prepare("select day_id,end_id from ".CANALPLAN_ROUTE_DAY." where blog_id=%d and route_id=%d and day_id > 0",$blog_id,$routeid);
 		$res = $wpdb->get_results($sql,ARRAY_A);
 		$markertext2='';
 		foreach($res as $dayresult){
@@ -1152,10 +1239,10 @@ function canal_bloggedroute($embed=0,$overnight="N"){
 			if (count($res)>0) {
 				$row = $res[0];
 			}
-			$markertext2.='var marker_onight'.($dayid+1).'_'.$overnight.'_'.$dogooglemap.' = new google.maps.Marker({ position: new google.maps.LatLng('.$row['lat'].','.$row['long'].'), map: map_'.$overnight.'_'.$dogooglemap.',   title: "Overnight at : '.$row['place_name'].'"});';
-			$markertext2.='iconFile = "http:/wp-content/plugins/canalplan-ac/canalplan/markers/cp_'.($dayid+1).'.png"; marker_onight'.($dayid+1).'_'.$overnight.'_'.$dogooglemap.'.setIcon(iconFile) ; ';
+			$markertext.='var marker_onight'.($dayid+1).'_'.$overnight.'_'.$dogooglemap.' = new google.maps.Marker({ position: new google.maps.LatLng('.$row['lat'].','.$row['long'].'), map: map_'.$overnight.'_'.$dogooglemap.',   title: "Overnight at : '.$row['place_name'].'"});';
+			$markertext.='iconFile = "http:/wp-content/plugins/canalplan-ac/canalplan/markers/cp_'.($dayid+1).'.png"; marker_onight'.($dayid+1).'_'.$overnight.'_'.$dogooglemap.'.setIcon(iconFile) ; ';
 		}
-		$google_map_code.=$markertext2;
+		$google_map_code.=$markertext;
 	}
 }
 	if($embed==0 && $routeid>0) {
@@ -1192,10 +1279,10 @@ function wp_canalplan_admin_pages() {
 function canalplan_header($blah){
 	global $blog_id,$wpdb,$google_map_code;
 	$canalplan_options = get_option('canalplan_options');
-	if (isset($canalplan_options['supress_google'])) {return;}
-	$header = '<meta name="viewport" content="initial-scale=1.0, user-scalable=no" /> <script type="text/javascript" src="//maps.google.com/maps/api/js?libraries=geometry&amp;sensor=false"> </script> ';
+	if (isset($canalplan_options['supress_google'])) {$google_map_code=''; return;}
+	$header = '<meta name="viewport" content="initial-scale=1.0, user-scalable=no" /> ';
 	echo $header;
-	$google_map_code='<script type="text/javascript"> google.maps.visualRefresh = true; function initialize() {  ';
+	$google_map_code=' <script type="text/javascript" src="//maps.google.com/maps/api/js?libraries=geometry&amp;sensor=false"> </script>  <script  async type="text/javascript"> google.maps.visualRefresh = true; function initialize() {  ';
 	return $blah;
 }
 
@@ -1206,9 +1293,9 @@ function canalplan_footer($blah) {
 	echo "\n<!-- Canalplan AC code revision : ".CANALPLAN_CODE_RELEASE." -->\n";
 	$canalplan_options = get_option('canalplan_options');
 	if (isset($canalplan_options['supress_google'])) {return;}
-	echo "<script type='text/javascript'> google.maps.event.addDomListener(window, 'load', initialize); </script> ";
+	echo "<script async type='text/javascript'> google.maps.event.addDomListener(window, 'load', initialize); </script> ";
 ?>
-<script type='text/javascript'>
+<script async type='text/javascript'>
 function CPResizeControl(e){this.startUp(e)}CPResizeControl.RESIZE_BOTH=0;CPResizeControl.RESIZE_WIDTH=1;CPResizeControl.RESIZE_HEIGHT=2;CPResizeControl.prototype.startUp=function(e){var t=this;this._map=e;this.resizing=false;this.mode=CPResizeControl.RESIZE_BOTH;this.minWidth=150;this.minHeight=150;this.maxWidth=0;this.maxHeight=0;this.diffX=0;this.diffY=0;google.maps.event.addListenerOnce(e,"tilesloaded",function(){var n=new CPResizeControl.ResizeControl(t,e);n.index=1})};CPResizeControl.ResizeControl=function(e,t){var n=document.createElement("div");n.style.width="20px";n.style.height="20px";n.style.backgroundImage="url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUBAMAAAB/pwA+AAAAAXNSR0IArs4c6QAAAA9QTFRFMBg0f39/0dDN7eri/v7+XsdLVAAAAAF0Uk5TAEDm2GYAAABNSURBVAjXRcpBDcAwDEPRKAymImghuCUw/qTWJI7nk/X0zXquZ+tH6E5df3TngPBA+ELY7UW2gWwDq02sNjHbwmwLoyVGS7ytbw62tA8zTA85AeAv2wAAAABJRU5ErkJggg%3D%3D)";n.style.position="absolute";n.style.right="0px";n.style.bottom="0px";google.maps.event.addDomListener(n,"mousedown",function(){e.resizing=true});google.maps.event.addDomListener(document,"mouseup",function(){if(e.resizing){e.resizing=false;if(typeof e.doneCallBack=="function")e.doneCallBack(e._map)}});google.maps.event.addDomListener(document,"mousemove",function(t){e.mouseMoving(t)});var r=t.getDiv();r.appendChild(n);var i=r.firstChild.childNodes[2];i.style.marginRight="25px";return n};CPResizeControl.prototype.changeMapSize=function(e,t){var n=this._map.getDiv().style;var r=parseInt(n.width);var i=parseInt(n.height);var s=r,o=i;r+=e;i+=t;if(this.minWidth){r=Math.max(this.minWidth,r)}if(this.maxWidth){r=Math.min(this.maxWidth,r)}if(this.minHeight){i=Math.max(this.minHeight,i)}if(this.maxHeight){i=Math.min(this.maxHeight,i)}var u=false;if(this.mode!=CPResizeControl.RESIZE_HEIGHT){n.width=r+"px";u=true}if(this.mode!=CPResizeControl.RESIZE_WIDTH){n.height=i+"px";u=true}if(u){if(typeof this.changeCallBack=="function")this.changeCallBack(this._map,r,i,r-s,i-o);google.maps.event.trigger(this._map,"resize")}};CPResizeControl.prototype.mouseMoving=function(e){var t=window.scrollX||document.documentElement.scrollLeft||0;var n=window.scrollY||document.documentElement.scrollTop||0;if(!e)e=window.event;var r=e.clientX+t;var i=e.clientY+n;if(this.resizing){this.changeMapSize(r-this.diffX,i-this.diffY)}this.diffX=r;this.diffY=i;return false}
 </script>
 <?php

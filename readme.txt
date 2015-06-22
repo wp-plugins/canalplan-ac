@@ -4,7 +4,7 @@ Contributors: SteveAtty
 Tags: crosspost, Canalplan AC
 Requires at least: 3.0
 Tested up to: 4.0.1
-Stable tag: 3.17
+Stable tag: 3.18
 
 == Description ==
 
@@ -51,6 +51,17 @@ You also need to ensure that your PHP installation has the PDOs for SQLite V3 in
 
 
 == Changelog ==
+
+= Version 3.18 28/03/2015 =
+- Confirmed 4.2.2 compatible
+- Changes to the Location Configuration Page so that None Backitude location updates propogate to Canalplan if selected
+- Changes to the Location Configuration Page and location handling page to force a wp-supercache refresh if the plugin in installed. 
+- Adds support for mobile devices - on these the map width is always 100% of the view port. None mobile devices will use the user defined width.
+- Change to the Bulk Notify so that it picks up the start and finish locations for the day.
+- Moved some javascript to the footer to help improve page load times.
+- Added Filters so that Jetpack creates OG:Description tags with place names in them instead of the [[CP tags
+- Changes to the Map generation code to solve intermittent issues with map and "where are we" widget rendering.
+
 
 = Version 3.17 22/11/2014 =
 - Confirmed 4.0.1 compatible

@@ -25,13 +25,16 @@ if (isset($_POST["bulkprocess"])){
 		$date = date("Ymd",strtotime($bulkpost->post_date));
 		$link=urlencode(str_replace($blog_url,"",get_permalink($rw['ID'])));
 		echo "<br />Processing Post <i>".$bulkpost->post_title."</i><br />";
-		if (preg_match_all('/' . preg_quote('[[CP:') . '(.*?)' . preg_quote(']]') .'/',$bulkpost->post_content,$matches)) {
+		$postcontent=$bulkpost->post_content;
+		$postcontent= canal_stats($postcontent,$blog_id,$rw['ID']) ;
+		if (preg_match_all('/' . preg_quote('[[CP:') . '(.*?)' . preg_quote(']]') .'/',$postcontent,$matches)) {
 			$places_array=$matches[1];
 			foreach ($places_array as $place) {
 				$placeinfo=explode('|',$place);
 				$x=CANALPLAN_URL.'api.cgi?mode=add_bloglink&id='.$api[1].'&key='.$api[0].'&title='.urlencode($bulkpost->post_title).'&placeid='.$placeinfo[1];
 				$x.='&url='.$link.'&date='.$date;
-				$fcheck=file_get_contents($x);
+			//	var_dump($x);
+			$fcheck=file_get_contents($x);
 				$cp_bulk=json_decode($fcheck,true);
 				echo "&nbsp;&nbsp;&nbsp;Found link to <i>".$placeinfo[0]."</i>";
 				if ($cp_bulk['status']=='OK') {

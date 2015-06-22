@@ -345,7 +345,6 @@ if ($username==$dbids[1] && $password==$dbids[0]) {
 		if ($plus_min=='-') $tzoff=0-$tz_offset;
 		if ($plus_min=='+') $tzoff=0+$tz_offset;
 		$domain=CANALPLAN_BASE ;
-		$domain='http://canalplan.org.uk';
 		$url=$domain."/boats/location.php?locat=$values[8]|$latitude|$longitude|$accuracy|$loc_timestamp|$tzoff";
 		file_put_contents('/tmp/url.txt', $url);
 		$fcheck=file_get_contents($url);
@@ -354,6 +353,8 @@ if ($username==$dbids[1] && $password==$dbids[0]) {
 		$res = $wpdb->query($sql);
 		$sql=$wpdb->prepare("insert into ".CANALPLAN_OPTIONS." set blog_id=%d ,pref_code='location_error', pref_value=%s",$blog_id,$fcheck.'|'.current_time( 'timestamp' ) );
 		$res = $wpdb->query($sql);
+		 // flush the cache if needed.
+		if (function_exists('wp_cache_clear_cache') )    wp_cache_clear_cache();
 		if  ( $res ) $updated_ok='Y';
 	}
 	if  ( $updated_ok=='Y' ) header(' ', true, 201);

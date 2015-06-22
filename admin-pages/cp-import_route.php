@@ -273,7 +273,7 @@ $sql=$wpdb->prepare("insert into ".CANALPLAN_ROUTE_DAY." set route_id=%d, day_id
 $r = $wpdb->query($sql);
 }
 
-print "<br><br>Draft Posts created. You can now go and <a href='wp-admin/edit.php'>edit</a> the posts or <a href='?page=canalplan-ac/admin-pages/cp-manage_route.php'>change the daily subtotals</a>";
+print "<br><br>Draft Posts created. You can now go and <a href='./edit.php'>edit</a> the posts or <a href='?page=canalplan-ac/admin-pages/cp-manage_route.php'>change the daily subtotals</a>";
 break;
 }
 if ($i>10){
